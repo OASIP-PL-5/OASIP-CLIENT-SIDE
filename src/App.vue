@@ -1,26 +1,91 @@
 <script setup>
-
+import { ref, onBeforeMount } from 'vue'
+import EventList from './components/EventList.vue';
+const eventList = ref([])
+// GET
+const getEvent = async () => {
+    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+    eventList.value = await res.json()
+}
+onBeforeMount(async () => {
+    await getEvent()
+})
 </script>
  
 <template>
-  <div><div class="flex items-center justify-center h-screen background from-indigo-500 to-indigo-800">
-    <div class="bg-white font-semibold text-center rounded-3xl border shadow-lg p-10 max-w-xs bg-opacity-80
-        bg-clip-padding">
-      <img class="mb-3 w-32 h-32 rounded-full shadow-lg mx-auto"
-        src="https://npgblog.dev/static/cf23526f451784ff137f161b8fe18d5a/vue-logo.png" />
-      <h1 class="text-lg text-gray-700">OASIP | CLIENT-SIDE</h1>
-      <h3 class="text-sm text-gray-500">PL-5 | AllForOne</h3>
-      <p class="text-xl text-gray-600 mt-4">Group's project is in process...</p>
-      <button class="bg-indigo-600 px-8 py-2 mt-8 rounded-3xl text-gray-100 font-semibold tracking-wide">GitHub</button>
-    </div>
-  </div>
-    <router-link :to="{ name: 'Home' }"><span class="border bg-black text-white">go to home page</span></router-link>
-
     <div>
-      <router-view></router-view>
+        <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>
+        <EventList :event="eventList" />
     </div>
-  </div>
+
+    <router-view />
 </template>
  
 <style>
 </style>
+
+<!-- <script setup>
+// const event = new Date('April 27, 2022 10:09:00 UTC');
+
+// const jsonDate = event.toJSON();
+
+// console.log(jsonDate);
+// // expected output: 2022-04-27T23:15:30.000Z
+
+// console.log(new Date(jsonDate).toUTCString());
+// // expected output: We, 27 April 2022 10:09:00 GMT
+
+</script>
+ 
+<template>
+    <div>
+        navbar goes here
+        <nav class="bg-white drop-shadow-md rounded-lg ">
+            <div class="max-w-screen-xl mx-auto">
+                <div class="flex justify-between">
+                    <div class="flex space-x-4">
+                        logo
+                        <div>
+                            <a href="#" class="flex items-center py-2 text-gray-700 hover:text-gray-900"
+                                @click="goToHome">
+                                <img src="./assets/FUNBOOK-LOGO.png" alt="LOGO" :style="logoSize" />
+                                <span class="font-bold text-7xl px-2">OASIP</span>
+                                <span class="font-light">Online Appointment <br>
+                                    Scheduling System <br>
+                                    for Integrated Project Clinics</span>
+                            </a>
+                        </div>
+                    </div>
+
+
+
+                    secondary nav
+                    <div class="hidden md:flex items-center space-x-1">
+                        <button type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
+                            font-medium text-xs leading-tight uppercase rounded 
+                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                            active:shadow-lg transition duration-150 ease-in-out" @click="goToHome">HOME</button>
+
+
+                        <button type="button" class="inline-block px-6 py-2.5 bg-gray-200 text-gray-700
+                            font-medium text-xs leading-tight uppercase rounded 
+                            shadow-sm hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400
+                            active:shadow-lg transition duration-150 ease-in-out" @click="">ABOUT PROJECT</button>
+
+                        <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
+                            font-medium text-xs leading-tight uppercase rounded shadow-sm 
+                            hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
+                            focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
+                            transition duration-150 ease-in-out" @click="">ABOUT US</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <router-view></router-view>
+    </div>
+</template>
+ 
+<style>
+</style> -->
