@@ -10,8 +10,13 @@ const eventList = ref([])
 // ty good luck u 2 by :D
 // /api in DEV and <host>/api in PROD
 
+const check = import.meta.env.PROD ? 'มีข้อมูล' : 'ไม่มีข้อมูล'
+console.log(check);
 // GET
 // important !
+// ใช้เช็คว่า baseUrl จะเป็น null รึป่าว ก็คือถ้า import.meta.env.PROD แล้วได้ null ก็คือ baseUrl = '/api'
+// ถ้า import.meta.env.PROD มีแล้วมีข้อมูล ก็จะเอา `${import.meta.env.VITE_BASE_URL}/api` มาใส่ใน baseUrl
+// สามารถลดรูปเหลือเป็น const baseUrl = '/api'; ได้
 const baseUrl = import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/api` : '/api';
 const getEvent = async () => {
     console.log(`${baseUrl}/event`);
