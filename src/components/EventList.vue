@@ -7,11 +7,11 @@ defineProps({
  
 <template>
     <div>
-        <ul>
+        <!-- <ul>
             <li v-for="(events, index) in event" :key="index">
                 {{ events.bookingId }}
             </li>
-        </ul>
+        </ul> -->
     </div>
 </template>
  

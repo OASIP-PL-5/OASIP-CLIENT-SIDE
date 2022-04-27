@@ -1,11 +1,23 @@
 <script setup>
 import { ref, onBeforeMount } from 'vue'
 import EventList from './components/EventList.vue';
+console.clear()
 const eventList = ref([])
+// all done bro ? arikato
+// ayo wheres the other member
+// lmao we got 2 here
+// susu bro
+// ty good luck u 2 by :D
+// /api in DEV and <host>/api in PROD
+
 // GET
+// important !
+const baseUrl = import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/api` : '/api';
 const getEvent = async () => {
-    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+    console.log(`${baseUrl}/event`);
+    const res = await fetch(`${baseUrl}/event`)
     eventList.value = await res.json()
+    console.log(eventList.value);
 }
 onBeforeMount(async () => {
     await getEvent()
@@ -15,10 +27,16 @@ onBeforeMount(async () => {
 <template>
     <div>
         <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>
-        <EventList :event="eventList" />
+        <ul>
+            <li v-for="(event, index) in eventList" :key="index">
+                {{ event.eventCategory1 }} -
+                {{ event.id }} - {{ event.bookingName }} - {{ event.bookingEmail }}
+                - {{ event.eventStartTime }}
+                <hr>
+            </li>
+        </ul>
+        <router-view />
     </div>
-
-    <router-view />
 </template>
  
 <style>
