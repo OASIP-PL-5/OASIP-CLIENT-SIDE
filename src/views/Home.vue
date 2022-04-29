@@ -1,4 +1,50 @@
 <script setup>
+import { ref, onBeforeMount, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router';
+import EventList from '../components/EventList.vue';
+import BaseButton from '../components/BaseButton.vue'
+console.clear()
+// binding-CSS
+const btnTailWind = "inline-block px-6 py-2.5 bg-blue-400 text-white font-medium text-xs leading-tight uppercase rounded shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600 active:shadow-lg transition duration-150 ease-in-out"
+
+const eventLists = ref([])
+const myRouter = useRouter()
+const { params } = useRoute()
+const goToDetail = () => myRouter.push({ name: 'EventDetailBase' })
+// all done bro ? arikato
+// ayo wheres the other member
+// lmao we got 2 here
+// susu bro
+// ty good luck u 2 by :D
+// /api in DEV and <host>/api in PROD
+
+// const check = import.meta.env.VITE_BASE_URL ? 'มีข้อมูล' : 'ไม่มีข้อมูล'
+// console.log('import.meta.env.VITE_BASE_URL : ', check);
+
+// const checkPROD = import.meta.env.PROD
+// console.log('import.meta.env.PROD: ', checkPROD);
+// GET
+// important !
+// ใช้เช็คว่า baseUrl จะเป็น null รึป่าว ก็คือถ้า import.meta.env.PROD แล้วได้ null ก็คือ baseUrl = '/api'
+// ถ้า import.meta.env.PROD มีแล้วมีข้อมูล ก็จะเอา `${import.meta.env.VITE_BASE_URL}/api` มาใส่ใน baseUrl
+// สามารถลดรูปเหลือเป็น const baseUrl = '/api'; ได้
+// const baseUrl = import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/api` : '/api';
+// const checkURL = `${import.meta.env.PROD}`
+// console.log(checkURL);
+// const getEvent = async () => {
+// console.log(`${baseUrl}/event`);
+// ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
+// ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
+// const res = await fetch(`${baseUrl}/event`)
+// eventList.value = await res.json()
+// console.log('data from api: ', eventList.value);
+
+// }
+// onBeforeMount(async () => {
+//     await getEvent()
+// })
+
+
 // import { ref, onBeforeMount } from 'vue'
 // import EventList from '../components/EventList.vue';
 // const eventList = ref([])
@@ -10,98 +56,116 @@
 // onBeforeMount(async () => {
 //     await getEvent()
 // })
-</script>
- 
-<template>
-    <div>
-        <!-- <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>
-        <EventList :event="eventList" /> -->
-    </div>
-</template>
- 
-<style>
-</style>
 
 
-
-
-
-
-<!-- <script setup>
-import { ref, onBeforeMount } from 'vue'
-import EventList from '../components/EventList.vue';
-
-const eventURL = 'http://localhost:8080/api/event';
-// const eventList = ref([])
-
-// // const getEvent = async () => {
-// //     const res = await fetch(eventURL)
-// //     eventList.value = await res.json()
-// // }
-
-// const getEvent = async () => {
-//     // const res = await fetch('http://localhost:5000/notes')
-//     const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-//     eventList.value = await res.json()
-// }
-
-
-// onBeforeMount(async () => {
-//     await getEvent()
-// })
-
-</script>
- 
-<template>
-    <div>
-        <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>
-        <hr>
-        <div>
-             <p>Date Object: {{ new Date() }}</p>
-            <p>toISOString(): {{ new Date().toISOString() }}</p>
-            <p>toLocaleString(): {{ new Date().toLocaleString() }}</p>
-            <p>getTime():{{ new Date().getTime() }}</p>
-            <p>getFullYear():{{ new Date().getFullYear() }}</p>
-            <p>getMonth(): {{ new Date().getMonth() }}</p>
-            <p>getDate(): {{ new Date().getDate() }}</p>
-            <p>getHours():{{ new Date().getHours() }}</p>
-            <p>getMinutes():{{ new Date().getMinutes() }}</p> -->
-            <!-- <img src="../assets/xd.png" alt="fake"> -->
-        <!-- </div> -->
-
-        <!-- <EventList :eventList="eventList" /> -->
-        <!-- <EventList :eventProp="eventList" /> -->
-
-    <!-- </div> -->
-<!-- </template> -->
- 
-<!-- <style>
-</style> -->
-<!-- <script setup>
-import { ref, onBeforeMount } from 'vue'
-
-const eventCategoryInfo = ref([])
-
-const eventCategoryURL = 'http://localhost:8080/api/event-category';
-const eventURL = 'http://localhost:8080/api/event';
-
-const getEventCategory = async () => {
-    const res = await fetch(eventCategoryURL)
-    eventCategoryInfo.value = await res.json()
+// GET:: Card
+const eventCard = ref([])
+const baseUrl = import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/api` : '/api'
+// const checkURL = `${import.meta.env.PROD}`
+// console.log(checkURL);
+const getEventCard = async () => {
+    console.log(`${baseUrl}/event`)
+    // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
+    // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
+    const res = await fetch(`${baseUrl}/event`)
+    // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+    eventCard.value = await res.json()
+    console.log('data from api: ', eventCard.value)
 }
 
-
 onBeforeMount(async () => {
-    await getEventCategory()
+    await getEventCard()
+    console.log("length of eventCard: ", eventCard.value)
 })
 
+const noScheduleImg = 'https://img.freepik.com/free-vector/man-reading-concept-illustration_114360-8705.jpg?t=st=1651136740~exp=1651137340~hmac=d17fed796546aa370aea3c826f9743b6eb558fd34399d6cf89663051933ab10f&w=826'
+
+
 </script>
- 
+
 <template>
     <div>
-        {{ eventCategoryInfo }}
+        <!-- No Schedule -->
+        <div v-show="eventCard == 0" class="grid place-items-center h-screen">
+            <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>
+            <img :src="noScheduleImg" alt="noScheduleImg" />
+        </div>
+
+        <!-- GET ALL -->
+        <div v-show="eventCard != 0">
+            <!-- <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>
+        <EventList :event="eventList" /> -->
+            <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">
+                LIST-ALL::
+            </h2>
+
+            <div class="w-12/12 m-auto grid grid-cols-4 items-center justify-center bg-white text-gray-900">
+                <div class="mx-10 my-3 max-w-sm rounded-lg overflow-hinden shadow-lg"
+                    v-for="(event, index) in eventCard" :key="index">
+                    <div>
+                        <!-- <img class="object-fill h-80 w-fit rounded-lg m-auto" :src="frontEndImg" alt="Book Image" /> -->
+                    </div>
+                    <div class="px-6 py-4 text-left">
+                        <div>
+                            <span class="flex text-xl font-bold">
+                                <!-- <BaseRating :rating="book.rating" />
+                            <span class="text-base py-1 px-1">{{ book.rating }}</span> -->
+                            </span>
+                        </div>
+
+                        <div>
+                            <div class="font-bold text-2xl mb-2">
+                               
+                                {{ event.eventCategory1 }}
+                                <span>
+                                    <!--Space between eventCategory and date-->
+                                </span>
+                                <!-- <span class="border-solid border-2 border-blue-400 rounded-3xl  ">
+                                    <span class="text-blue-400 font-semibold text-base text-center px-2  ">
+                                        {{ new Date(event.eventStartTime).toLocaleDateString('th') }}
+                                    </span>
+                                </span> -->
+                                <span class="text-blue-400 
+                                hover:text-white border
+                                border-blue-700 hover:bg-blue-800
+                                focus:ring-4 focus:outline-none
+                                transition duration-500 ease-in-out
+                                focus:ring-blue-300 font-semibold
+                                rounded-3xl text-sm px-1.5 py-1
+                                text-center mr-2 mb-2 dark:border-blue-500
+                                dark:text-blue-500 dark:hover:text-white
+                                dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                                    {{ new Date(event.eventStartTime).toLocaleDateString('th') }}
+                                </span>
+
+                            </div>
+                            
+                            <ul class="list-disc">
+                                <li>bookingName: {{ event.bookingName }}</li>
+                                <!-- <li>eventStartTime: {{ event.eventStartTime }}</li> -->
+                                <li>eventStartTime: {{ new
+                                        Date(event.eventStartTime).toLocaleTimeString('th', {
+                                            hour: '2-digit', minute:
+                                                '2-digit'
+                                        })
+                                }}
+                                </li>
+                                <li>eventDuration: {{ event.eventDuration }} minutes</li>
+                            </ul>
+                        </div>
+
+                        <hr />
+                        <div class="flex my-2">
+                            <span class="content-center mx-auto">
+                                <!-- <BaseButton buttonName="Details" /> -->
+                                <router-link :to="{ name: 'EventDetailBase', params: { id: event.id, bookingName: event.bookingName } }">
+                                    <button :class="btnTailWind">Details</button>
+                                </router-link>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
- 
-<style>
-</style> --> 

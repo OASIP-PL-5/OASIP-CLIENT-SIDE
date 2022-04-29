@@ -1,64 +1,41 @@
 <script setup>
-
-defineProps({
-    event: { type: Array, require: true }
-})
-</script>
- 
-<template>
-    <div>
-        <!-- <ul>
-            <li v-for="(events, index) in event" :key="index">
-                {{ events.bookingId }}
-            </li>
-        </ul> -->
-    </div>
-</template>
- 
-
-
-
-
-<!-- <script setup>
 import { ref, onBeforeMount } from 'vue'
+console.clear()
 
 defineProps({
-    eventProp: {
+    eventList: {
         type: Array,
         require: true
     }
 })
 
-
 const eventList = ref([])
 
-
+// GET
+const baseUrl = import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/api` : '/api'
+// const checkURL = `${import.meta.env.PROD}`
+// console.log(checkURL);
 const getEvent = async () => {
-    // const res = await fetch('http://localhost:5000/notes')
-    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-    if (res.status === 200) {
-        eventList.value = await res.json()
-    } else {
-        console.log('what happen!?');
-    }
-
+    console.log(`${baseUrl}/event`)
+    // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
+    // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
+    const res = await fetch(`${baseUrl}/event`)
+    eventList.value = await res.json()
+    console.log('data from api: ', eventList.value)
 }
 onBeforeMount(async () => {
     await getEvent()
 })
-
 </script>
- 
+
 <template>
     <div>
         <ul>
-            <li v-for="(events, index) in eventList" :key="index">
-                {{ events }}
+            <li v-for="(event, index) in eventList" :key="index">
+                {{ event.eventCategory1 }} - {{ event.id }} - {{ event.bookingName }} -
+                {{ event.bookingEmail }} - {{ event.eventStartTime }}
+                <hr />
             </li>
         </ul>
-        
     </div>
 </template>
- 
-<style>
-</style> -->
