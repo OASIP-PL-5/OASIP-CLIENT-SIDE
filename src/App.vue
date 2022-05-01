@@ -93,11 +93,23 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
                 <hr>
             </li>
         </ul> -->
-        <router-view />
+        <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+                <component :is="Component" />
+            </transition>
+        </router-view>
     </div>
 </template>
  
-<style>
+<style scoped>
+.fade-enter-from,.fade-leave-to{
+    opacity: 0;
+}
+
+.fade-enter-active,.fade-leave.active{
+    transition: opacity 1.2s ease-out;
+}
+
 </style>
 
 <!-- <script setup>
