@@ -5,9 +5,8 @@ import EventList from '../components/EventList.vue';
 import BaseButton from '../components/BaseButton.vue'
 console.clear()
 // binding-CSS
-const btnTailWind = "inline-block px-6 py-2.5 bg-blue-400 text-white font-medium text-xs leading-tight uppercase rounded shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600 active:shadow-lg transition duration-150 ease-in-out"
+const btnTailWind = "inline-block px-6 py-2.5 mt-1.5 bg-blue-400 text-white font-bold text-xs leading-tight uppercase rounded shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600 active:shadow-lg transition duration-150 ease-in-out"
 
-const eventLists = ref([])
 const myRouter = useRouter()
 const { params } = useRoute()
 const goToDetail = () => myRouter.push({ name: 'EventDetailBase' })
@@ -99,13 +98,13 @@ const noScheduleImg = 'https://img.freepik.com/free-vector/man-reading-concept-i
                 LIST-ALL::
             </h2>
 
-            <div class="w-12/12 m-auto grid grid-cols-4 items-center justify-center bg-white text-gray-900">
-                <div class="mx-10 my-10 max-w-sm rounded-lg overflow-hinden shadow-lg"
+            <div class="w-12/12 m-auto grid grid-cols-4 items-center justify-center bg-white text-gray-900 ">
+                <div class="mx-10 my-10 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
                     v-for="(event, index) in eventCard" :key="index">
                     <div>
                         <!-- <img class="object-fill h-80 w-fit rounded-lg m-auto" :src="frontEndImg" alt="Book Image" /> -->
                     </div>
-                    <div class="px-6 py-4 text-left">
+                    <div class="px-6 py-2 text-left">
                         <div>
                             <span class="flex text-xl font-bold">
                                 <!-- <BaseRating :rating="book.rating" />
@@ -114,7 +113,7 @@ const noScheduleImg = 'https://img.freepik.com/free-vector/man-reading-concept-i
                         </div>
 
                         <div>
-                            <div class="font-bold text-2xl mb-2">
+                            <div class="font-bold text-2xl mb-2 text-gray-700">
                                
                                 {{ event.eventCategory1 }}
                                 <span>
@@ -140,20 +139,20 @@ const noScheduleImg = 'https://img.freepik.com/free-vector/man-reading-concept-i
 
                             </div>
                             
-                            <ul class="list-disc">
-                                <li>bookingName: {{ event.bookingName }}</li>
+                            <ul class="mb-2">
+                                <li>Name: {{ event.bookingName }}</li>
                                 <!-- <li>eventStartTime: {{ event.eventStartTime }}</li> -->
-                                <li>eventStartTime: {{ new
-                                        Date(event.eventStartTime).toLocaleTimeString('th', {
+                                <li>Start Time: {{ new
+                                        Date(event.eventStartTime).toLocaleTimeString('en', {
                                             hour: '2-digit', minute:
                                                 '2-digit'
                                         })
                                 }}
                                 </li>
-                                <li>eventDuration: {{ event.eventDuration }} minutes</li>
+                                <li>Duration: {{ event.eventDuration }} minutes</li>
                             </ul>
                         </div>
-
+                        
                         <hr />
                         <div class="flex my-2">
                             <span class="content-center mx-auto">

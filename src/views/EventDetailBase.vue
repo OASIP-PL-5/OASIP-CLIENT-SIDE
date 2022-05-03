@@ -75,7 +75,7 @@ onBeforeMount(async () => {
                                 </div>
 
                                 <div>
-                                    <div class="font-bold text-5xl mb-2 flex gap-x-3	 ">
+                                    <div class="font-bold text-5xl mb-2 flex gap-x-3 text-gray-700">
                                         <!-- {{ event.eventCategory1 }} -->
                                         {{ thisEventDetail.eventCategory1 }}
 
@@ -98,19 +98,19 @@ onBeforeMount(async () => {
                                         </span>
                                     </div>
 
-                                    <ul class="list-disc">
-                                        <li>bookingName: {{ thisEventDetail.bookingName }}</li>
-                                        <li>bookingEmail: {{ thisEventDetail.bookingEmail }}</li>
-                                        <li v-if="thisEventDetail.eventNotes === null">eventNotes: - </li>
-                                        <li v-else>eventNotes: {{ thisEventDetail.eventNotes }}</li>
-                                        <li>eventStartTime: {{ new
-                                                Date(thisEventDetail.eventStartTime).toLocaleTimeString('th', {
+                                    <ul>
+                                        <li>Name: {{ thisEventDetail.bookingName }}</li>
+                                        <li>Email: {{ thisEventDetail.bookingEmail }}</li>
+                                        <li v-if="thisEventDetail.eventNotes === null">Notes: - </li>
+                                        <li v-else>SNotes: {{ thisEventDetail.eventNotes }}</li>
+                                        <li>Start Time: {{ new
+                                                Date(thisEventDetail.eventStartTime).toLocaleTimeString('en', {
                                                     hour: '2-digit', minute:
                                                         '2-digit'
                                                 })
                                         }}
                                         </li>
-                                        <li>eventDuration: {{ thisEventDetail.eventDuration }} minutes</li>
+                                        <li>Duration: {{ thisEventDetail.eventDuration }} minutes</li>
                                     </ul>
                                 </div>
 

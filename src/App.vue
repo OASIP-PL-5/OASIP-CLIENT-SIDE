@@ -51,10 +51,11 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
                     <div class="flex space-x-4">
 
                         <div>
-                            <a href="#" class="flex items-center py-2 text-gray-700 hover:text-gray-900"
+                            <a href="#" class="flex items-center py-2 text-gray-700"
                                 @click="goToHome">
                                 <!-- <img src="./assets/FUNBOOK-LOGO.png" alt="LOGO" :style="logoSize" /> -->
-                                <span class="font-bold text-5xl px-2">OASIP I PL-5</span>
+                                <span class="font-bold text-5xl px-2 text-transparent 
+                                bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">OASIP I PL-5</span>
                                 <span class="font-light">Online Appointment <br>
                                     Scheduling System <br>
                                     for Integrated Project Clinics</span>
