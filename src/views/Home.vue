@@ -100,7 +100,7 @@ const noScheduleImg = 'https://img.freepik.com/free-vector/man-reading-concept-i
             </h2>
 
             <div class="w-12/12 m-auto grid grid-cols-4 items-center justify-center bg-white text-gray-900">
-                <div class="mx-10 my-3 max-w-sm rounded-lg overflow-hinden shadow-lg"
+                <div class="mx-10 my-10 max-w-sm rounded-lg overflow-hinden shadow-lg"
                     v-for="(event, index) in eventCard" :key="index">
                     <div>
                         <!-- <img class="object-fill h-80 w-fit rounded-lg m-auto" :src="frontEndImg" alt="Book Image" /> -->
