@@ -6,6 +6,8 @@ const goToNotFound = () => myRouter.push({ name: 'NotFound' })
 
 console.clear()
 const { params } = useRoute()
+const goToHome = () => myRouter.push({ name: 'Home' })
+
 
 
 
@@ -61,7 +63,7 @@ onBeforeMount(async () => {
                     EVENT-DETAIL-BASE::
                 </h2>
                 <div>
-                    <div class="w-11/12 m-auto grid items-center justify-center bg-white text-gray-900">
+                    <div class="w-11/12 m-auto  grid items-center justify-center bg-white text-gray-900">
                         <div class="mx-10 my-3 max-w-none rounded-lg overflow-hinden shadow-lg">
                             <div>
                                 <!-- <img class="object-fill h-80 w-fit rounded-lg m-auto" :src="frontEndImg" alt="Book Image" /> -->
@@ -75,7 +77,7 @@ onBeforeMount(async () => {
                                 </div>
 
                                 <div>
-                                    <div class="font-bold text-5xl mb-2 flex gap-x-3 text-gray-700">
+                                    <div class="font-bold text-5xl mb-2 flex gap-x-4 text-gray-700">
                                         <!-- {{ event.eventCategory1 }} -->
                                         {{ thisEventDetail.eventCategory1 }}
 
@@ -91,7 +93,7 @@ onBeforeMount(async () => {
                                 transition duration-500 ease-in-out
                                 focus:ring-blue-300 font-semibold
                                 rounded-3xl text-lg px-1.5 py-1.5
-                                text-center mr-4 mb-2 dark:border-blue-500
+                                text-center mb-2 dark:border-blue-500
                                 dark:text-blue-500 dark:hover:text-white
                                 dark:hover:bg-blue-600 dark:focus:ring-blue-800">
                                             {{ new Date(thisEventDetail.eventStartTime).toLocaleDateString('th') }}
@@ -102,7 +104,7 @@ onBeforeMount(async () => {
                                         <li>Name: {{ thisEventDetail.bookingName }}</li>
                                         <li>Email: {{ thisEventDetail.bookingEmail }}</li>
                                         <li v-if="thisEventDetail.eventNotes === null">Notes: - </li>
-                                        <li v-else>SNotes: {{ thisEventDetail.eventNotes }}</li>
+                                        <li v-else>Notes: {{ thisEventDetail.eventNotes }}</li>
                                         <li>Start Time: {{ new
                                                 Date(thisEventDetail.eventStartTime).toLocaleTimeString('en', {
                                                     hour: '2-digit', minute:
@@ -112,30 +114,50 @@ onBeforeMount(async () => {
                                         </li>
                                         <li>Duration: {{ thisEventDetail.eventDuration }} minutes</li>
                                     </ul>
+                                    <div class="grid grid-cols-4">
+                                        <button class="text-blue-400 
+                                                hover:text-white border
+                                                border-blue-700 hover:bg-blue-800
+                                                focus:ring-4 focus:outline-none
+                                                transition duration-500 ease-in-out
+                                                focus:ring-blue-300 font-light
+                                                rounded-xl text-lg 
+                                                text-center mr-16 mt-2 dark:border-blue-500
+                                                dark:text-blue-500 dark:hover:text-white
+                                                dark:hover:bg-blue-600 dark:focus:ring-blue-800" @click="goToHome">
+                                            BACK
+                                        </button>
+                                        <span></span>
+                                        <button class="text-orange-400 
+                                                hover:text-white border
+                                                border-orange-700 hover:bg-orange-800
+                                                focus:ring-4 focus:outline-none
+                                                transition duration-500 ease-in-out
+                                                focus:ring-orange-300 font-light
+                                                rounded-xl text-lg px-3 py.5
+                                                text-center mr-2 mt-2 dark:border-orange-500
+                                                dark:text-orange-500 dark:hover:text-white
+                                                dark:hover:bg-orange-600 dark:focus:ring-orange-800">
+                                            EDIT
+                                        </button><button class="text-red-400 
+                                                hover:text-white border
+                                                border-red-700 hover:bg-red-800
+                                                focus:ring-4 focus:outline-none
+                                                transition duration-500 ease-in-out
+                                                focus:ring-red-300 font-light
+                                                rounded-xl text-lg px-3 py.5
+                                                text-center  mt-2 dark:border-red-500
+                                                dark:text-red-500 dark:hover:text-white
+                                                dark:hover:bg-red-600 dark:focus:ring-red-800">
+                                            CANCLE
+                                        </button>
+                                    </div>
                                 </div>
-
-
-                                <!-- <div class="flex my-2">
-                                    <span class="content-center mx-auto"> -->
-
-                                <!-- <router-link
-                                        :to="{ name: 'EventDetailBase', params: { id: event.id, bookingName: event.bookingName } }">
-                                        <button :class="btnTailWind">Details</button>
-                                    </router-link> -->
-                                <!-- </span>
-                                </div> -->
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- <li v-for="(event, index) in eventDetail" :key="index">
-            {{ event.eventCategory1 }} - {{ event.id }} - {{ event.bookingName }} - {{ event.bookingEmail }} - {{
-                        event.eventStartTime
-                }}
-                <hr>
-            </li> -->
         </div>
     </div>
 </template>
