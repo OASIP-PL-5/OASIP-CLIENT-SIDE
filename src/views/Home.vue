@@ -10,6 +10,8 @@ const btnTailWind = "inline-block px-6 py-2.5 mt-1.5 bg-blue-400 text-white font
 const myRouter = useRouter()
 const { params } = useRoute()
 const goToDetail = () => myRouter.push({ name: 'EventDetailBase' })
+const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
+
 // all done bro ? arikato
 // ayo wheres the other member
 // lmao we got 2 here
@@ -166,24 +168,20 @@ const noScheduleImg = 'https://img.freepik.com/free-vector/man-reading-concept-i
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="relative">
+            <div class="relative" >
 
             <button class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500  
                 hover:scale-150 transition-transform
-                active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none">
+                active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none" @click="goToCreate">
                 <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" class="w-16 h-16 inline-block">
                     <path fill="#FFFFFF" d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
                                     C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399
                                     C15.952,9,16,9.447,16,10z" />
-
                 </svg>
-
-
             </button>
-
-
         </div>
+        </div>
+        
     </div>
 
 </template>

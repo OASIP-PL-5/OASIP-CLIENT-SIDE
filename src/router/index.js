@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from '../views/Home.vue'
 import EventDetailBase from '../views/EventDetailBase.vue'
 import NotFound from '../views/NotFound.vue'
+import CreateEvent from '../views/CreateEvent.vue'
+import AboutProject from '../views/AboutProject.vue'
 const history = createWebHistory()
 
 const routes = [
@@ -20,7 +22,20 @@ const routes = [
         path: '/:pageNotFound(.*)*',
         name: "NotFound",
         component: NotFound
+    },
+    {
+        path: '/create-event',
+        name: "CreateEvent",
+        component: CreateEvent
+    },
+    {
+        path: '/about-project',
+        name: "AboutProject",
+        component: AboutProject
     }
+
+    
+
     
 
 ]

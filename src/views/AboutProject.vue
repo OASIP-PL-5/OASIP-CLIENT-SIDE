@@ -1,0 +1,71 @@
+<script setup>
+
+</script>
+ 
+<template>
+    <div class="px-3 mx-10 flex flex-wrap flex-col md:flex-row items-center">
+        <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left z-10">
+            <h1 class="mt-40 text-8xl font-bold leading-tight text-slate-800">OASIP</h1>
+            <p class="text-2xl font-light text-slate-900">Online Appointment Scheduling System
+                <span>
+                    <br>
+                </span>
+                for Integrated
+                Project Clinics
+            </p>
+            <div class="my-4 mx-4 text-xl font-semibold text-slate-800">
+                <ul class="list-disc">
+                    <li>Makes appointment for each clinic (event)</li>
+                    <li>The slot duration is up to each clinic setting </li>
+                    <li>Can reschedule / cancel event</li>
+
+                </ul>
+            </div>
+            <div class="flex gap-x-4">
+                <button class="text-blue-400 
+                                hover:text-white border
+                                border-blue-700 hover:bg-blue-800
+                                focus:ring-4 focus:outline-none
+                                transition duration-500 ease-in-out
+                                focus:ring-blue-300 font-bold
+                                rounded-lg text-2xl px-1.5 py-1.5
+                                text-center mb-2 dark:border-blue-500
+                                dark:text-blue-500 dark:hover:text-white
+                                dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                    SCHEDULE</button>
+                <button class="text-white bg-blue-500 border
+                                border-white hover:bg-blue-800
+                                focus:ring-4 focus:outline-none
+                                transition duration-500 ease-in-out
+                                focus:ring-blue-300 font-bold
+                                rounded-lg text-2xl px-1.5 py-1.5
+                                text-center mb-2 dark:border-blue-500 ">
+                    BOOK NOW</button>
+            </div>
+
+
+        </div>
+        <div class="relative z-0">
+            <img src="../assets/3959915.jpg" alt="pic" class="w-7/12 h-7/12 fixed right-0 top-40 ">
+        </div>
+    </div>
+</template>
+ 
+<style>
+</style>
+
+ <!-- <div>
+        <div>
+            <div class="container px-2 mx-auto flex flex-wrap  items-center">
+                <div class="flex lg:flex-col w-full w-2/5 justify-center text-center md:text-left">
+                    <h2 class="w-full font-bold text-8xl font-bold mt-40 ">OASIP</h2>
+                    <p class="text-2xl font-light w-8/12">Online Appointment Scheduling System for Integrated Project Clinics
+                    </p>
+                </div>
+                <div class="relative">
+                    <img src="../assets/3959915.jpg" alt="pic" class="w-7/12 h-7/12 fixed right-10">
+                </div>
+            </div>
+        </div>
+
+    </div> -->
