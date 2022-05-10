@@ -1,7 +1,44 @@
 <script setup>
+import {ref} from 'vue'
+import CreateEditEvent from '../components/CreateEditEvent.vue'
+
+const newBookingName = ref()
+const newBookingEmail = ref()
+const CategorySelection = ref()
+const newStartDate = ref()
+// const newStartTime = ref()
+const newNotes = ref()
+
+const baseUrl = import.meta.env.PROD
+    ? `${import.meta.env.VITE_BASE_URL}/api`
+    : '/api'
+// method: POST -- new event
+const addEvent = async () => {
+    const res = await fetch(`${baseUrl}/event`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+            bookingName: newBookingName.value,
+            bookingEmail: newBookingEmail.value,
+            eventStartTime: newStartDate.value,
+            eventNotes: newNotes.value,
+            eventCategoryName: CategorySelection.value
+        })
+    })
+    if (res.status === 201) {
+        const addedEvent = await res.json()
+        eventCard.value.push(addedEvent)
+        console.log('added sucessfully');
+        alert('add event success !')
+    } else {
+        console.log('error, cannot be added');
+        alert('error!!!\nadd event ไม่ได้ เพราะหำของคุณเล็กเกินไป')
+    }
+}
+
 
 </script>
- 
+
 <template>
     <div>
         <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">
@@ -15,53 +52,58 @@
                 </div>
                 <div class="flex flex-col mb-4">
                     <h1 class="mb-2 font-bold text-lg text-gray-900">Booking Name</h1>
-                    <input class="border py-2 px-3 text-grey-800 rounded-lg" type="text">
+                    <input class="border py-2 px-3 text-grey-800 rounded-lg" 
+                    v-model="newBookingName" type="name" placeholder="Somchai Jairuk (ss-5)" />
                 </div>
                 <div class="flex flex-col mb-4">
                     <label class="mb-2 font-bold text-lg text-gray-900">Email</label>
-                    <input class="border py-2 px-3 text-grey-800 rounded-lg" type="email">
+                    <input class="border py-2 px-3 text-grey-800 rounded-lg" 
+                    v-model="newBookingEmail" type="email" placeholder="Somchai.jairuk@gmail.com" />
                 </div>
-                <div class="grid grid-cols-2 mb-2 gap-x-2  ">
-                    <h1 class=" font-bold text-lg text-gray-900">Category</h1>
-                    <h1 class=" font-bold text-lg text-gray-900">Duration</h1>
+                <div class="grid grid-cols-2 mb-2 gap-x-2">
+                    <h1 class="font-bold text-lg text-gray-900">Category</h1>
+                    <h1 class="font-bold text-lg text-gray-900">Duration</h1>
                 </div>
-                <div class="grid grid-cols-2 mb-4 gap-x-2 ">
-                    <select class="border py-2 px-3 text-grey-800 rounded-lg">
-                        <option disabled>Please select one</option>
-                        <option>Client-side Clinic</option>
-                        <option>Server-side Clinic</option>
-                        <option>Project Management Clinic</option>
-                        <option>Database Clinic</option>
-                        <option>DevOps/Infra Clinic</option>
+                <div class="grid grid-cols-2 mb-4 gap-x-2">
+                    <select v-model="CategorySelection" class="border py-2 px-3 text-grey-800 rounded-lg">
+                        <option disable value>Please select one</option>
+                        <option value="Client-side Clinic">Client-side Clinic</option>
+                        <option value="Server-side Clinic">Server-side Clinic</option>
+                        <option value="Project Management Clinic">Project Management Clinic</option>
+                        <option value="Database Clinic">Database Clinic</option>
+                        <option value="DevOps/Infra Clinic">DevOps/Infra Clinic</option>
                     </select>
                     <input class="border py-2 px-3 text-grey-800 rounded-lg"
-                        placeholder="[duration value is from category selection]" disabled>
+                        placeholder="[duration value is from category selection]" disabled />
                 </div>
-                <div class="grid grid-cols-2 mb-2  ">
-                    <h1 class=" font-bold text-lg text-gray-900">Date</h1>
-                    <h1 class=" font-bold text-lg text-gray-900">Start Time</h1>
+                <div class="grid grid-cols-2 mb-2">
+                    <h1 class="font-bold text-lg text-gray-900">Date</h1>
+                    <!-- <h1 class="font-bold text-lg text-gray-900">Start Time</h1> -->
                 </div>
-                <div class="grid grid-cols-2 mb-4 gap-x-2 ">
-                    <input class="border py-2 px-3 text-grey-800 rounded-lg " type="date">
-                    <input class="border py-2 px-3 text-grey-800 rounded-lg " type="time">
+                <div class="grid grid-cols-2 mb-4 gap-x-2">
+                    <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newStartDate" type="datetime-local" />
+                    <!-- <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newStartTime" type="time" /> -->
                 </div>
                 <div class="flex flex-col mb-4">
                     <label class="mb-2 font-bold text-lg text-gray-900">Notes</label>
-                    <textarea class="border py-2 px-3 text-grey-800 rounded-lg"
-                        placeholder="maximum at 500 characters"></textarea>
+                    <textarea class="border py-2 px-3 text-grey-800 rounded-lg" placeholder="maximum at 500 characters"
+                        v-model="newNotes"></textarea>
                 </div>
                 <div class="flex flex-cols-2">
-                    <button class="inline-block px-6 py-2.5 mt-1.5 bg-blue-400 mx-auto
-                text-white font-bold text-xl leading-tight uppercase rounded 
-                shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500 
-                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600 
-                active:shadow-lg transition duration-150 ease-in-out">SUMBIT
-                    </button>
+                    <!-- <button class="inline-block px-6 py-2.5 mt-1.5 bg-blue-400 
+                        mx-auto text-white font-bold text-xl leading-tight
+                         uppercase rounded shadow-sm hover:bg-blue-500 
+                         hover:shadow-lg focus:bg-blue-500 focus:shadow-lg
+                          focus:outline-none focus:ring-0 active:bg-blue-600
+                           active:shadow-lg transition duration-150 ease-in-out" @click="addEvent">
+                        SUMBIT
+                    </button> -->
+                    <CreateEditEvent @addEventCom="addEvent"/>
                 </div>
             </div>
         </div>
     </div>
 </template>
- 
+
 <style>
 </style>

@@ -6,6 +6,7 @@ const goToHome = () => myRouter.push({ name: 'Home' })
 const goToContact = () => myRouter.push({ name: 'ContactUs' })
 const goToAboutProject = () => myRouter.push({ name:'AboutProject'})
 
+
 // import EventList from './components/EventList.vue';
 // console.clear()
 // const eventList = ref([])

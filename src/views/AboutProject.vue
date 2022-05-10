@@ -1,9 +1,15 @@
 <script setup>
+import { useRoute, useRouter } from 'vue-router';
+const myRouter = useRouter()
+
+const goToHome = () => myRouter.push({ name: 'Home' })
+const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
+
 
 </script>
  
 <template>
-    <div class="px-3 mx-10 flex flex-wrap flex-col md:flex-row items-center">
+    <div class="px-14 mx-10 flex flex-wrap flex-row items-center">
         <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left z-10">
             <h1 class="mt-40 text-8xl font-bold leading-tight text-slate-800">OASIP</h1>
             <p class="text-2xl font-light text-slate-900">Online Appointment Scheduling System
@@ -21,17 +27,13 @@
 
                 </ul>
             </div>
-            <div class="flex gap-x-4">
+            <div class="flex gap-x-4 ">
                 <button class="text-blue-400 
-                                hover:text-white border
-                                border-blue-700 hover:bg-blue-800
-                                focus:ring-4 focus:outline-none
-                                transition duration-500 ease-in-out
-                                focus:ring-blue-300 font-bold
-                                rounded-lg text-2xl px-1.5 py-1.5
-                                text-center mb-2 dark:border-blue-500
-                                dark:text-blue-500 dark:hover:text-white
-                                dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                                border border-blue-400 
+                                 duration-500 ease-in-out
+                                font-bold rounded-lg text-2xl px-1.5 py-1.5
+                                text-center mb-2 hover:shadow-xl
+                                " @click="goToHome">
                     SCHEDULE</button>
                 <button class="text-white bg-blue-500 border
                                 border-white hover:bg-blue-800
@@ -39,7 +41,8 @@
                                 transition duration-500 ease-in-out
                                 focus:ring-blue-300 font-bold
                                 rounded-lg text-2xl px-1.5 py-1.5
-                                text-center mb-2 dark:border-blue-500 ">
+                                text-center mb-2 dark:border-blue-500 
+                                hover:scale-125 transition-transform" @click="goToCreate">
                     BOOK NOW</button>
             </div>
 
