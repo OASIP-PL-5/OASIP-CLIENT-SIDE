@@ -13,6 +13,9 @@ const myRouter = useRouter()
 const { params } = useRoute()
 const goToDetail = () => myRouter.push({ name: 'EventDetailBase' })
 const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
+// goHome จาก component create
+const goToHome = () => myRouter.push({ path: '/' })
+const goToAboutProject = () => myRouter.push({ name: 'AboutProject' })
 
 // GET:: Card
 const eventCard = ref([])
@@ -44,19 +47,22 @@ const noScheduleImg =
 const toggleModal = ref(false)
 // console.log(toggleModal.value);
 
-// const newStartTime = ref()
-// const newNotes = ref()
+
 // method: POST -- add event
-const addEvent = async (newEvent) => {
+const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes, categorySelection) => {
+    console.log(`${baseUrl}/event`);
     const res = await fetch(`${baseUrl}/event`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-            bookingName: newEvent,
-            bookingEmail: newEvent,
-            eventStartTime: newEvent,
-            eventNotes: newEvent,
-            eventCategoryName: newEvent
+            // มีผลต่อ payload ต้องใส่
+            bookingName: newBookingName,
+            bookingEmail: newBookingEmail,
+            eventStartTime: newStartTime,
+            eventDuration: categorySelection.eventDuration,
+            eventNotes: newNotes,
+            eventCategoryId: categorySelection.eventCategoryId,
+            eventCategoryName: categorySelection.eventCategoryName
         })
     })
     if (res.status === 201) {
@@ -66,7 +72,7 @@ const addEvent = async (newEvent) => {
         alert('add event success !')
     } else {
         console.log('error, cannot be added');
-        alert('error!!!\nadd event ไม่ได้ เพราะหำของคุณเล็กเกินไป')
+        alert('error!!!\nadd event ไม่ได้ เพราะหำของคุณใหญ่เกินไป')
     }
 }
 // toggleModal = !toggleModal
@@ -75,8 +81,8 @@ const addEvent = async (newEvent) => {
 <template>
     <div>
         <!-- modal for POST-event from CreateEditEvent.vue(component)-->
-        <CreateEditEvent v-if="toggleModal" @closeToggle="toggleModal = !toggleModal" @addEventComp="addEvent" />
-
+        <CreateEditEvent v-if="toggleModal" @closeToggle="toggleModal = !toggleModal" />
+        <!-- toggleModal = !toggleModal -->
 
         <!-- No Schedule -->
         <div v-show="eventCard == 0" class="grid place-items-center h-screen">
@@ -86,7 +92,7 @@ const addEvent = async (newEvent) => {
 
         <!-- GET ALL -->
         <div v-show="eventCard != 0">
-            <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700 ">LIST-ALL::</h2>
+            <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">LIST-ALL::</h2>
             <div class="w-full md:w-1/3 p-5 mx-10">
                 <div class="relative">
                     <div class="absolute flex items-center ml-2 h-full">
@@ -97,14 +103,12 @@ const addEvent = async (newEvent) => {
                             </path>
                         </svg>
                     </div>
-
                     <input type="text" placeholder="Search by eventCategory, bookingName..."
                         class="px-8 py-3 w-7/12 rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm" />
                 </div>
 
                 <div class="flex items-center justify-between mt-4 w-7/12">
                     <p class="font-medium">Filters</p>
-
                     <button
                         class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md">
                         Reset Filter
@@ -133,7 +137,7 @@ const addEvent = async (newEvent) => {
                 </div>
             </div>
 
-            <div class="w-full m-auto grid lg:grid-cols-4 items-center justify-center bg-white text-gray-900 ">
+            <div class="w-full m-auto grid md:grid-cols-4 items-center justify-center bg-white text-gray-900 ">
                 <div class="mx-10 my-5 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
                     v-for="(event, index) in eventCard" :key="index">
                     <div class="px-6 py-2 text-left">
@@ -148,7 +152,6 @@ const addEvent = async (newEvent) => {
                                     {{ new Date(event.eventStartTime).toLocaleDateString('th') }}
                                 </span>
                             </div>
-
                             <ul class="mb-2">
                                 <li>Name: {{ event.bookingName }}</li>
                                 <li>
@@ -163,7 +166,6 @@ const addEvent = async (newEvent) => {
                                 <li>Duration: {{ event.eventDuration }} minutes</li>
                             </ul>
                         </div>
-
                         <hr />
                         <div class="flex my-2">
                             <span class="content-center mx-auto">
@@ -175,16 +177,13 @@ const addEvent = async (newEvent) => {
                                 </router-link>
                             </span>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
             <div class="relative">
                 <button @click="toggleModal = !toggleModal" data-modal-toggle="defaultModal" type="button"
-                    class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500 hover:scale-150 transition-transform active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none">
+                    class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500 hover:scale-150 transition-transform active:shadow-lg mouse shadow ease-in duration-200 focus:outline-none">
                     <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" class="w-16 h-16 inline-block">
                         <path fill="#FFFFFF" d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
                                     C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399

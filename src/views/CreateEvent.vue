@@ -1,13 +1,13 @@
-<script setup>
+<!-- <script setup>
 import {ref} from 'vue'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
 
 const newBookingName = ref()
 const newBookingEmail = ref()
-const CategorySelection = ref()
-const newStartDate = ref()
-// const newStartTime = ref()
+const categorySelection = ref()
+const newStartTime = ref()
 const newNotes = ref()
+// const newStartTime = ref()
 
 const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`
@@ -78,11 +78,11 @@ const addEvent = async () => {
                 </div>
                 <div class="grid grid-cols-2 mb-2">
                     <h1 class="font-bold text-lg text-gray-900">Date</h1>
-                    <!-- <h1 class="font-bold text-lg text-gray-900">Start Time</h1> -->
+                    
                 </div>
                 <div class="grid grid-cols-2 mb-4 gap-x-2">
                     <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newStartDate" type="datetime-local" />
-                    <!-- <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newStartTime" type="time" /> -->
+                    
                 </div>
                 <div class="flex flex-col mb-4">
                     <label class="mb-2 font-bold text-lg text-gray-900">Notes</label>
@@ -90,14 +90,14 @@ const addEvent = async () => {
                         v-model="newNotes"></textarea>
                 </div>
                 <div class="flex flex-cols-2">
-                    <!-- <button class="inline-block px-6 py-2.5 mt-1.5 bg-blue-400 
+                    <button class="inline-block px-6 py-2.5 mt-1.5 bg-blue-400 
                         mx-auto text-white font-bold text-xl leading-tight
                          uppercase rounded shadow-sm hover:bg-blue-500 
                          hover:shadow-lg focus:bg-blue-500 focus:shadow-lg
                           focus:outline-none focus:ring-0 active:bg-blue-600
                            active:shadow-lg transition duration-150 ease-in-out" @click="addEvent">
                         SUMBIT
-                    </button> -->
+                    </button>
                     <CreateEditEvent @addEventCom="addEvent"/>
                 </div>
             </div>
@@ -106,4 +106,4 @@ const addEvent = async () => {
 </template>
 
 <style>
-</style>
+</style> -->
