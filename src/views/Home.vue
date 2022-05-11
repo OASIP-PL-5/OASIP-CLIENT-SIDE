@@ -42,12 +42,10 @@ onBeforeMount(async () => {
 const noScheduleImg =
     'https://img.freepik.com/free-vector/man-reading-concept-illustration_114360-8705.jpg?t=st=1651136740~exp=1651137340~hmac=d17fed796546aa370aea3c826f9743b6eb558fd34399d6cf89663051933ab10f&w=826'
 
-
-
-const toggleModal = ref(false)
 // console.log(toggleModal.value);
 
-
+const toggleModal = ref(false)
+const closeToggle = () => window.location.reload()  
 // method: POST -- add event
 const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes, categorySelection) => {
     console.log(`${baseUrl}/event`);
@@ -72,7 +70,7 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
         alert('add event success !')
     } else {
         console.log('error, cannot be added');
-        alert('error!!!\nadd event ไม่ได้ เพราะหำของคุณใหญ่เกินไป')
+        alert('error!!!\n Please check your bookingName or Notes might be too long!')
     }
 }
 // toggleModal = !toggleModal
@@ -81,7 +79,7 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
 <template>
     <div>
         <!-- modal for POST-event from CreateEditEvent.vue(component)-->
-        <CreateEditEvent v-if="toggleModal" @closeToggle="toggleModal = !toggleModal" />
+        <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" />
         <!-- toggleModal = !toggleModal -->
 
         <!-- No Schedule -->

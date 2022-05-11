@@ -66,10 +66,9 @@ const test = ref()
           <div class="grid grid-cols-1 mb-4 gap-x-2">
             <select v-model="newEvent.categorySelection" class="border py-2 px-3 text-grey-800 rounded-lg">
               <option value disabled>Please select one</option>
-              <option v-for="(eventCat, index) in eventCategory" :key="index"
-                :value="{
-                  eventCategoryId: eventCat.id, eventDuration: eventCat.eventDuration, eventCategoryName: eventCat.eventCategoryName
-                }">
+              <option v-for="(eventCat, index) in eventCategory" :key="index" :value="{
+                eventCategoryId: eventCat.id, eventDuration: eventCat.eventDuration, eventCategoryName: eventCat.eventCategoryName
+              }">
                 {{ eventCat.id }} -- {{ eventCat.eventCategoryName }} ({{ eventCat.eventDuration }} minutes)
               </option>
             </select>
@@ -104,6 +103,7 @@ const test = ref()
                         text-center  mr-4 dark:border-red-500
                         dark:text-red-500 dark:hover:text-white
                         dark:hover:bg-red-600 dark:focus:ring-red-800" @click="$emit('closeToggle')">
+                        <!-- @click="$emit('closeToggle') -->
               CLOSE
             </button>
             <button @click="$emit('addEventComp',
