@@ -103,7 +103,7 @@ const test = ref()
                         text-center  mr-4 dark:border-red-500
                         dark:text-red-500 dark:hover:text-white
                         dark:hover:bg-red-600 dark:focus:ring-red-800" @click="$emit('closeToggle')">
-                        <!-- @click="$emit('closeToggle') -->
+              <!-- @click="$emit('closeToggle') -->
               CLOSE
             </button>
             <button @click="$emit('addEventComp',

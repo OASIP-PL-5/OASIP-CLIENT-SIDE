@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 const myRouter = useRouter()
 const goToHome = () => myRouter.push({ name: 'Home' })
 const goToContact = () => myRouter.push({ name: 'ContactUs' })
-const goToAboutProject = () => myRouter.push({ name:'AboutProject'})
+const goToAllEvent = () => myRouter.push({ name:'AllEvent'})
 
 
 // import EventList from './components/EventList.vue';
@@ -64,7 +64,7 @@ const goToAboutProject = () => myRouter.push({ name:'AboutProject'})
                         </div>
                     </div>
 
-                    <div class="hidden md:flex items-center space-x-1">
+                    <div class="hidden md:grid grid-cols-3 items-center space-x-1">
                         <button type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
                             font-medium text-xs leading-tight uppercase rounded 
                             shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
@@ -75,7 +75,7 @@ const goToAboutProject = () => myRouter.push({ name:'AboutProject'})
                             font-medium text-xs leading-tight uppercase rounded 
                             shadow-sm hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 
                             focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400
-                            active:shadow-lg transition duration-150 ease-in-out" @click="goToAboutProject">ABOUT PROJECT</button>
+                            active:shadow-lg transition duration-150 ease-in-out" @click="goToAllEvent">ALL EVENTS</button>
 
                         <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
                             font-medium text-xs leading-tight uppercase rounded shadow-sm 

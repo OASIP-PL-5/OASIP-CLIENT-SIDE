@@ -3,7 +3,7 @@ import Home from '../views/Home.vue'
 import EventDetailBase from '../views/EventDetailBase.vue'
 import NotFound from '../views/NotFound.vue'
 import CreateEvent from '../views/CreateEvent.vue'
-import AboutProject from '../views/AboutProject.vue'
+import AllEvent from '../views/AllEvent.vue'
 import ContactUs from '../views/ContactUs.vue'
 
 
@@ -32,9 +32,9 @@ const routes = [
         component: CreateEvent
     },
     {
-        path: '/about-project',
-        name: "AboutProject",
-        component: AboutProject
+        path: '/list-all-event',
+        name: "AllEvent",
+        component: AllEvent
     },
     {
         path: '/contact-us',

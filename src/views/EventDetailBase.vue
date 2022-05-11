@@ -6,7 +6,7 @@ const goToNotFound = () => myRouter.push({ name: 'NotFound' })
 
 console.clear()
 const { params } = useRoute()
-const goToHome = () => myRouter.push({ name: 'Home' })
+const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 
 
 
@@ -44,7 +44,7 @@ const cancelEvent = async () => {
         })
         if (res.status === 200) {
             console.log('cancel bookingId: [' + id + '] success');
-            await goToHome()
+            await goToAllEvent()
         } else {
             console.log('ERROR, cannot delete this note \n"please check your response status code"');
         }
@@ -92,11 +92,11 @@ const cancelEvent = async () => {
                                         </span>
                                     </div>
 
-                                    <ul>
-                                        <li>Name: {{ thisEventDetail.bookingName }}</li>
+                                    <ul class="max-w-md">
+                                        <li >Name: {{ thisEventDetail.bookingName }}</li>
                                         <li>Email: {{ thisEventDetail.bookingEmail }}</li>
                                         <li v-if="thisEventDetail.eventNotes === null">Notes: - </li>
-                                        <li v-else class="max-w-md">Notes: {{ thisEventDetail.eventNotes }}</li>
+                                        <li v-else >Notes: {{ thisEventDetail.eventNotes }}</li>
                                         <li>Start Time: {{ new
                                                 Date(thisEventDetail.eventStartTime).toLocaleTimeString('en', {
                                                     hour: '2-digit', minute:
@@ -116,7 +116,7 @@ const cancelEvent = async () => {
                                                 rounded-xl text-lg 
                                                 text-center mr-16 mt-2 dark:border-blue-500
                                                 dark:text-blue-500 dark:hover:text-white
-                                                dark:hover:bg-blue-600 dark:focus:ring-blue-800" @click="goToHome">
+                                                dark:hover:bg-blue-600 dark:focus:ring-blue-800" @click="goToAllEvent">
                                             BACK
                                         </button>
                                         <span></span>
