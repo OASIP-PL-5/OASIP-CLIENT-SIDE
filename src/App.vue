@@ -1,11 +1,14 @@
 <script setup>
 import { ref, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router';
+import IconHamburger from './components/icons/IconHamburger.vue';
+
 const myRouter = useRouter()
 const goToHome = () => myRouter.push({ name: 'Home' })
 const goToContact = () => myRouter.push({ name: 'ContactUs' })
+const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 
-
+const showMenu = ref(true)
 // import EventList from './components/EventList.vue';
 // console.clear()
 // const eventList = ref([])
@@ -40,6 +43,8 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
 // onBeforeMount(async () => {
 //     await getEvent()
 // })
+
+
 </script>
  
 <template>
@@ -51,19 +56,18 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
                     <div class="flex space-x-4">
 
                         <div>
-                            <a href="#" class="flex items-center py-2 text-gray-700"
-                                @click="goToHome">
+                            <a href="#" class="flex items-center py-2 text-gray-700" @click="goToHome">
                                 <!-- <img src="./assets/FUNBOOK-LOGO.png" alt="LOGO" :style="logoSize" /> -->
                                 <span class="font-bold text-5xl px-2 text-transparent 
                                 bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">OASIP I PL-5</span>
-                                <span class="font-light">Online Appointment <br>
+                                <!-- <span class="font-light">Online Appointment <br>
                                     Scheduling System <br>
-                                    for Integrated Project Clinics</span>
+                                    for Integrated Project Clinics</span> -->
                             </a>
                         </div>
                     </div>
 
-                    <div class="hidden md:flex items-center space-x-1">
+                    <div class="hidden md:grid grid-cols-3 items-center space-x-1">
                         <button type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
                             font-medium text-xs leading-tight uppercase rounded 
                             shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
@@ -74,7 +78,8 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
                             font-medium text-xs leading-tight uppercase rounded 
                             shadow-sm hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 
                             focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400
-                            active:shadow-lg transition duration-150 ease-in-out" @click="">ABOUT PROJECT</button>
+                            active:shadow-lg transition duration-150 ease-in-out" @click="goToAllEvent">ALL
+                            EVENTS</button>
 
                         <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
                             font-medium text-xs leading-tight uppercase rounded shadow-sm 
@@ -82,7 +87,33 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
                             focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
                             transition duration-150 ease-in-out" @click="goToContact">ABOUT US</button>
                     </div>
+
+                    <div class="md:hidden flex items-center">
+                        <button class="py-5 px-2">
+                            <icon-hamburger @click="showMenu = !showMenu" class="text-gray-700" />
+                        </button>
+                    </div>
                 </div>
+            </div>
+            <div class="md:hidden grid grid-rows-3" :class="{ hidden: showMenu }">
+                <button type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
+                            font-medium text-xs leading-tight uppercase rounded 
+                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                            active:shadow-lg transition duration-150 ease-in-out" @click="goToHome">HOME</button>
+
+                <button type="button" class="inline-block px-6 py-2.5 bg-gray-200 text-gray-700
+                            font-medium text-xs leading-tight uppercase rounded 
+                            shadow-sm hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400
+                            active:shadow-lg transition duration-150 ease-in-out" @click="goToAllEvent">ALL
+                    EVENTS</button>
+
+                <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
+                            font-medium text-xs leading-tight uppercase rounded shadow-sm 
+                            hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
+                            focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
+                            transition duration-150 ease-in-out" @click="goToContact">ABOUT US</button>
             </div>
         </nav>
         <!-- <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>
@@ -103,14 +134,15 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
 </template>
  
 <style scoped>
-.fade-enter-from,.fade-leave-to{
+.fade-enter-from,
+.fade-leave-to {
     opacity: 0;
 }
 
-.fade-enter-active,.fade-leave.active{
+.fade-enter-active,
+.fade-leave.active {
     transition: opacity 1.2s ease-out;
 }
-
 </style>
 
 <!-- <script setup>

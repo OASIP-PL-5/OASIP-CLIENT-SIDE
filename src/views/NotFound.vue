@@ -8,7 +8,7 @@ const goToHome = () => myRouter.push({ name: 'Home' })
  
 <template>
     <div>
-        <div class="flex items-center justify-center w-screen h-screen">
+        <div class="flex items-center justify-center w-full h-full">
             <div class="px-4 lg:py-12">
                 <div class="lg:gap-4 lg:flex">
                     <div class="flex flex-col items-center justify-center md:py-24 lg:py-32">

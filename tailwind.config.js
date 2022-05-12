@@ -9,6 +9,11 @@ module.exports = {
           body:['Sarabun']
       }
     },
+    variants:{
+      extend:{
+        display: ['group-hover'],
+      }
+    }
   },
   plugins: [],
 }
