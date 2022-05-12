@@ -27,9 +27,14 @@ const eventCategory = ref([])
 const baseUrl = import.meta.env.PROD
   ? `${import.meta.env.VITE_BASE_URL}/api`
   : '/api'
+
+// const BASEURL = "http://202.44.9.103:8080/pl5/api"
+
 const getEventCategory = async () => {
   console.log(`${baseUrl}/event-category`)
-  const res = await fetch(`${baseUrl}/event-category`)
+  // const res = await fetch(`${baseUrl}/event-category`)
+  const res = await fetch("http://202.44.9.103:8080/pl5/api/event-category")
+
   eventCategory.value = await res.json()
   console.log('data from api: ' + eventCategory.value)
 }

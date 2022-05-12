@@ -1,11 +1,38 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
+import { ref, onBeforeMount, computed } from 'vue'
 const myRouter = useRouter()
 
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
 
+const baseUrl = import.meta.env.PROD
+    ? `${import.meta.env.VITE_BASE_URL}/api`
+    : '/api'
+// const checkURL = `${import.meta.env.PROD}`
+// console.log(checkURL);
+const eventCategoryCard = ref()
 
+const getAllEventCategory = async () => {
+    console.log(`${baseUrl}/event-category`)
+    // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
+    // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
+    // const res = await fetch(`${baseUrl}/event-category`)
+    // const res = await fetch(import.meta.env.BASE_URL+"api/event-category")
+    const res = await fetch("http://202.44.9.103:8080/pl5/api/event-category")
+    // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+    eventCategoryCard.value = await res.json()
+    console.log('data from api: ', eventCategoryCard.value)
+}
+
+onBeforeMount(async () => {
+    await getAllEventCategory()
+    console.log('length of eventCard: ', eventCategoryCard.value)
+})
+
+// const eventCategoriesImg = ref([
+//     {id:203,img:}
+// ])
 </script>
  
 <template>
@@ -13,13 +40,14 @@ const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
     <div>
         <div class="px-14 mx-10 flex flex-wrap flex-row items-center">
             <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left z-10">
-                <h1 class="mt-36 text-8xl font-bold leading-tight text-slate-800">OASIP</h1>
+                <h1 class="mt-33 text-8xl font-bold leading-tight text-slate-800">OASIP</h1>
                 <p class="text-2xl font-light text-slate-900">Online Appointment Scheduling System
                     <span>
                         <br>
                     </span>
                     for Integrated
                     Project Clinics
+
                 </p>
                 <div class="my-4 mx-4 text-xl font-semibold text-slate-800">
                     <ul class="list-disc">
@@ -48,12 +76,104 @@ const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
                         BOOK NOW</button> -->
                 </div>
             </div>
-            <div class="relative z-0">
-                <img src="../assets/3959915.jpg" alt="pic" class="md:w-8/12 md:h-8/12 md:fixed right-0 top-44 ">
+            <!-- <div class="relative">
+                <img src="../assets/decorate-bg.png" alt="pic" class="md:w-6/12 md:h-6/12 md:fixed right-18 top-12 ">
+            </div> -->
+            <div class="w-full md:w-3/5 ">
+                <img src="../assets/decorate-bg.png">
+            </div>
+
+        </div>
+        <div class="shape-background">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
+                preserveAspectRatio="none">
+                <path d="M0,0V7.23C0,65.52,268.63,112.77,600,112.77S1200,65.52,1200,7.23V0Z" class="shape-fill"></path>
+            </svg>
+        </div>
+        <div class="text-gray-600 body-font" id="eventCateSection">
+            <div class="container px-24 py-24 mx-auto">
+                <div class="flex flex-wrap -m-4">
+                    <div class="p-4 md:w-1/3" v-for="(eventCategories, index) in eventCategoryCard" :key="index">
+                        <div
+                            class="h-full rounded-xl shadow-cla-blue bg-gradient-to-r from-indigo-50 to-blue-50 overflow-hidden">
+                            <img class="lg:h-48 md:h-36 w-full object-cover object-center scale-110 transition-all duration-400 hover:scale-100"
+                                src="../assets/decorate-bg.png">
+                            <div class="p-6">
+                                <h1 class="title-font text-4xl font-bold text-gray-600 mb-3">
+                                    {{ eventCategories.eventCategoryName }}</h1>
+                                <div class="leading-relaxed mb-3">
+                                    <p v-if="eventCategories.eventCategoryDescription === null">
+                                        Unfortunately this clinic has no description yet.📁
+                                    </p>
+                                    <p v-else>{{ eventCategories.eventCategoryDescription }}</p>
+                                </div>
+                                <!-- <div class="flex items-center flex-wrap ">
+                                    <button
+                                        class="bg-gradient-to-r from-cyan-400 to-blue-400 hover:scale-105 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Learn
+                                        more</button>
+
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
             </div>
         </div>
+        <footer class="p-4 shadow md:px-6 md:py-8 bg-blue-400">
+            <!-- <div class="sm:flex sm:items-center sm:justify-between">
+                <a href="https://flowbite.com" class="flex items-center mb-4 sm:mb-0">
+                    <img src="/docs/images/logo.svg" class="mr-3 h-8" alt="Flowbite Logo" />
+                    <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Flowbite</span>
+                </a>
+                <ul class="flex flex-wrap items-center mb-6 text-sm text-gray-500 sm:mb-0 dark:text-gray-400">
+                    <li>
+                        <a href="#" class="mr-4 hover:underline md:mr-6 ">About</a>
+                    </li>
+                    <li>
+                        <a href="#" class="mr-4 hover:underline md:mr-6">Privacy Policy</a>
+                    </li>
+                    <li>
+                        <a href="#" class="mr-4 hover:underline md:mr-6 ">Licensing</a>
+                    </li>
+                    <li>
+                        <a href="#" class="hover:underline">Contact</a>
+                    </li>
+                </ul>
+            </div> -->
+            <!-- <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" /> -->
+            <span class="block text-lg text-white sm:text-center ">© 2022 <a href="" class="hover:underline">PL5 |
+                    ALLFORONE </a>. All Rights Reserved.
+            </span>
+        </footer>
     </div>
+
+
 </template>
  
 <style>
+#eventCateSection {
+    background-color: #3a66c9;
+}
+
+.shape-background {
+    position: absolute;
+    top: 150;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.shape-background svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 46px;
+}
+
+.shape-background .shape-fill {
+    fill: white;
+}
 </style>

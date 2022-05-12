@@ -28,8 +28,9 @@ const getEventCard = async () => {
     console.log(`${baseUrl}/event`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const res = await fetch(`${baseUrl}/event`)
+    // const res = await fetch(`${baseUrl}/event`)
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+    const res = await fetch("http://202.44.9.103:8080/pl5/api/event")
     eventCard.value = await res.json()
     console.log('data from api: ', eventCard.value)
 }
@@ -49,7 +50,8 @@ const closeToggle = () => window.location.reload()
 // method: POST -- add event
 const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes, categorySelection) => {
     console.log(`${baseUrl}/event`);
-    const res = await fetch(`${baseUrl}/event`, {
+    
+    const res = await fetch("http://202.44.9.103:8080/pl5/api/event", {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
@@ -147,7 +149,7 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
                                 </span>
                                 <span
                                     class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
-                                    {{ new Date(event.eventStartTime).toLocaleDateString('th') }}
+                                    {{ new Date(event.eventStartTime).toLocaleDateString('en') }}
                                 </span>
                             </div>
                             <ul class="mb-2">

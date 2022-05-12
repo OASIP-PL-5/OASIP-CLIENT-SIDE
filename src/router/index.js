@@ -7,7 +7,7 @@ import AllEvent from '../views/AllEvent.vue'
 import ContactUs from '../views/ContactUs.vue'
 
 
-const history = createWebHistory()
+const history = createWebHistory(import.meta.env.BASE_URL)
 
 const routes = [
     {
