@@ -5,7 +5,7 @@ import NotFound from '../views/NotFound.vue'
 import CreateEvent from '../views/CreateEvent.vue'
 import AllEvent from '../views/AllEvent.vue'
 import ContactUs from '../views/ContactUs.vue'
-
+import EventCategoryDetailBase from '../views/EventCategoryDetailBase.vue'
 
 const history = createWebHistory()
 
@@ -20,7 +20,11 @@ const routes = [
         name: 'EventDetailBase',
         component: EventDetailBase
     },
-    
+    {
+        path: '/event-cateogry-detai-base/:id',
+        name: 'EventCategoryDetailBase',
+        component: EventCategoryDetailBase
+    },
     {
         path: '/:pageNotFound(.*)*',
         name: "NotFound",

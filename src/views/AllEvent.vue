@@ -63,17 +63,48 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
             eventCategoryName: categorySelection.eventCategoryName
         })
     })
+    if (newBookingName.trim().length == 0) {
+        newBookingName = null
+        alert('Booking Name must be filled out!')
+        res.status = 400
+    }
+    // if(newStartTime != currentDateTime){
+    //     newStartTime = null
+    //     alert('select again')
+    // }
+
     if (res.status === 201) {
         const addedEvent = await res.json()
         eventCard.value.push(addedEvent)
         console.log('added sucessfully');
         alert(`Booking Name: ${newBookingName} is created successfully`)
-    } else {
-        console.log('error, cannot be added');
-        alert('error!!!\n Please check your bookingName or Notes might be too long!')
+        window.location.reload()
+
     }
+    //     else {
+    //         console.log('error, cannot be added');
+    //         alert(`Booking Name: [${newBookingName}]   ทำไมมันยะัง reload เมื่อ post วะ กุจะดู payload
+    // Booking Email: [${newBookingEmail}]
+    // Start Time: ${newStartTime}
+    // Event Category: ${categorySelection.eventCategoryName}
+    // Event Duration: ${categorySelection.eventDuration}
+    // Please try again with undefined field(s)`)
+    //     }
+
 }
+// var currentDateTime = new Date();
+// console.log(currentDateTime.toJSON());
+// var dd = String(currentDateTime.getDate()).padStart(2, '0');
+// var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0!
+// var yyyy = currentDateTime.getFullYear();
+// var hr = String(currentDateTime.getHours())
+// var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
+
+// currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
+// console.log('currentDateTime ', currentDateTime);
 // toggleModal = !toggleModal
+
+
 </script>
 
 <template>
@@ -90,7 +121,8 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
 
         <!-- GET ALL -->
         <div v-show="eventCard != 0">
-            <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">LIST-ALL::</h2>
+            <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">LIST ALL :: <span
+                    class="text-3xl text-blue-400">{{ eventCard.length }} events</span></h2>
             <div class="w-full md:w-1/3 p-5 mx-10">
                 <div class="relative">
                     <div class="absolute flex items-center ml-2 h-full">
@@ -179,19 +211,19 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
                 </div>
             </div>
 
-            <div class="relative">
-                <button @click="toggleModal = !toggleModal" data-modal-toggle="defaultModal" type="button"
-                    class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500 hover:scale-150 transition-transform active:shadow-lg mouse shadow ease-in duration-200 focus:outline-none">
-                    <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" class="w-16 h-16 inline-block">
-                        <path fill="#FFFFFF" d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
-                                    C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399
-                                    C15.952,9,16,9.447,16,10z" />
-                    </svg>
-                </button>
-            </div>
+
 
         </div>
-
+        <div class="relative">
+            <button @click="toggleModal = !toggleModal" type="button"
+                class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500 hover:scale-150 transition-transform active:shadow-lg mouse shadow ease-in duration-200 focus:outline-none">
+                <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" class="w-16 h-16 inline-block">
+                    <path fill="#FFFFFF" d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
+                                    C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399
+                                    C15.952,9,16,9.447,16,10z" />
+                </svg>
+            </button>
+        </div>
     </div>
 
 </template>
