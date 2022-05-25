@@ -89,31 +89,18 @@ const showMenu = ref(true)
                     </div>
 
                     <div class="md:hidden flex items-center">
-                        <button class="py-5 px-2">
+                        <button class="py-2 px-2">
                             <icon-hamburger @click="showMenu = !showMenu" class="text-gray-700" />
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="md:hidden grid grid-rows-3" :class="{ hidden: showMenu }">
-                <button type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
-                            font-medium text-xs leading-tight uppercase rounded 
-                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
-                            active:shadow-lg transition duration-150 ease-in-out" @click="goToHome">HOME</button>
-
-                <button type="button" class="inline-block px-6 py-2.5 bg-gray-200 text-gray-700
-                            font-medium text-xs leading-tight uppercase rounded 
-                            shadow-sm hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400
-                            active:shadow-lg transition duration-150 ease-in-out" @click="goToAllEvent">ALL
+            <hr>
+            <div class="md:hidden grid grid-rows-3 text-xl divide-y " :class="{ hidden: showMenu }">
+                <button type="button" class="font-semibold text-blue-400" @click="goToHome">HOME</button>
+                <button type="button" class="font-semibold text-gray-400" @click="goToAllEvent">ALL
                     EVENTS</button>
-
-                <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
-                            font-medium text-xs leading-tight uppercase rounded shadow-sm 
-                            hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
-                            focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
-                            transition duration-150 ease-in-out" @click="goToContact">ABOUT US</button>
+                <button type="button" class="font-semibold text-gray-800" @click="goToContact">ABOUT US</button>
             </div>
         </nav>
         <!-- <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>

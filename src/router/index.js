@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from '../views/Home.vue'
 import EventDetailBase from '../views/EventDetailBase.vue'
 import NotFound from '../views/NotFound.vue'
-import CreateEvent from '../views/CreateEvent.vue'
 import AllEvent from '../views/AllEvent.vue'
 import ContactUs from '../views/ContactUs.vue'
+import EventCategoryDetailBase from '../views/EventCategoryDetailBase.vue'
 
 
 const history = createWebHistory(import.meta.env.BASE_URL)
@@ -20,17 +20,17 @@ const routes = [
         name: 'EventDetailBase',
         component: EventDetailBase
     },
-    
+    {
+        path: '/event-cateogry-detai-base/:id',
+        name: 'EventCategoryDetailBase',
+        component: EventCategoryDetailBase
+    },
     {
         path: '/:pageNotFound(.*)*',
         name: "NotFound",
         component: NotFound
     },
-    {
-        path: '/create-event',
-        name: "CreateEvent",
-        component: CreateEvent
-    },
+    
     {
         path: '/list-all-event',
         name: "AllEvent",

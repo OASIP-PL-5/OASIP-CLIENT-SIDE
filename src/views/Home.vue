@@ -1,6 +1,7 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
 import { ref, onBeforeMount, computed } from 'vue'
+
 const myRouter = useRouter()
 
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
@@ -14,12 +15,10 @@ const baseUrl = import.meta.env.PROD
 const eventCategoryCard = ref()
 
 const getAllEventCategory = async () => {
-    console.log(`${baseUrl}/event-category`)
+    console.log(`${baseUrl}/event-categories`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    // const res = await fetch(`${baseUrl}/event-category`)
-    // const res = await fetch(import.meta.env.BASE_URL+"api/event-category")
-    const res = await fetch("http://202.44.9.103:8080/pl5/api/event-category")
+    const res = await fetch(`${baseUrl}/event-categories`)
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     eventCategoryCard.value = await res.json()
     console.log('data from api: ', eventCategoryCard.value)
@@ -30,14 +29,16 @@ onBeforeMount(async () => {
     console.log('length of eventCard: ', eventCategoryCard.value)
 })
 
-// const eventCategoriesImg = ref([
-//     {id:203,img:}
-// ])
+const toggleModal = ref(false)
+
+
 </script>
  
 <template>
 
     <div>
+        <!-- modal for POST-event from EditEventCategory.vue(component)-->
+        <EditEventCategory v-if="toggleModal" @closeToggle="closeToggle" />
         <div class="px-14 mx-10 flex flex-wrap flex-row items-center">
             <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left z-10">
                 <h1 class="mt-33 text-8xl font-bold leading-tight text-slate-800">OASIP</h1>
@@ -90,6 +91,7 @@ onBeforeMount(async () => {
                 <path d="M0,0V7.23C0,65.52,268.63,112.77,600,112.77S1200,65.52,1200,7.23V0Z" class="shape-fill"></path>
             </svg>
         </div>
+        <!-- content section -->
         <div class="text-gray-600 body-font" id="eventCateSection">
             <div class="container px-24 py-24 mx-auto">
                 <div class="flex flex-wrap -m-4">
@@ -107,6 +109,23 @@ onBeforeMount(async () => {
                                     </p>
                                     <p v-else>{{ eventCategories.eventCategoryDescription }}</p>
                                 </div>
+                                <!-- เอา duration ไปแสดงใน EventCategoryDetailBase -->
+                                <!-- <div class="leading-relaxed mb-3">
+                                    <span class="font-bold">Duration :</span>
+                                    {{ eventCategories.eventDuration }} minutes
+                                </div> -->
+
+
+                                <router-link :to="{
+                                    name: 'EventCategoryDetailBase',
+                                    params: { id: eventCategories.id}
+                                }">
+                                    <button @click="toggleModal = !toggleModal" type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
+                            font-medium text-xs leading-tight uppercase rounded 
+                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                            active:shadow-lg transition duration-150 ease-in-out">LEARN MORE</button>
+                                </router-link>
                                 <!-- <div class="flex items-center flex-wrap ">
                                     <button
                                         class="bg-gradient-to-r from-cyan-400 to-blue-400 hover:scale-105 drop-shadow-md  shadow-cla-blue px-4 py-1 rounded-lg">Learn
@@ -121,7 +140,7 @@ onBeforeMount(async () => {
                 </div>
             </div>
         </div>
-        <footer class="p-4 shadow md:px-6 md:py-8 bg-blue-400">
+        <footer class="p-4 shadow md:px-6 md:py-8z bg-blue-400">
             <!-- <div class="sm:flex sm:items-center sm:justify-between">
                 <a href="https://flowbite.com" class="flex items-center mb-4 sm:mb-0">
                     <img src="/docs/images/logo.svg" class="mr-3 h-8" alt="Flowbite Logo" />
