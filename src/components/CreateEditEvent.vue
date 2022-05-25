@@ -20,6 +20,7 @@ const newEvent = computed(() => {
     eventCategoryId: props.currentEvent.eventCategoryId
   }
 })
+console.log("test", newEvent.eventStartTime);
 // const togxgleModal = ref(false)
 
 // GET เพื่อจะ map [id และ duration : จะทำให้สามารถ POST ได้]
@@ -28,8 +29,8 @@ const baseUrl = import.meta.env.PROD
   ? `${import.meta.env.VITE_BASE_URL}/api`
   : '/api'
 const getEventCategory = async () => {
-  console.log(`${baseUrl}/event-category`)
-  const res = await fetch(`${baseUrl}/event-category`)
+  console.log(`${baseUrl}/event-categories`)
+  const res = await fetch(`${baseUrl}/event-categories`)
   eventCategory.value = await res.json()
   console.log('data from api: ' + eventCategory.value)
 }
@@ -107,8 +108,8 @@ const showWarning = ref()
               <!-- <h1 class="font-bold text-lg text-gray-900">Start Time</h1> -->
             </div>
             <div class="grid mb-4 ">
-              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model="newEvent.newStartTime"
-                type="datetime-local" :min="currentDateTime" />
+              <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newEvent.newStartTime"
+                type="datetime-local" :min="currentDateTime">
               <!-- <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newStartTime" type="time" /> -->
             </div>
             <!-- <span v-if="newStartTime != today">You're choosing past date</span> -->

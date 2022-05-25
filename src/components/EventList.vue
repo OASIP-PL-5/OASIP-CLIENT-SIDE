@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { ref, onBeforeMount } from 'vue'
 console.clear()
 
@@ -38,4 +38,4 @@ onBeforeMount(async () => {
             </li>
         </ul>
     </div>
-</template>
+</template> -->

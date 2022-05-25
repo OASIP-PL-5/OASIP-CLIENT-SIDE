@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -15,4 +15,4 @@ const props = defineProps({
 </template>
  
 <style>
-</style>
+</style> -->

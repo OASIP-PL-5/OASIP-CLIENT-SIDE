@@ -15,10 +15,10 @@ const baseUrl = import.meta.env.PROD
 const eventCategoryCard = ref()
 
 const getAllEventCategory = async () => {
-    console.log(`${baseUrl}/event-category`)
+    console.log(`${baseUrl}/event-categories`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const res = await fetch(`${baseUrl}/event-category`)
+    const res = await fetch(`${baseUrl}/event-categories`)
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     eventCategoryCard.value = await res.json()
     console.log('data from api: ', eventCategoryCard.value)

@@ -3,7 +3,7 @@ import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import EventList from '../components/EventList.vue'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
-
+import IconFilter from '../components/icons/IconFilter.vue'
 console.clear()
 // binding-CSS
 const btnTailWind =
@@ -17,18 +17,22 @@ const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
 const goToHome = () => myRouter.push({ path: '/' })
 const goToAboutProject = () => myRouter.push({ name: 'AboutProject' })
 
-// GET:: Card
+// object -- แสดงรายการ event เป็น card ต่างๆ
 const eventCard = ref([])
+// object -- จัดการการ searching
+const searchingInfo = ref([])
+
+// GET:: Card
 const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`
     : '/api'
 // const checkURL = `${import.meta.env.PROD}`
 // console.log(checkURL);
 const getEventCard = async () => {
-    console.log(`${baseUrl}/event`)
+    console.log(`${baseUrl}/events`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const res = await fetch(`${baseUrl}/event`)
+    const res = await fetch(`${baseUrl}/events`)
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     eventCard.value = await res.json()
     console.log('data from api: ', eventCard.value)
@@ -47,9 +51,15 @@ const noScheduleImg =
 const toggleModal = ref(false)
 const closeToggle = () => window.location.reload()
 // method: POST -- add event
-const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes, categorySelection) => {
-    console.log(`${baseUrl}/event`);
-    const res = await fetch(`${baseUrl}/event`, {
+const addEvent = async (
+    newBookingName,
+    newBookingEmail,
+    newStartTime,
+    newNotes,
+    categorySelection
+) => {
+    console.log(`${baseUrl}/events`)
+    const res = await fetch(`${baseUrl}/events`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
@@ -67,51 +77,216 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
         newBookingName = null
         alert('Booking Name must be filled out!')
         res.status = 400
+    } if (res.status == 400) {
+        console.log(currentDateTime);
+        alert('Appointment start time must be present or future.')
+        // return res.status = 400
     }
-    // if(newStartTime != currentDateTime){
-    //     newStartTime = null
-    //     alert('select again')
-    // }
 
     if (res.status === 201) {
         const addedEvent = await res.json()
         eventCard.value.push(addedEvent)
-        console.log('added sucessfully');
+        console.log('added sucessfully')
         alert(`Booking Name: ${newBookingName} is created successfully`)
         window.location.reload()
-
     }
-    //     else {
-    //         console.log('error, cannot be added');
-    //         alert(`Booking Name: [${newBookingName}]   ทำไมมันยะัง reload เมื่อ post วะ กุจะดู payload
-    // Booking Email: [${newBookingEmail}]
-    // Start Time: ${newStartTime}
-    // Event Category: ${categorySelection.eventCategoryName}
-    // Event Duration: ${categorySelection.eventDuration}
-    // Please try again with undefined field(s)`)
-    //     }
 
 }
-// var currentDateTime = new Date();
-// console.log(currentDateTime.toJSON());
-// var dd = String(currentDateTime.getDate()).padStart(2, '0');
-// var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0!
-// var yyyy = currentDateTime.getFullYear();
-// var hr = String(currentDateTime.getHours())
-// var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
 
-// currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
-// console.log('currentDateTime ', currentDateTime);
-// toggleModal = !toggleModal
+// SEARCHING METHOD
+// search-catName-option
+const eventCategory = ref([])
+const getEventCategory = async () => {
+    console.log(`${baseUrl}/event-categories`)
+    const res = await fetch(`${baseUrl}/event-categories`)
+    eventCategory.value = await res.json()
+    console.log('data from api: ' + eventCategory.value)
+}
+onBeforeMount(async () => {
+    await getEventCategory()
+})
 
+// ลองกำหนด model สำหรับรับ id 
+const modelId = ref(null)
+// model for filter: time/chrono
+const filterByCategory = async () => {
+    // fetch for filter catName
+    const test = modelId.value
+    if (modelId.value == 'all') {
+        const res = await fetch(`${baseUrl}/events`)
+        eventCard.value = await res.json()
+    }
+
+    else {
+        var id = modelId.value.eventCategoryId
+        const res = await fetch(`${baseUrl}/events/getByEventCategories/${id}`)
+        eventCard.value = await res.json()
+        console.log("res", res.url);
+    }
+}
+
+const modelTime = ref()
+const filterByPeriod = async () => {
+    // // fetch for filter period/chrono
+    if (modelTime.value == 'all') {
+        const res = await fetch(`${baseUrl}/events`)
+        eventCard.value = await res.json()
+    }
+    else if (modelTime.value == 'upcoming') {
+        const res = await fetch(`${baseUrl}/events/getEventByUpcoming`)
+        eventCard.value = await res.json()
+    } else if (modelTime.value == 'past') {
+        const res = await fetch(`${baseUrl}/events/getEventByPast`)
+        eventCard.value = await res.json()
+    }
+}
+
+// const modelDate = ref()
+// const filterByDate = computed(async () => {
+//     // // fetch for filter period/chrono
+//     const dt = modelDate.value
+//     const res = await fetch(`${baseUrl}/events/getEventByEventStartTime/${dt}`)
+//     eventCard.value = await res.json()
+// })
+
+
+const showFilterMenu = ref(false)
+const picked = ref(false)
+const refresh = () => window.location.reload()
+
+// เพื่อ disable เวลาที่เป็นอดีต
+var currentDateTime = new Date();
+console.log(currentDateTime.toJSON());
+var dd = String(currentDateTime.getDate()).padStart(2, '0');
+var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0!
+var yyyy = currentDateTime.getFullYear();
+var hr = String(currentDateTime.getHours())
+var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
+
+currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
 
 </script>
 
 <template>
     <div>
+        <!-- show filter component button -->
+
+        <button class="border rounded-xl bg-blue-400 text-white bg-blue-400 
+                            font-medium text-lg leading-tight uppercase rounded 
+                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                            active:shadow-lg transition duration-150 ease-in-out
+                        font-bold mx-10 mt-4 px-2 rounded inline-flex items-center
+                        absolute top-56 lg:top-36 right-6" @click="showFilterMenu = !showFilterMenu">
+            <span class="mx-2">Filter Menu</span>
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true"
+                role="img" class="iconify iconify--mdi" width="32" height="32" preserveAspectRatio="xMidYMid meet"
+                viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M9 6v2H2V6h7m0 5v2H2v-2h7m9 5v2H2v-2h16m1.31-4.5c.44-.68.69-1.5.69-2.39c0-2.5-2-4.5-4.5-4.5s-4.5 2-4.5 4.5s2 4.5 4.5 4.5c.87 0 1.69-.25 2.38-.68L21 16l1.39-1.39l-3.08-3.11m-3.81.11c-1.38 0-2.5-1.11-2.5-2.5s1.12-2.5 2.5-2.5a2.5 2.5 0 0 1 0 5Z">
+                </path>
+            </svg>
+        </button>
+
+        <!-- filter component -->
+        <div class="relative ">
+            <!-- <IconHideFilter class="text-blue-400"/> -->
+            <div class="border rounded-xl shadow-2xl justify-center bg-white text-gray-900 sm:w-3/12
+                    sm:absolute -top-16 right-0 z-50 lg:h-screen" v-show="showFilterMenu">
+                <div>
+                    <!-- <div class="mx-4 my-2 text-2xl text-center font-bold text-gray-800">Filter Tools
+
+                    </div> -->
+                    <form class="grid sm:grid-col gap-4 my-4 mx-auto w-10/12 ">
+                        <div>
+                            <h2 class="text-4xl font-bold text-blue-400 mb-3">FILTER MENU</h2>
+                            <hr class="mb-3">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input appearance-none rounded-full h-4 w-4 border 
+                                    border-gray-300 bg-white checked:bg-blue-600 
+                                    checked:border-blue-600 focus:outline-none transition
+                                    duration-200 mt-1 align-top bg-no-repeat bg-center
+                                    bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
+                                    id="flexRadioDefault1" v-model="picked" value="1">
+
+                                <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
+                                    Filter by event-category
+                                </label>
+
+                            </div>
+                            <select v-if="picked == 1" class="border py-2 px-3 text-grey-800 rounded-lg mb-2 w-full"
+                                required v-model="modelId" @change="filterByCategory">
+                                <option value="all">All Event Category</option>
+                                <option v-for="(eventCat, index) in eventCategory" :key="index" :value="{
+                                    eventCategoryId: eventCat.id
+                                    // eventCategoryName: eventCat.eventCategoryName
+                                }">
+                                    {{ eventCat.id }} -- {{ eventCat.eventCategoryName }}
+                                </option>
+                            </select>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input appearance-none rounded-full h-4 w-4 border 
+                                    border-gray-300 bg-white checked:bg-blue-600 
+                                    checked:border-blue-600 focus:outline-none transition
+                                    duration-200 mt-1 align-top bg-no-repeat bg-center
+                                    bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
+                                    id="flexRadioDefault1" v-model="picked" value="2">
+                                <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
+                                    Filter by date
+                                </label>
+
+                            </div>
+                            <select v-if="picked == 2" v-model="modelTime" @change="filterByPeriod"
+                                class="border py-2 px-3 text-grey-800 rounded-lg mb-2 w-full">
+                                <option value="all">All Events Date</option>
+                                <option value="past">Past</option>
+                                <option value="upcoming">Upcoming</option>
+                            </select>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input appearance-none rounded-full h-4 w-4 border 
+                                    border-gray-300 bg-white checked:bg-blue-600 
+                                    checked:border-blue-600 focus:outline-none transition
+                                    duration-200 mt-1 align-top bg-no-repeat bg-center
+                                    bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
+                                    id="flexRadioDefault1" v-model="picked" value="3" disabled>
+
+                                <label class="form-check-label inline-block text-gray-400" for="flexRadioDefault1">
+                                    Filter by specific date (coming soon)
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                        <input v-if="picked == 3" class="border py-2 px-3 text-grey-800 rounded-lg"
+                            type="datetime-local" v-model="modelDate" @change="filterByDate" />
+
+
+
+                        <button @click="refresh"
+                            class="bg-gray-400 
+                            font-medium text-lg leading-tight uppercase rounded text-white
+                            shadow-sm hover:bg-gray-500 hover:shadow-lg focus:bg-gray-500
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-600
+                            active:shadow-lg transition duration-150 ease-in-out border py-2 px-3 text-grey-800 rounded-lg" type="reset">
+                            RESET
+                        </button>
+                        <button class="bg-blue-400 
+                            font-medium text-lg leading-tight uppercase rounded 
+                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                            active:shadow-lg transition duration-150 ease-in-out text-white border 
+                            py-2 px-3 text-grey-800 rounded-lg" type="button"
+                            @click="showFilterMenu = !showFilterMenu">
+                            CLOSE
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- modal for POST-event from CreateEditEvent.vue(component)-->
         <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" />
-        <!-- toggleModal = !toggleModal -->
 
         <!-- No Schedule -->
         <div v-show="eventCard == 0" class="grid place-items-center h-screen">
@@ -121,97 +296,74 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
 
         <!-- GET ALL -->
         <div v-show="eventCard != 0">
-            <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">LIST ALL :: <span
-                    class="text-3xl text-blue-400">{{ eventCard.length }} events</span></h2>
-            <div class="w-full md:w-1/3 p-5 mx-10">
-                <div class="relative">
-                    <div class="absolute flex items-center ml-2 h-full">
-                        <svg class="w-4 h-4 fill-current text-primary-gray-dark" viewBox="0 0 16 16" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M15.8898 15.0493L11.8588 11.0182C11.7869 10.9463 11.6932 10.9088 11.5932 10.9088H11.2713C12.3431 9.74952 12.9994 8.20272 12.9994 6.49968C12.9994 2.90923 10.0901 0 6.49968 0C2.90923 0 0 2.90923 0 6.49968C0 10.0901 2.90923 12.9994 6.49968 12.9994C8.20272 12.9994 9.74952 12.3431 10.9088 11.2744V11.5932C10.9088 11.6932 10.9495 11.7869 11.0182 11.8588L15.0493 15.8898C15.1961 16.0367 15.4336 16.0367 15.5805 15.8898L15.8898 15.5805C16.0367 15.4336 16.0367 15.1961 15.8898 15.0493ZM6.49968 11.9994C3.45921 11.9994 0.999951 9.54016 0.999951 6.49968C0.999951 3.45921 3.45921 0.999951 6.49968 0.999951C9.54016 0.999951 11.9994 3.45921 11.9994 6.49968C11.9994 9.54016 9.54016 11.9994 6.49968 11.9994Z">
-                            </path>
-                        </svg>
-                    </div>
-                    <input type="text" placeholder="Search by eventCategory, bookingName..."
-                        class="px-8 py-3 w-7/12 rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm" />
-                </div>
+            <div>
+                <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
+                    SCHEDULED EVENTS::
+                    <span class="text-3xl text-blue-400 mb-4">{{ eventCard.length }} events
+                    </span>
 
-                <div class="flex items-center justify-between mt-4 w-7/12">
-                    <p class="font-medium">Filters</p>
-                    <button
-                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md">
-                        Reset Filter
-                    </button>
-                </div>
 
-                <div>
-                    <div class="grid grid-cols-2 gap-4 mt-4 w-7/12">
+                    <!-- <div class="grid sm:grid-cols-2 lg:w-2/12 sm:w-4/12 mt-2">
+                        <span class="text-3xl text-blue-400 mb-2">{{ eventCard.length }} events </span>
                         <select
                             class="px-4 py-3 w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm">
-                            <option value="">All Category</option>
-                            <option>Client-side Clinic</option>
-                            <option>Server-side Clinic</option>
-                            <option>Project Management Clinic</option>
-                            <option>Database Clinic</option>
-                            <option>DevOps/Infra Clinic</option>
-                        </select>
-
-                        <select
-                            class="px-4 py-3 w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm">
-                            <option value="">All Date</option>
+                            <option value="">All Events</option>
                             <option>Past</option>
                             <option>Upcoming</option>
                         </select>
-                    </div>
-                </div>
-            </div>
+                    </div> -->
+                </h2>
 
-            <div class="w-full m-auto grid md:grid-cols-4 items-center justify-center bg-white text-gray-900 ">
-                <div class="mx-10 my-5 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
-                    v-for="(event, index) in eventCard" :key="index">
-                    <div class="px-6 py-2 text-left">
-                        <div>
-                            <div class="font-bold text-2xl mb-2 text-gray-700">
-                                {{ event.eventCategoryName }}
-                                <span>
-                                    <!--Space between eventCategory and date-->
-                                </span>
-                                <span
-                                    class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
-                                    {{ new Date(event.eventStartTime).toLocaleDateString('th') }}
+
+
+
+
+                <div class="w-full m-auto mt-12 grid md:grid-cols-4 items-center justify-center bg-white text-gray-900">
+                    <div class="mx-10 my-6 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
+                        v-for="(event, index) in eventCard" :key="index">
+                        <div class="px-6 py-2 text-left">
+                            <div>
+                                <div class="font-bold text-2xl mb-2 text-gray-700">
+                                    {{ event.eventCategoryName }}
+                                    <span>
+                                        <!--Space between eventCategory and date-->
+                                    </span>
+                                    <span
+                                        class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                                        {{
+                                                new Date(event.eventStartTime).toLocaleDateString('th')
+                                        }}
+                                    </span>
+                                </div>
+                                <ul class="mb-2">
+                                    <li>Name: {{ event.bookingName }}</li>
+                                    <li>
+                                        Start Time:
+                                        {{
+                                                new Date(event.eventStartTime).toLocaleTimeString('en', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })
+                                        }}
+                                    </li>
+                                    <li>Duration: {{ event.eventDuration }} minutes</li>
+                                </ul>
+                            </div>
+                            <hr />
+                            <div class="flex my-2">
+                                <span class="content-center mx-auto">
+                                    <router-link :to="{
+                                        name: 'EventDetailBase',
+                                        params: { id: event.id, bookingName: event.bookingName }
+                                    }">
+                                        <button :class="btnTailWind">Details</button>
+                                    </router-link>
                                 </span>
                             </div>
-                            <ul class="mb-2">
-                                <li>Name: {{ event.bookingName }}</li>
-                                <li>
-                                    Start Time:
-                                    {{
-                                            new Date(event.eventStartTime).toLocaleTimeString('en', {
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })
-                                    }}
-                                </li>
-                                <li>Duration: {{ event.eventDuration }} minutes</li>
-                            </ul>
-                        </div>
-                        <hr />
-                        <div class="flex my-2">
-                            <span class="content-center mx-auto">
-                                <router-link :to="{
-                                    name: 'EventDetailBase',
-                                    params: { id: event.id, bookingName: event.bookingName }
-                                }">
-                                    <button :class="btnTailWind">Details</button>
-                                </router-link>
-                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-
-
 
         </div>
         <div class="relative">
@@ -223,7 +375,8 @@ const addEvent = async (newBookingName, newBookingEmail, newStartTime, newNotes,
                                     C15.952,9,16,9.447,16,10z" />
                 </svg>
             </button>
+
+
         </div>
     </div>
-
 </template>

@@ -20,7 +20,7 @@ const baseUrl = import.meta.env.PROD
 
 const getThisEventCard = async () => {
   const id = params.id
-  const res = await fetch(`${baseUrl}/event/${id}`)
+  const res = await fetch(`${baseUrl}/events/${id}`)
   // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
   // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
   editStartTimeModel.value = thisEventDetail.value.eventStartTime
@@ -45,7 +45,7 @@ const cancelEvent = async () => {
   const id = params.id
   let confirmation = 'Are you sure?'
   if (confirm(confirmation) == true) {
-    const res = await fetch(`${baseUrl}/event/${id}`, {
+    const res = await fetch(`${baseUrl}/events/${id}`, {
       method: 'DELETE'
     })
     if (res.status === 200) {
@@ -84,14 +84,12 @@ const cancelEdit = () => {
 
 const updateEvent = async () => {
   const id = params.id
-  const resGet = await fetch(`${baseUrl}/event/${id}`)
+  const resGet = await fetch(`${baseUrl}/events/${id}`)
   // const bookingName = params.bookingName
   // method: GET
   console.clear()
   // method: PUT
-  let confirmToEdit = 'Are you sure to save ?'
-  if (confirm(confirmToEdit) == true) {
-    const resPut = await fetch(`${baseUrl}/event/${id}`, {
+    const resPut = await fetch(`${baseUrl}/events/${id}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -114,7 +112,6 @@ const updateEvent = async () => {
     }
 
   }
-}
 // เพื่อ disable เวลาที่เป็นอดีต
 var currentDateTime = new Date();
 console.log(currentDateTime.toJSON());
