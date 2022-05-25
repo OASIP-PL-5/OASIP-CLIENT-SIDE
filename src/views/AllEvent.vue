@@ -35,6 +35,7 @@ const getEventCard = async () => {
     const res = await fetch(`${baseUrl}/events`)
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     eventCard.value = await res.json()
+
     console.log('data from api: ', eventCard.value)
 }
 
@@ -124,23 +125,58 @@ const filterByCategory = async () => {
         console.log("res", res.url);
     }
 }
+let isShow = ref(true);
+
+const isShowListAll = ref(true)
+
+const eventCardFilterUp = ref([])
+const eventCardFilterPast = ref([])
 
 const modelTime = ref()
 const filterByPeriod = async () => {
+
     // // fetch for filter period/chrono
     if (modelTime.value == 'all') {
-        const res = await fetch(`${baseUrl}/events`)
-        eventCard.value = await res.json()
+        eventCardFilterUp.value = 0
+        eventCardFilterPast.value = 0
     }
     else if (modelTime.value == 'upcoming') {
         const res = await fetch(`${baseUrl}/events/getEventByUpcoming`)
-        eventCard.value = await res.json()
+        eventCardFilterUp.value = await res.json()
+        console.log(`event card returned: ${eventCardFilterUp.value.length} `);
+        if (eventCardFilterUp.value.length == 0) {
+            console.log(`event card returned: ${eventCardFilterUp.value.length} + no upcoming or on-going events`);
+            eventCardFilterUp.value = undefined
+        } else if (eventCardFilterUp.value.length != 0) {
+            eventCardFilterUp.value = await res.json()
+        }
+        else {
+            eventCardFilterUp.value = 0
+        }
     } else if (modelTime.value == 'past') {
         const res = await fetch(`${baseUrl}/events/getEventByPast`)
-        eventCard.value = await res.json()
+        eventCardFilterPast.value = await res.json()
+        if (eventCardFilterPast.value.length == 0) {
+            console.log(`event card returned: ${eventCardFilterPast.value.length} + no past events`);
+            eventCardFilterPast.value = undefined
+        }
+         else {
+            eventCardFilterUp.value = 0
+        }
     }
 }
 
+// const checkIsShow = (() => {
+//     let isShow = false;
+//     if (eventCard.value.length == 0) {
+//         isShow = true;
+//         console.log("no scheduled is showing");
+//     } else {
+//         isShow = false;
+//         console.log("no scheduled is not showing");
+//     }
+// })
+// console.log(checkIsShow());
 // const modelDate = ref()
 // const filterByDate = computed(async () => {
 //     // // fetch for filter period/chrono
@@ -164,7 +200,6 @@ var hr = String(currentDateTime.getHours())
 var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
 
 currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
-
 </script>
 
 <template>
@@ -293,9 +328,162 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
             <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>
             <img :src="noScheduleImg" alt="noScheduleImg" />
         </div>
+        <div v-show="eventCardFilterUp == undefined" class="grid place-items-center">
+            <h1 class="font-bold text-5xl text-blue-500">No Upcoming or On-going Events</h1>
+            <!-- <img :src="noScheduleImg" alt="noScheduleImg" /> -->
+        </div>
+        <div v-show="eventCardFilterPast == undefined" class="grid place-items-center">
+            <h1 class="font-bold text-5xl text-blue-500">No Past Events</h1>
+            <!-- <img :src="noScheduleImg" alt="noScheduleImg" /> -->
+        </div>
+
+        <div v-show="eventCardFilterUp != 0 && eventCardFilterPast != undefined && eventCard != 0">
+            <!-- eventCardFilterPast != 0 && eventCardFilterUp != undefined && eventCard != 0 -->
+            <div>
+                <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
+                    SCHEDULED EVENTS:: FILTER UPCOMING
+                    <!-- <span class="text-3xl text-blue-400 mb-4">{{ eventCardFilterUp.length }} events
+                    </span> -->
+
+
+                    <!-- <div class="grid sm:grid-cols-2 lg:w-2/12 sm:w-4/12 mt-2">
+                        <span class="text-3xl text-blue-400 mb-2">{{ eventCard.length }} events </span>
+                        <select
+                            class="px-4 py-3 w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm">
+                            <option value="">All Events</option>
+                            <option>Past</option>
+                            <option>Upcoming</option>
+                        </select>
+                    </div> -->
+                </h2>
+
+
+
+
+
+                <div class="w-full m-auto mt-12 grid md:grid-cols-4 items-center justify-center bg-white text-gray-900">
+                    <div class="mx-10 my-6 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
+                        v-for="(event, index) in eventCardFilterUp" :key="index">
+                        <div class="px-6 py-2 text-left">
+                            <div>
+                                <div class="font-bold text-2xl mb-2 text-gray-700">
+                                    {{ event.eventCategoryName }}
+                                    <span>
+                                        <!--Space between eventCategory and date-->
+                                    </span>
+                                    <span
+                                        class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                                        {{
+                                                new Date(event.eventStartTime).toLocaleDateString('th')
+                                        }}
+                                    </span>
+                                </div>
+                                <ul class="mb-2">
+                                    <li>Name: {{ event.bookingName }}</li>
+                                    <li>
+                                        Start Time:
+                                        {{
+                                                new Date(event.eventStartTime).toLocaleTimeString('en', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })
+                                        }}
+                                    </li>
+                                    <li>Duration: {{ event.eventDuration }} minutes</li>
+                                </ul>
+                            </div>
+                            <hr />
+                            <div class="flex my-2">
+                                <span class="content-center mx-auto">
+                                    <router-link :to="{
+                                        name: 'EventDetailBase',
+                                        params: { id: event.id, bookingName: event.bookingName }
+                                    }">
+                                        <button :class="btnTailWind">Details</button>
+                                    </router-link>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div v-show="eventCardFilterPast != 0 && eventCardFilterUp != undefined && eventCard != 0">
+            <div>
+                <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
+                    SCHEDULED EVENTS:: FILTER PAST
+                    <span class="text-3xl text-blue-400 mb-4">{{ eventCardFilterPast.length }} events
+                    </span>
+
+
+                    <!-- <div class="grid sm:grid-cols-2 lg:w-2/12 sm:w-4/12 mt-2">
+                        <span class="text-3xl text-blue-400 mb-2">{{ eventCard.length }} events </span>
+                        <select
+                            class="px-4 py-3 w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm">
+                            <option value="">All Events</option>
+                            <option>Past</option>
+                            <option>Upcoming</option>
+                        </select>
+                    </div> -->
+                </h2>
+
+
+
+
+
+                <div class="w-full m-auto mt-12 grid md:grid-cols-4 items-center justify-center bg-white text-gray-900">
+                    <div class="mx-10 my-6 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
+                        v-for="(event, index) in eventCardFilterPast" :key="index">
+                        <div class="px-6 py-2 text-left">
+                            <div>
+                                <div class="font-bold text-2xl mb-2 text-gray-700">
+                                    {{ event.eventCategoryName }}
+                                    <span>
+                                        <!--Space between eventCategory and date-->
+                                    </span>
+                                    <span
+                                        class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
+                                        {{
+                                                new Date(event.eventStartTime).toLocaleDateString('th')
+                                        }}
+                                    </span>
+                                </div>
+                                <ul class="mb-2">
+                                    <li>Name: {{ event.bookingName }}</li>
+                                    <li>
+                                        Start Time:
+                                        {{
+                                                new Date(event.eventStartTime).toLocaleTimeString('en', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })
+                                        }}
+                                    </li>
+                                    <li>Duration: {{ event.eventDuration }} minutes</li>
+                                </ul>
+                            </div>
+                            <hr />
+                            <div class="flex my-2">
+                                <span class="content-center mx-auto">
+                                    <router-link :to="{
+                                        name: 'EventDetailBase',
+                                        params: { id: event.id, bookingName: event.bookingName }
+                                    }">
+                                        <button :class="btnTailWind">Details</button>
+                                    </router-link>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
 
         <!-- GET ALL -->
-        <div v-show="eventCard != 0">
+        <div v-show="eventCard != 0 && eventCardFilterUp == 0 && eventCardFilterPast == 0">
             <div>
                 <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
                     SCHEDULED EVENTS::
