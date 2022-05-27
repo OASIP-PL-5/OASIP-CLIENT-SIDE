@@ -60,10 +60,18 @@ const updateEventCategory = async () => {
             eventCategoryDescription: editDescriptionModel.value,
             eventDuration: editDurationModel.value,
         })
-    })
+    }
+    )
 
-    if (resPut.status != 200) {
-        alert("Can not update, Please check again.")
+    if (resPut.status == 500) {
+        alert(`Can not update, ${editCategoryNameModel.value} is already used.`)
+    } else if (resPut.status == 400) {
+        if (editDescriptionModel.value.length > 500) {
+            alert("Description maximum at 500 characters")
+        }
+        if (editDurationModel.value > 480) {
+            alert("Duration must be between 1-480 minutes.")
+        }
     }
 
     // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
@@ -108,8 +116,9 @@ const cancelEdit = () => {
                                         <span class="text-sm font-thin text-red-400">| Must be unique*</span></label>
                                     <input type="name" class="border py-2 px-3 text-gray-800 rounded-lg shadow-lg"
                                         v-model.trim="editCategoryNameModel" required />
-                                    <label>Description</label>
-                                    <textarea type="text" rows="3"
+                                    <label>Description <span class="text-sm font-thin text-red-400">| Maximum 500
+                                            characters*</span></label>
+                                    <textarea type="text" rows="3" maxlength="500"
                                         class="border py-2 px-3 text-gray-800 rounded-lg shadow-lg"
                                         v-model="editDescriptionModel" required />
                                     <label>Duration<span class="text-sm font-thin text-red-400">
@@ -124,7 +133,7 @@ const cancelEdit = () => {
                                 <!-- <div class="text-xl font-thin text-center ">| Description |</div> -->
                                 <div class="text-gray-500 text-xl mb-3 max-w-xl" v-if="isClickEdit == false">
                                     <p v-if="
-                                        thisEventCategoryDetail.eventCategoryDescription === null
+                                        thisEventCategoryDetail.eventCategoryDescription === null || thisEventCategoryDetail.eventCategoryDescription.trim().length == 0
                                     ">
                                         Unfortunately this clinic has no description yet.📁
                                     </p>

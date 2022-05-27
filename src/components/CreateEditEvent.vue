@@ -97,7 +97,7 @@ const showWarning = ref()
                 <option v-for="(eventCat, index) in eventCategory" :key="index" :value="{
                   eventCategoryId: eventCat.id, eventDuration: eventCat.eventDuration, eventCategoryName: eventCat.eventCategoryName
                 }">
-                  {{ eventCat.id }} -- {{ eventCat.eventCategoryName }} ({{ eventCat.eventDuration }} minutes)
+                  {{ eventCat.eventCategoryName }} ({{ eventCat.eventDuration }} minutes)
                 </option>
               </select>
               <!-- <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newEvent.newStartTime"

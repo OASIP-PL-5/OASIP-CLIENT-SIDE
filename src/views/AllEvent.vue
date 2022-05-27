@@ -125,65 +125,67 @@ const filterByCategory = async () => {
         console.log("res", res.url);
     }
 }
-let isShow = ref(true);
+// let isShow = ref(true);
 
-const isShowListAll = ref(true)
+// const isShowListAll = ref(true)
 
-const eventCardFilterUp = ref([])
-const eventCardFilterPast = ref([])
+// const eventCardFilterUp = ref([])
+// const eventCardFilterPast = ref([])
 
 const modelTime = ref()
+// obj สำหรับ จัดการ div show scheldule by period
+const haveUpcoming = ref(false)
+const havePast = ref(false)
+const haveAll = ref(false)
+
+// สำหรับแสดง text-header ของแต่ละ filter
+const isFilterAll = ref(true)
+const isFilterUp = ref(false)
+const isFilterPast = ref(false)
 const filterByPeriod = async () => {
 
     // // fetch for filter period/chrono
     if (modelTime.value == 'all') {
-        eventCardFilterUp.value = 0
-        eventCardFilterPast.value = 0
+        isFilterAll.value = true
+        isFilterUp.value = false
+        isFilterPast.value = false
+        const res = await fetch(`${baseUrl}/events`)
+        eventCard.value = await res.json()
+        haveAll.value = true
+        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming & past
+        haveUpcoming.value = false
+        havePast.value = false
     }
     else if (modelTime.value == 'upcoming') {
-        const res = await fetch(`${baseUrl}/events/getEventByUpcoming`)
-        eventCardFilterUp.value = await res.json()
-        console.log(`event card returned: ${eventCardFilterUp.value.length} `);
-        if (eventCardFilterUp.value.length == 0) {
-            console.log(`event card returned: ${eventCardFilterUp.value.length} + no upcoming or on-going events`);
-            eventCardFilterUp.value = undefined
-        } else if (eventCardFilterUp.value.length != 0) {
-            eventCardFilterUp.value = await res.json()
+        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no past 
+        const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`)
+        havePast.value = false
+        haveAll.value = false
+        isFilterUp.value = true
+        isFilterAll.value = false
+        isFilterPast.value = false
+        if (resUp.status == 204) {
+            console.log(`event card returned: ${haveUpcoming.value.length} + no upcoming or on-going events`);
+            haveUpcoming.value = true
         }
         else {
-            eventCardFilterUp.value = 0
+            eventCard.value = await resUp.json()
         }
     } else if (modelTime.value == 'past') {
-        const res = await fetch(`${baseUrl}/events/getEventByPast`)
-        eventCardFilterPast.value = await res.json()
-        if (eventCardFilterPast.value.length == 0) {
-            console.log(`event card returned: ${eventCardFilterPast.value.length} + no past events`);
-            eventCardFilterPast.value = undefined
-        }
-         else {
-            eventCardFilterUp.value = 0
+        const resPast = await fetch(`${baseUrl}/events/getEventByPast`)
+        isFilterPast.value = true
+        isFilterAll.value = false
+        isFilterUp.value = false
+        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming 
+        haveUpcoming.value = false
+        haveAll.value = false
+        if (resPast.status == 204) {
+            havePast.value = true
+        } else {
+            eventCard.value = await resPast.json()
         }
     }
 }
-
-// const checkIsShow = (() => {
-//     let isShow = false;
-//     if (eventCard.value.length == 0) {
-//         isShow = true;
-//         console.log("no scheduled is showing");
-//     } else {
-//         isShow = false;
-//         console.log("no scheduled is not showing");
-//     }
-// })
-// console.log(checkIsShow());
-// const modelDate = ref()
-// const filterByDate = computed(async () => {
-//     // // fetch for filter period/chrono
-//     const dt = modelDate.value
-//     const res = await fetch(`${baseUrl}/events/getEventByEventStartTime/${dt}`)
-//     eventCard.value = await res.json()
-// })
 
 
 const showFilterMenu = ref(false)
@@ -205,7 +207,6 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
 <template>
     <div>
         <!-- show filter component button -->
-
         <button class="border rounded-xl bg-blue-400 text-white bg-blue-400 
                             font-medium text-lg leading-tight uppercase rounded 
                             shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
@@ -224,14 +225,10 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         </button>
 
         <!-- filter component -->
-        <div class="relative ">
-            <!-- <IconHideFilter class="text-blue-400"/> -->
+        <div class="relative">
             <div class="border rounded-xl shadow-2xl justify-center bg-white text-gray-900 sm:w-3/12
                     sm:absolute -top-16 right-0 z-50 lg:h-screen" v-show="showFilterMenu">
                 <div>
-                    <!-- <div class="mx-4 my-2 text-2xl text-center font-bold text-gray-800">Filter Tools
-
-                    </div> -->
                     <form class="grid sm:grid-col gap-4 my-4 mx-auto w-10/12 ">
                         <div>
                             <h2 class="text-4xl font-bold text-blue-400 mb-3">FILTER MENU</h2>
@@ -256,7 +253,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     eventCategoryId: eventCat.id
                                     // eventCategoryName: eventCat.eventCategoryName
                                 }">
-                                    {{ eventCat.id }} -- {{ eventCat.eventCategoryName }}
+                                    {{ eventCat.eventCategoryName }}
                                 </option>
                             </select>
                             <div class="form-check mb-2">
@@ -328,183 +325,29 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
             <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>
             <img :src="noScheduleImg" alt="noScheduleImg" />
         </div>
-        <div v-show="eventCardFilterUp == undefined" class="grid place-items-center">
+        <div v-show="haveUpcoming && eventCard != 0" class="grid place-items-center h-screen">
             <h1 class="font-bold text-5xl text-blue-500">No Upcoming or On-going Events</h1>
             <!-- <img :src="noScheduleImg" alt="noScheduleImg" /> -->
         </div>
-        <div v-show="eventCardFilterPast == undefined" class="grid place-items-center">
+        <div v-show="havePast && eventCard != 0" class="grid place-items-center h-screen">
             <h1 class="font-bold text-5xl text-blue-500">No Past Events</h1>
             <!-- <img :src="noScheduleImg" alt="noScheduleImg" /> -->
         </div>
 
-        <div v-show="eventCardFilterUp != 0 && eventCardFilterPast != undefined && eventCard != 0">
-            <!-- eventCardFilterPast != 0 && eventCardFilterUp != undefined && eventCard != 0 -->
-            <div>
-                <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
-                    SCHEDULED EVENTS:: FILTER UPCOMING
-                    <!-- <span class="text-3xl text-blue-400 mb-4">{{ eventCardFilterUp.length }} events
-                    </span> -->
-
-
-                    <!-- <div class="grid sm:grid-cols-2 lg:w-2/12 sm:w-4/12 mt-2">
-                        <span class="text-3xl text-blue-400 mb-2">{{ eventCard.length }} events </span>
-                        <select
-                            class="px-4 py-3 w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm">
-                            <option value="">All Events</option>
-                            <option>Past</option>
-                            <option>Upcoming</option>
-                        </select>
-                    </div> -->
-                </h2>
 
 
 
-
-
-                <div class="w-full m-auto mt-12 grid md:grid-cols-4 items-center justify-center bg-white text-gray-900">
-                    <div class="mx-10 my-6 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
-                        v-for="(event, index) in eventCardFilterUp" :key="index">
-                        <div class="px-6 py-2 text-left">
-                            <div>
-                                <div class="font-bold text-2xl mb-2 text-gray-700">
-                                    {{ event.eventCategoryName }}
-                                    <span>
-                                        <!--Space between eventCategory and date-->
-                                    </span>
-                                    <span
-                                        class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
-                                        {{
-                                                new Date(event.eventStartTime).toLocaleDateString('th')
-                                        }}
-                                    </span>
-                                </div>
-                                <ul class="mb-2">
-                                    <li>Name: {{ event.bookingName }}</li>
-                                    <li>
-                                        Start Time:
-                                        {{
-                                                new Date(event.eventStartTime).toLocaleTimeString('en', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })
-                                        }}
-                                    </li>
-                                    <li>Duration: {{ event.eventDuration }} minutes</li>
-                                </ul>
-                            </div>
-                            <hr />
-                            <div class="flex my-2">
-                                <span class="content-center mx-auto">
-                                    <router-link :to="{
-                                        name: 'EventDetailBase',
-                                        params: { id: event.id, bookingName: event.bookingName }
-                                    }">
-                                        <button :class="btnTailWind">Details</button>
-                                    </router-link>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div v-show="eventCardFilterPast != 0 && eventCardFilterUp != undefined && eventCard != 0">
-            <div>
-                <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
-                    SCHEDULED EVENTS:: FILTER PAST
-                    <span class="text-3xl text-blue-400 mb-4">{{ eventCardFilterPast.length }} events
-                    </span>
-
-
-                    <!-- <div class="grid sm:grid-cols-2 lg:w-2/12 sm:w-4/12 mt-2">
-                        <span class="text-3xl text-blue-400 mb-2">{{ eventCard.length }} events </span>
-                        <select
-                            class="px-4 py-3 w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm">
-                            <option value="">All Events</option>
-                            <option>Past</option>
-                            <option>Upcoming</option>
-                        </select>
-                    </div> -->
-                </h2>
-
-
-
-
-
-                <div class="w-full m-auto mt-12 grid md:grid-cols-4 items-center justify-center bg-white text-gray-900">
-                    <div class="mx-10 my-6 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
-                        v-for="(event, index) in eventCardFilterPast" :key="index">
-                        <div class="px-6 py-2 text-left">
-                            <div>
-                                <div class="font-bold text-2xl mb-2 text-gray-700">
-                                    {{ event.eventCategoryName }}
-                                    <span>
-                                        <!--Space between eventCategory and date-->
-                                    </span>
-                                    <span
-                                        class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
-                                        {{
-                                                new Date(event.eventStartTime).toLocaleDateString('th')
-                                        }}
-                                    </span>
-                                </div>
-                                <ul class="mb-2">
-                                    <li>Name: {{ event.bookingName }}</li>
-                                    <li>
-                                        Start Time:
-                                        {{
-                                                new Date(event.eventStartTime).toLocaleTimeString('en', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })
-                                        }}
-                                    </li>
-                                    <li>Duration: {{ event.eventDuration }} minutes</li>
-                                </ul>
-                            </div>
-                            <hr />
-                            <div class="flex my-2">
-                                <span class="content-center mx-auto">
-                                    <router-link :to="{
-                                        name: 'EventDetailBase',
-                                        params: { id: event.id, bookingName: event.bookingName }
-                                    }">
-                                        <button :class="btnTailWind">Details</button>
-                                    </router-link>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
 
         <!-- GET ALL -->
-        <div v-show="eventCard != 0 && eventCardFilterUp == 0 && eventCardFilterPast == 0">
-            <div>
+        <div>
+            <div v-show="eventCard != 0 && haveUpcoming != true && havePast != true">
                 <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
-                    SCHEDULED EVENTS::
+                    <span v-show="isFilterAll">SCHEDULED EVENTS:: </span>
+                    <span v-show="isFilterPast">SCHEDULED EVENTS:: FILTER PAST </span>
+                    <span v-show="isFilterUp">SCHEDULED EVENTS:: FILTER UPCOMING </span>
                     <span class="text-3xl text-blue-400 mb-4">{{ eventCard.length }} events
                     </span>
-
-
-                    <!-- <div class="grid sm:grid-cols-2 lg:w-2/12 sm:w-4/12 mt-2">
-                        <span class="text-3xl text-blue-400 mb-2">{{ eventCard.length }} events </span>
-                        <select
-                            class="px-4 py-3 w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm">
-                            <option value="">All Events</option>
-                            <option>Past</option>
-                            <option>Upcoming</option>
-                        </select>
-                    </div> -->
                 </h2>
-
-
-
-
 
                 <div class="w-full m-auto mt-12 grid md:grid-cols-4 items-center justify-center bg-white text-gray-900">
                     <div class="mx-10 my-6 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"

@@ -38,6 +38,7 @@ const teamMembers = [
                             <p class="text-gray-700 text-lg font-light">
                                 INT221 | INFORMATION TECHNOLOGY INTEGRATED PROJECT
                             </p>
+                            <p class="font-thin text-tiny text-gray-700">Support Mobile Device 📱</p>
                         </div>
                     </div>
 
