@@ -22,6 +22,8 @@ const eventCard = ref([])
 // object -- จัดการการ searching
 const searchingInfo = ref([])
 
+
+const eventCat = ref([])
 // GET:: Card
 const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`
@@ -29,14 +31,14 @@ const baseUrl = import.meta.env.PROD
 // const checkURL = `${import.meta.env.PROD}`
 // console.log(checkURL);
 const getEventCard = async () => {
-    console.log(`${baseUrl}/events`)
+    // console.log(`${baseUrl}/events`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const res = await fetch(`${baseUrl}/events`)
-    // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-    eventCard.value = await res.json()
 
-    console.log('data from api: ', eventCard.value)
+    const resEvent = await fetch(`${baseUrl}/events`)
+    // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+    eventCard.value = await resEvent.json()
+
 }
 
 onBeforeMount(async () => {
