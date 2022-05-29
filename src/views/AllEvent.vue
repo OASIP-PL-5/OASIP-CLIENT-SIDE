@@ -114,7 +114,7 @@ const modelId = ref(null)
 // model for filter: time/chrono
 const filterByCategory = async () => {
     // fetch for filter catName
-    const test = modelId.value
+    // const test = modelId.value
     if (modelId.value == 'all') {
         const res = await fetch(`${baseUrl}/events`)
         eventCard.value = await res.json()
@@ -123,9 +123,14 @@ const filterByCategory = async () => {
     else {
         var id = modelId.value.eventCategoryId
         const res = await fetch(`${baseUrl}/events/getByEventCategories/${id}`)
-        eventCard.value = await res.json()
-        console.log("res", res.url);
+        if (res.status == 204) {
+            eventCard.value = 0;
+        } else {
+            eventCard.value = await res.json()
+            console.log("res", res.url);
+        }
     }
+
 }
 // let isShow = ref(true);
 
@@ -188,6 +193,21 @@ const filterByPeriod = async () => {
         }
     }
 }
+
+
+const modelDate = ref()
+const filterByDate = async () => {
+    var date = modelDate.value
+    const res = await fetch(`${baseUrl}/events/getEventsByEventStartTime/${date}`)
+    if (res.status == 204) {
+        eventCard.value = 0
+    }
+    else {
+        eventCard.value = await res.json()
+        console.log("modelDate: ", modelDate.value);
+    }
+}
+
 
 
 const showFilterMenu = ref(false)
@@ -282,14 +302,12 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     checked:border-blue-600 focus:outline-none transition
                                     duration-200 mt-1 align-top bg-no-repeat bg-center
                                     bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
-                                    id="flexRadioDefault1" v-model="picked" value="3" disabled>
+                                    id="flexRadioDefault1" v-model="picked" value="3">
 
-                                <label class="form-check-label inline-block text-gray-400" for="flexRadioDefault1">
-                                    Filter by specific date (coming soon)
+                                <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
+                                    Filter by specific date
                                 </label>
-
                             </div>
-
                         </div>
 
                         <input v-if="picked == 3" class="border py-2 px-3 text-grey-800 rounded-lg"
@@ -336,10 +354,6 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
             <!-- <img :src="noScheduleImg" alt="noScheduleImg" /> -->
         </div>
 
-
-
-
-
         <!-- GET ALL -->
         <div>
             <div v-show="eventCard != 0 && haveUpcoming != true && havePast != true">
@@ -364,7 +378,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     <span
                                         class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
                                         {{
-                                                new Date(event.eventStartTime).toLocaleDateString('th')
+                                                new Date(event.eventStartTime).toLocaleDateString('en')
                                         }}
                                     </span>
                                 </div>
