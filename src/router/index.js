@@ -6,7 +6,6 @@ import AllEvent from '../views/AllEvent.vue'
 import ContactUs from '../views/ContactUs.vue'
 import EventCategoryDetailBase from '../views/EventCategoryDetailBase.vue'
 
-
 const history = createWebHistory(import.meta.env.BASE_URL)
 
 const routes = [

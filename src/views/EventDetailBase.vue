@@ -24,9 +24,11 @@ const getThisEventCard = async () => {
   // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
   // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
   thisEventDetail.value = await res.json()
-  
-  editStartTimeModel.value = thisEventDetail.value.eventStartTime
-  editNotesModel.value = thisEventDetail.value.eventNotes
+  console.log(`model startTime:: ${thisEventDetail.value[0].eventStartTime}`);
+  console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
+  editStartTimeModel.value = thisEventDetail.value[0].eventStartTime
+  editNotesModel.value = thisEventDetail.value[0].eventNotes
+
 
   console.log(`res.status = 200? --> ${res.status == 200 ? true : false}`)
   console.log(thisEventDetail.value)
@@ -38,6 +40,7 @@ const getThisEventCard = async () => {
 }
 onBeforeMount(async () => {
   await getThisEventCard()
+
 })
 
 // DELETE: event
@@ -88,30 +91,27 @@ const updateEvent = async () => {
   // const bookingName = params.bookingName
   // method: GET
   console.clear()
+  console.log(editStartTimeModel.value);
+  console.log(editNotesModel.value);
   // method: PUT
-    const resPut = await fetch(`${baseUrl}/events/${id}`, {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        id: thisEventDetail.value.id,
-        // bookingName: thisEventDetail.value.bookingName,
-        // bookingEmail: thisEventDetail.value.bookingEmail,
-        eventStartTime: editStartTimeModel.value, // รับค่าจาก model
-        // eventDuration: thisEventDetail.value.eventDuration,
-        eventNotes: editNotesModel.value, //รับค่าจาก model
-        // eventCategoryId: thisEventDetail.value.eventCategoryId,
-        // eventCategoryName: thisEventDetail.value.eventCategoryName
-      })
+  const resPut = await fetch(`${baseUrl}/events/${id}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      id: thisEventDetail.value[0].id,
+      eventStartTime: editStartTimeModel.value, // รับค่าจาก model
+      eventNotes: editNotesModel.value, //รับค่าจาก model
     })
-    if (resPut.status == 400) {
-      alert("Appointment date can not be time in the past.")
-    }
-    // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
-    if (resPut.status == 200) {
-      window.location.reload()
-    }
-
+  })
+  if (resPut.status == 400) {
+    alert("Appointment date can not be time in the past.")
   }
+  // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
+  if (resPut.status == 200) {
+    window.location.reload()
+  }
+
+}
 // เพื่อ disable เวลาที่เป็นอดีต
 var currentDateTime = new Date();
 console.log(currentDateTime.toJSON());
@@ -135,21 +135,22 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
           <div class="w-11/12 m-auto grid items-center justify-center bg-white text-gray-900">
             <div class="mx-10 my-3 max-w-none rounded-lg overflow-hinden shadow-lg">
               <div class="px-6 py-4 text-left">
-                <div class="md:flex flex-col justify-center items-center">
+                <div v-for="(eventDetail, index) in thisEventDetail" :key="index"
+                  class="md:flex flex-col justify-center items-center">
                   <div class="font-bold text-center text-5xl mb-2 text-gray-700 max-w-xl" v-if="isClickEdit == false">
-                    {{ thisEventDetail.bookingName }}
+                    {{ eventDetail.bookingName }}
 
                   </div>
                   <div class="font-bold text-center text-5xl mb-2 text-gray-200 max-w-xl" v-if="isClickEdit == true">
-                    {{ thisEventDetail.bookingName }}
+                    {{ eventDetail.bookingName }}
 
                   </div>
                   <div class="flex flex-col justify-center items-center">
                     <div class="text-gray-500 text-xl mb-4" v-if="isClickEdit == false">
-                      {{ thisEventDetail.bookingEmail }}
+                      {{ eventDetail.bookingEmail }}
                     </div>
                     <div class="text-gray-200 text-xl mb-4" v-if="isClickEdit == true">
-                      {{ thisEventDetail.bookingEmail }}
+                      {{ eventDetail.bookingEmail }}
                     </div>
 
                     <div class="text-blue-400 hover:text-white border
@@ -160,8 +161,8 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                      text-3xl px-2 py-1 text-center mb-2 dark:border-blue-500
                      dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600
                      dark:focus:ring-blue-800" v-if="isClickEdit == false">
-                      {{ thisEventDetail.eventCategoryName }}
-                      <span v-show="isClickEdit" class="font-light text-lg">({{ thisEventDetail.eventDuration }}
+                      {{ eventDetail.eventCategoryName }}
+                      <span v-show="isClickEdit" class="font-light text-lg">({{ eventDetail.eventDuration }}
                         minutes)</span>
                     </div>
                     <div class="text-gray-400 hover:text-white border
@@ -172,26 +173,26 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                      text-3xl px-2 py-1 text-center mb-2 dark:border-gray-200
                      dark:text-gray-200 dark:hover:text-white dark:hover:bg-gray-200
                      dark:focus:ring-gray-200" v-if="isClickEdit == true">
-                      {{ thisEventDetail.eventCategoryName }}
-                      <span v-show="isClickEdit" class="font-light text-lg">({{ thisEventDetail.eventDuration }}
+                      {{ eventDetail.eventCategoryName }}
+                      <span v-show="isClickEdit" class="font-light text-lg">({{ eventDetail.eventDuration }}
                         minutes)</span>
                     </div>
                     <!-- เมื่อกดปุ่ม save จะซ่อน บรรทัด startTime-duration เดิมทั้งหมด... -->
                     <div v-show="isClickEdit == false" class="text-gray-800 text-2xl">
                       {{
                           new Date(
-                            thisEventDetail.eventStartTime
+                            eventDetail.eventStartTime
                           ).toLocaleDateString('en')
                       }}
                       {{
                           new Date(
-                            thisEventDetail.eventStartTime
+                            eventDetail.eventStartTime
                           ).toLocaleTimeString('en', {
                             hour: '2-digit',
                             minute: '2-digit'
                           })
                       }}
-                      <span class="font-light text-lg">({{ thisEventDetail.eventDuration }} minutes)</span>
+                      <span class="font-light text-lg">({{ eventDetail.eventDuration }} minutes)</span>
                     </div>
                     <!-- แล้วจะแสดง div ตัวนี้แทน (modelStartTime) -->
                     <div v-show="isClickEdit" class="text-gray-800 text-2xl mt-2 mb-3">
@@ -203,15 +204,16 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     <!-- detail: event-notes || เมื่อ click edit จะ ซ่อน div ของ notes นี้แล้วจะกลายเป็น input-->
                     <div class="w-full mb-3" v-show="isClickEdit == false">
                       <div class="border rounded-lg bg-gray-100 max-w-md mt-2 text-gray-600 px-3 py-3 text-2sm" v-if="
-                        thisEventDetail.eventNotes === null ||
-                        thisEventDetail.eventNotes.trim().length === 0
+                        eventDetail.eventNotes === null ||
+                        eventDetail.eventNotes.trim().length === 0
                       ">
                         no note from user.
                       </div>
+
                       <div class="border rounded-lg bg-gray-100
                        max-w-md mt-2 text-gray-600 px-3 py-3 
                        text-2sm " v-else>
-                        {{ thisEventDetail.eventNotes }}
+                        {{ eventDetail.eventNotes }}
                       </div>
                     </div>
 

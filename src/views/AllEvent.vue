@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import EventList from '../components/EventList.vue'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
 import IconFilter from '../components/icons/IconFilter.vue'
 console.clear()
@@ -34,6 +35,7 @@ const getEventCard = async () => {
     const res = await fetch(`${baseUrl}/events`)
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     eventCard.value = await res.json()
+
     console.log('data from api: ', eventCard.value)
 }
 
@@ -123,30 +125,67 @@ const filterByCategory = async () => {
         console.log("res", res.url);
     }
 }
+// let isShow = ref(true);
+
+// const isShowListAll = ref(true)
+
+// const eventCardFilterUp = ref([])
+// const eventCardFilterPast = ref([])
 
 const modelTime = ref()
+// obj สำหรับ จัดการ div show scheldule by period
+const haveUpcoming = ref(false)
+const havePast = ref(false)
+const haveAll = ref(false)
+
+// สำหรับแสดง text-header ของแต่ละ filter
+const isFilterAll = ref(true)
+const isFilterUp = ref(false)
+const isFilterPast = ref(false)
 const filterByPeriod = async () => {
+
     // // fetch for filter period/chrono
     if (modelTime.value == 'all') {
+        isFilterAll.value = true
+        isFilterUp.value = false
+        isFilterPast.value = false
         const res = await fetch(`${baseUrl}/events`)
         eventCard.value = await res.json()
+        haveAll.value = true
+        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming & past
+        haveUpcoming.value = false
+        havePast.value = false
     }
     else if (modelTime.value == 'upcoming') {
-        const res = await fetch(`${baseUrl}/events/getEventByUpcoming`)
-        eventCard.value = await res.json()
+        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no past 
+        const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`)
+        havePast.value = false
+        haveAll.value = false
+        isFilterUp.value = true
+        isFilterAll.value = false
+        isFilterPast.value = false
+        if (resUp.status == 204) {
+            console.log(`event card returned: ${haveUpcoming.value.length} + no upcoming or on-going events`);
+            haveUpcoming.value = true
+        }
+        else {
+            eventCard.value = await resUp.json()
+        }
     } else if (modelTime.value == 'past') {
-        const res = await fetch(`${baseUrl}/events/getEventByPast`)
-        eventCard.value = await res.json()
+        const resPast = await fetch(`${baseUrl}/events/getEventByPast`)
+        isFilterPast.value = true
+        isFilterAll.value = false
+        isFilterUp.value = false
+        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming 
+        haveUpcoming.value = false
+        haveAll.value = false
+        if (resPast.status == 204) {
+            havePast.value = true
+        } else {
+            eventCard.value = await resPast.json()
+        }
     }
 }
-
-// const modelDate = ref()
-// const filterByDate = computed(async () => {
-//     // // fetch for filter period/chrono
-//     const dt = modelDate.value
-//     const res = await fetch(`${baseUrl}/events/getEventByEventStartTime/${dt}`)
-//     eventCard.value = await res.json()
-// })
 
 
 const showFilterMenu = ref(false)
@@ -163,13 +202,11 @@ var hr = String(currentDateTime.getHours())
 var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
 
 currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
-
 </script>
 
 <template>
     <div>
         <!-- show filter component button -->
-
         <button class="border rounded-xl bg-blue-400 text-white bg-blue-400 
                             font-medium text-lg leading-tight uppercase rounded 
                             shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
@@ -188,14 +225,10 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         </button>
 
         <!-- filter component -->
-        <div class="relative ">
-            <!-- <IconHideFilter class="text-blue-400"/> -->
+        <div class="relative">
             <div class="border rounded-xl shadow-2xl justify-center bg-white text-gray-900 sm:w-3/12
                     sm:absolute -top-16 right-0 z-50 lg:h-screen" v-show="showFilterMenu">
                 <div>
-                    <!-- <div class="mx-4 my-2 text-2xl text-center font-bold text-gray-800">Filter Tools
-
-                    </div> -->
                     <form class="grid sm:grid-col gap-4 my-4 mx-auto w-10/12 ">
                         <div>
                             <h2 class="text-4xl font-bold text-blue-400 mb-3">FILTER MENU</h2>
@@ -220,7 +253,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     eventCategoryId: eventCat.id
                                     // eventCategoryName: eventCat.eventCategoryName
                                 }">
-                                    {{ eventCat.id }} -- {{ eventCat.eventCategoryName }}
+                                    {{ eventCat.eventCategoryName }}
                                 </option>
                             </select>
                             <div class="form-check mb-2">
@@ -292,30 +325,29 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
             <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>
             <img :src="noScheduleImg" alt="noScheduleImg" />
         </div>
+        <div v-show="haveUpcoming && eventCard != 0" class="grid place-items-center h-screen">
+            <h1 class="font-bold text-5xl text-blue-500">No Upcoming or On-going Events</h1>
+            <!-- <img :src="noScheduleImg" alt="noScheduleImg" /> -->
+        </div>
+        <div v-show="havePast && eventCard != 0" class="grid place-items-center h-screen">
+            <h1 class="font-bold text-5xl text-blue-500">No Past Events</h1>
+            <!-- <img :src="noScheduleImg" alt="noScheduleImg" /> -->
+        </div>
+
+
+
+
 
         <!-- GET ALL -->
-        <div v-show="eventCard != 0">
-            <div>
+        <div>
+            <div v-show="eventCard != 0 && haveUpcoming != true && havePast != true">
                 <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
-                    SCHEDULED EVENTS::
+                    <span v-show="isFilterAll">SCHEDULED EVENTS:: </span>
+                    <span v-show="isFilterPast">SCHEDULED EVENTS:: FILTER PAST </span>
+                    <span v-show="isFilterUp">SCHEDULED EVENTS:: FILTER UPCOMING </span>
                     <span class="text-3xl text-blue-400 mb-4">{{ eventCard.length }} events
                     </span>
-
-
-                    <!-- <div class="grid sm:grid-cols-2 lg:w-2/12 sm:w-4/12 mt-2">
-                        <span class="text-3xl text-blue-400 mb-2">{{ eventCard.length }} events </span>
-                        <select
-                            class="px-4 py-3 w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0 text-sm">
-                            <option value="">All Events</option>
-                            <option>Past</option>
-                            <option>Upcoming</option>
-                        </select>
-                    </div> -->
                 </h2>
-
-
-
-
 
                 <div class="w-full m-auto mt-12 grid md:grid-cols-4 items-center justify-center bg-white text-gray-900">
                     <div class="mx-10 my-6 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"

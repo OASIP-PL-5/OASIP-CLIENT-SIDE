@@ -5,7 +5,6 @@ const props = defineProps({
     currentEvent: { type: Object, default: {} }
 })
 
-// คิดว่า ไม่น่าจะได้ใช้การทำงานตรงนี้
 const newEvent = computed(() => {
     return {
         id: props.currentEvent.id,
