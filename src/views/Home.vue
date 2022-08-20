@@ -6,6 +6,7 @@ const myRouter = useRouter()
 
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
+const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 
 const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`
@@ -77,10 +78,18 @@ const toggleModal = ref(false)
                     </ul>
                 </div>
                 <div class="flex gap-x-4">
-                    <button
-                        class="text-blue-400 border border-blue-400 duration-500 ease-in-out font-bold rounded-lg text-2xl px-1.5 py-1.5 text-center mb-2 hover:shadow-xl"
-                        @click="goToAllEvent">
+                    <button class="text-blue-400 border border-blue-400 
+                        duration-500 ease-in-out font-bold 
+                        rounded-lg text-2xl px-1.5 py-1.5 
+                        text-center mb-2 hover:shadow-xl" @click="goToAllEvent">
                         SCHEDULE
+                    </button>
+                    <button class="inline-block rounded-lg text-2xl px-1.5 py-1.5 bg-blue-400 text-white 
+                            font-bold rounded-lg text-center mb-2
+                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                            active:shadow-lg transition duration-150 ease-in-out" @click="goToAllUser">
+                        MANAGE USER
                     </button>
                     <!-- <button class="text-white bg-blue-500 border
                                 border-white hover:bg-blue-800

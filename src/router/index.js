@@ -5,6 +5,9 @@ import NotFound from '../views/NotFound.vue'
 import AllEvent from '../views/AllEvent.vue'
 import ContactUs from '../views/ContactUs.vue'
 import EventCategoryDetailBase from '../views/EventCategoryDetailBase.vue'
+import AllUser from '../views/AllUser.vue'
+import UserDetail from '../views/UserDetail.vue'
+
 
 const history = createWebHistory()
 
@@ -40,7 +43,18 @@ const routes = [
         name: "ContactUs",
         component: ContactUs
     }
-
+    ,
+    {
+        path: '/list-all-user',
+        name: "AllUser",
+        component: AllUser
+    }
+    ,
+    {
+        path: '/user-detail/:id',
+        name: 'UserDetail',
+        component: UserDetail
+    }
     
 
     
