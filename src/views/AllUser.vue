@@ -27,60 +27,65 @@ onBeforeMount(async () => {
 </script>
  
 <template>
-    <div class="overflow-x-auto">
-        <div class="min-w-screen min-h-screen flex items-center justify-center font-sans overflow-hidden">
-            <div class="w-full lg:w-5/6">
-                <div class="bg-white shadow-md rounded my-6">
-                    <table class="min-w-max w-full table-auto">
-                        <thead>
-                            <tr class="bg-blue-400 text-white uppercase text-sm leading-normal">
-                                <th class="py-3 px-6 text-left">NAME</th>
-                                <th class="py-3 px-6 text-left">EMAIL</th>
-                                <th class="py-3 px-6 text-center">ROLE</th>
-                                <th class="py-3 px-6 text-center">ACTION</th>
-                            </tr>
-                        </thead>
+    <div>
+        <h2 class="font-bold text-4xl mx-10 mt-10 text-blue-400 ">
+            USER MANAGEMENT
+        </h2>
+        <div>
+            <div class="min-w-screen min-h-screen flex items-center justify-center font-sans overflow-hidden">
+                <div class="w-full lg:w-5/6">
+                    <div class="bg-white shadow-md rounded my-6">
+                        <table class="min-w-max w-full table-auto">
+                            <thead>
+                                <tr class="bg-blue-400 text-white uppercase text-sm leading-normal">
+                                    <th class="py-3 px-6 text-left">NAME</th>
+                                    <th class="py-3 px-6 text-left">EMAIL</th>
+                                    <th class="py-3 px-6 text-center">ROLE</th>
+                                    <th class="py-3 px-6 text-center">ACTION</th>
+                                </tr>
+                            </thead>
 
-                        <tbody class="text-gray-600 text-sm font-light">
-                            <tr v-for="user in users" class="border-b border-gray-200 hover:bg-gray-100">
+                            <tbody class="text-gray-600 text-sm font-light">
+                                <tr v-for="user in users" class="border-b border-gray-200 hover:bg-gray-100">
 
-                                <td class="py-3 px-6 text-left whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="mr-2">
-                                            <!---user name here-->
-                                            {{ user.name }}
+                                    <td class="py-3 px-6 text-left whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="mr-2">
+                                                <!---user name here-->
+                                                {{ user.name }}
+
+                                            </div>
 
                                         </div>
-
-                                    </div>
-                                </td>
-                                <td class="py-3 px-6 text-left">
-                                    <div class="flex items-center">
-                                        <div class="mr-2">
-                                            {{ user.email }}
+                                    </td>
+                                    <td class="py-3 px-6 text-left">
+                                        <div class="flex items-center">
+                                            <div class="mr-2">
+                                                {{ user.email }}
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="py-3 px-6 text-center">
-                                    <div class="flex items-center justify-center">
-                                        {{ user.role }}
-                                    </div>
-                                </td>
-                                <td class="py-3 px-6 text-center">
+                                    </td>
+                                    <td class="py-3 px-6 text-center">
+                                        <div class="flex items-center justify-center">
+                                            {{ user.role }}
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-6 text-center">
 
-                                    <router-link :to="{
-                                        name: 'UserDetail',
-                                        params: { id: user.id }
-                                    }">
-                                        <span
-                                            class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs">detail-
-                                            icon</span>
-                                    </router-link>
-                                </td>
+                                        <router-link :to="{
+                                            name: 'UserDetail',
+                                            params: { id: user.id }
+                                        }">
+                                            <span
+                                                class="bg-purple-200 text-purple-600 py-1 px-3 rounded-full text-xs">detail-
+                                                icon</span>
+                                        </router-link>
+                                    </td>
 
-                            </tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

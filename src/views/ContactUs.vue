@@ -1,12 +1,6 @@
 <script setup>
 // รายการสมาชิกในทีม
 const teamMembers = [
-    {
-        name: 'Apiwat Atittieng',
-        title: '63130500130',
-        avatar: "https://scontent.fbkk22-2.fna.fbcdn.net/v/t1.6435-9/78214244_115474499911249_784467860989673472_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=09cbfe&_nc_eui2=AeEw8yCny14yjohJjXp_o4FRKzaFuHX0Z5wrNoW4dfRnnCEu_H-1PP7CXR-pot8kpMeuKeVA6BThnnTMEJ3KJtN3&_nc_ohc=fYEvSVA4z2IAX_olXXl&_nc_ht=scontent.fbkk22-2.fna&oh=00_AT-BHJ9E9LbJhZE9iyEaQfz6CiTVIhFZCqiMRoo4aChPQQ&oe=6326EE88",
-        contactLink: 'https://github.com/ApiwatPhai'
-    },
 
     {
         name: 'Pattarapon Makhirun',
@@ -19,6 +13,12 @@ const teamMembers = [
         title: '63130500103',
         avatar: "https://www.techhub.in.th/wp-content/uploads/2021/05/DhYGYs6WkAAScEU.jpg",
         contactLink: 'https://github.com/willvaritchai'
+    },
+    {
+        name: 'Apiwat Atittieng',
+        title: '63130500130',
+        avatar: "https://scontent.fbkk22-2.fna.fbcdn.net/v/t1.6435-9/78214244_115474499911249_784467860989673472_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=09cbfe&_nc_eui2=AeEw8yCny14yjohJjXp_o4FRKzaFuHX0Z5wrNoW4dfRnnCEu_H-1PP7CXR-pot8kpMeuKeVA6BThnnTMEJ3KJtN3&_nc_ohc=fYEvSVA4z2IAX_olXXl&_nc_ht=scontent.fbkk22-2.fna&oh=00_AT-BHJ9E9LbJhZE9iyEaQfz6CiTVIhFZCqiMRoo4aChPQQ&oe=6326EE88",
+        contactLink: 'https://github.com/ApiwatPhai'
     }
 ]
 
