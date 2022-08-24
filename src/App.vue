@@ -9,41 +9,6 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 
 const showMenu = ref(true)
-// import EventList from './components/EventList.vue';
-// console.clear()
-// const eventList = ref([])
-// // all done bro ? arikato
-// // ayo wheres the other member
-// // lmao we got 2 here
-// // susu bro
-// // ty good luck u 2 by :D
-// // /api in DEV and <host>/api in PROD
-
-// const check = import.meta.env.VITE_BASE_URL ? 'มีข้อมูล' : 'ไม่มีข้อมูล'
-// console.log('import.meta.env.VITE_BASE_URL : ', check);
-
-// const checkPROD = import.meta.env.PROD
-// console.log('import.meta.env.PROD: ', checkPROD);
-// // GET
-// // important !
-// // ใช้เช็คว่า baseUrl จะเป็น null รึป่าว ก็คือถ้า import.meta.env.PROD แล้วได้ null ก็คือ baseUrl = '/api'
-// // ถ้า import.meta.env.PROD มีแล้วมีข้อมูล ก็จะเอา `${import.meta.env.VITE_BASE_URL}/api` มาใส่ใน baseUrl
-// // สามารถลดรูปเหลือเป็น const baseUrl = '/api'; ได้
-// const baseUrl = import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/api` : '/api';
-// const checkURL = `${import.meta.env.PROD}`
-// console.log(checkURL);
-// const getEvent = async () => {
-//     console.log(`${baseUrl}/event`);
-//     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
-//     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-//     const res = await fetch(`${baseUrl}/event`)
-//     eventList.value = await res.json()
-//     console.log(eventList.value);
-// }
-// onBeforeMount(async () => {
-//     await getEvent()
-// })
-
 
 </script>
  
@@ -51,14 +16,13 @@ const showMenu = ref(true)
     <div>
 
         <nav class="bg-white drop-shadow-md rounded-lg ">
-            <div class="max-w-screen-xl mx-auto">
+            <div class="max-w-full mx-16">
                 <div class="flex justify-between">
                     <div class="flex space-x-4">
-
                         <div>
                             <a href="#" class="flex items-center py-2 text-gray-700" @click="goToHome">
                                 <!-- <img src="./assets/FUNBOOK-LOGO.png" alt="LOGO" :style="logoSize" /> -->
-                                <span class="font-bold text-5xl px-2 text-transparent 
+                                <span class="font-bold text-5xl px-1 text-transparent 
                                 bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">OASIP I PL-5</span>
                                 <!-- <span class="font-light">Online Appointment <br>
                                     Scheduling System <br>
@@ -86,6 +50,9 @@ const showMenu = ref(true)
                             hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
                             focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
                             transition duration-150 ease-in-out" @click="goToContact">ABOUT US</button>
+                            
+                           
+                            
                     </div>
 
                     <div class="md:hidden flex items-center">

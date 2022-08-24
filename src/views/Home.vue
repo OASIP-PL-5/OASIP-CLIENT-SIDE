@@ -7,6 +7,8 @@ const myRouter = useRouter()
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
+const goToContact = () => myRouter.push({ name: 'ContactUs' })
+
 
 const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`
@@ -89,7 +91,7 @@ const toggleModal = ref(false)
                             shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
                             focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
                             active:shadow-lg transition duration-150 ease-in-out" @click="goToAllUser">
-                        MANAGE USER
+                        OUR USERS
                     </button>
                     <!-- <button class="text-white bg-blue-500 border
                                 border-white hover:bg-blue-800
@@ -166,7 +168,7 @@ const toggleModal = ref(false)
 
         <footer class="p-4 shadow md:px-6 md:py-8z bg-blue-400">
 
-            <span class="block text-lg text-white sm:text-center">© 2022 <a href="" class="hover:underline">PL5 |
+            <span class="block text-lg text-white sm:text-center">© 2022 <a href="" class="hover:underline" @click="goToContact">PL5 |
                     ALLFORONE </a>. All
                 Rights Reserved.
             </span>

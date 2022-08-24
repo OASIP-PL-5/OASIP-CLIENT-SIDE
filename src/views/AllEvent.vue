@@ -357,7 +357,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         <!-- GET ALL -->
         <div>
             <div v-show="eventCard != 0 && haveUpcoming != true && havePast != true">
-                <h2 class="font-bold text-5xl mx-10 mt-16 text-slate-700">
+                <h2 class="font-bold text-5xl mx-16 mt-16 text-slate-700">
                     <span v-show="isFilterAll">SCHEDULED EVENTS:: </span>
                     <span v-show="isFilterPast">SCHEDULED EVENTS:: FILTER PAST </span>
                     <span v-show="isFilterUp">SCHEDULED EVENTS:: FILTER UPCOMING </span>

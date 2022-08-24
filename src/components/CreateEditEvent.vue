@@ -10,14 +10,14 @@ const props = defineProps({
 
 const newEvent = computed(() => {
   return {
-    id: props.currentEvent.id,
-    bookingName: props.currentEvent.bookingName,
-    bookingEmail: props.currentEvent.bookingEmail,
-    eventCategoryName: props.currentEvent.eventCategoryName,
-    eventDuration: props.currentEvent.eventDuration,
-    eventNotes: props.currentEvent.eventNotes,
-    eventStartTime: props.currentEvent.eventStartTime,
-    eventCategoryId: props.currentEvent.eventCategoryId
+    id: props,
+    bookingName: props,
+    bookingEmail: props,
+    eventCategoryName: props,
+    eventDuration: props,
+    eventNotes: props,
+    eventStartTime: props,
+    eventCategoryId: props
   }
 })
 console.log("test", newEvent.eventStartTime);
