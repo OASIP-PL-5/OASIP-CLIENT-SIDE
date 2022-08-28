@@ -7,6 +7,8 @@ const myRouter = useRouter()
 const goToHome = () => myRouter.push({ name: 'Home' })
 const goToContact = () => myRouter.push({ name: 'ContactUs' })
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
+const goToSignUp = () => myRouter.push({ name: 'SignUp' })
+
 
 const showMenu = ref(true)
 
@@ -31,7 +33,7 @@ const showMenu = ref(true)
                         </div>
                     </div>
 
-                    <div class="hidden md:grid grid-cols-3 items-center space-x-1">
+                    <div class="hidden md:grid grid-cols-4 items-center space-x-1">
                         <button type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
                             font-medium text-xs leading-tight uppercase rounded 
                             shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
@@ -50,9 +52,15 @@ const showMenu = ref(true)
                             hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
                             focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
                             transition duration-150 ease-in-out" @click="goToContact">ABOUT US</button>
-                            
-                           
-                            
+
+                        <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
+                            font-medium text-xs leading-tight uppercase rounded shadow-sm 
+                            hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
+                            focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
+                            transition duration-150 ease-in-out" @click="goToSignUp">SIGN UP</button>
+
+
+
                     </div>
 
                     <div class="md:hidden flex items-center">
@@ -68,6 +76,7 @@ const showMenu = ref(true)
                 <button type="button" class="font-semibold text-gray-400" @click="goToAllEvent">ALL
                     EVENTS</button>
                 <button type="button" class="font-semibold text-gray-800" @click="goToContact">ABOUT US</button>
+                <button type="button" class="font-semibold text-gray-800" @click="goToSignUp">SIGN UP</button>
             </div>
         </nav>
         <!-- <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>

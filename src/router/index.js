@@ -7,7 +7,7 @@ import ContactUs from '../views/ContactUs.vue'
 import EventCategoryDetailBase from '../views/EventCategoryDetailBase.vue'
 import AllUser from '../views/AllUser.vue'
 import UserDetail from '../views/UserDetail.vue'
-
+import SignUp from '../views/SignUp.vue'
 
 const history = createWebHistory()
 
@@ -32,7 +32,7 @@ const routes = [
         name: "NotFound",
         component: NotFound
     },
-    
+
     {
         path: '/list-all-event',
         name: "AllEvent",
@@ -54,10 +54,16 @@ const routes = [
         path: '/user-detail/:id',
         name: 'UserDetail',
         component: UserDetail
+    },
+    {
+        path: '/sign-up',
+        name: 'SignUp',
+        component: SignUp
     }
     
 
-    
+
+
 
 ]
 

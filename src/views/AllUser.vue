@@ -36,7 +36,11 @@ const addUser = async (
   //ใส่ตัวแปรที่จะใช้POST
   newName,
   newEmail,
-  newRole
+  newPassword,
+  confirm,
+  newRole,
+  // newPassword,
+  // confirm,
 ) => {
   var checkName = users.value.filter(function (user) {
     return user.name == newName;
@@ -46,33 +50,50 @@ const addUser = async (
   });
   console.log(checkName);
   console.log(checkEmail);
-  if (checkName.length == 0) {
-    if (checkEmail.length == 0) {
-      const res = await fetch(`${baseUrl}/users`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
-          name: newName,
-          email: newEmail,
-          role: newRole
-        })
-      })
-      if (res.status === 201) {
-        const addedUser = await res.json()
-        users.value.push(addedUser)
-        alert(`User: ${newName} is created successfully`)
-        location.reload()
+
+  console.log(newName);
+  console.log(newEmail);
+  console.log(newRole);
+  console.log(newPassword);
+  console.log(confirm);
+
+  console.log(newPassword.localeCompare(confirm));
+
+  if (newName.length !== 0 && newEmail.length !== 0 && newRole.length !== 0 && newPassword.length !== 0) {
+    if (checkName.length == 0) {
+      if (checkEmail.length == 0) {
+        if (newPassword.localeCompare(confirm) == 0) {
+          const res = await fetch(`${baseUrl}/users`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
+              name: newName,
+              email: newEmail,
+              password: newPassword,
+              role: newRole
+            })
+          })
+          if (res.status === 201) {
+            const addedUser = await res.json()
+            users.value.push(addedUser)
+            alert(`User: ${newName} is created successfully`)
+            location.reload()
+          }
+        } else {
+          alert("password not match please try again")
+          console.log("password not match please try again")
+        }
+      } else {
+        alert("This email is already used.")
+        isEmailExist.value = true
+        console.log("is email exist ? : ", isEmailExist.value);
       }
     } else {
-      alert("This email is already used.")
-      isEmailExist.value = true
-      console.log("is email exist ? : ", isEmailExist.value);
+      alert("This name is already used.")
+      isNameExist.value = true
+      console.log("is name exist ? : ", isNameExist.value);
     }
-  } else {
-    alert("This name is already used.")
-    isNameExist.value = true
-    console.log("is name exist ? : ", isNameExist.value);
   }
 
   if (newName.trim().length == 0) {
@@ -115,7 +136,7 @@ const noUsersImg =
         <span class="text-3xl text-blue-300 mb-4">total {{ users.length }} user(s)
         </span>
       </h2>
-      
+
 
       <!-- <button class="text-blue-400 hover:text-white border border-blue-700 
             hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 
