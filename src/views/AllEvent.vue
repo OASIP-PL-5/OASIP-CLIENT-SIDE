@@ -261,7 +261,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     checked:border-blue-600 focus:outline-none transition
                                     duration-200 mt-1 align-top bg-no-repeat bg-center
                                     bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
-                                    id="flexRadioDefault1" v-model="picked" value="1">
+                                    id="flexRadioDefault1" v-model="picked" >
 
                                 <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
                                     Filter by event-category
@@ -284,7 +284,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     checked:border-blue-600 focus:outline-none transition
                                     duration-200 mt-1 align-top bg-no-repeat bg-center
                                     bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
-                                    id="flexRadioDefault1" v-model="picked" value="2">
+                                    id="flexRadioDefault1" v-model="picked" >
                                 <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
                                     Filter by date
                                 </label>
@@ -302,7 +302,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     checked:border-blue-600 focus:outline-none transition
                                     duration-200 mt-1 align-top bg-no-repeat bg-center
                                     bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
-                                    id="flexRadioDefault1" v-model="picked" value="3">
+                                    id="flexRadioDefault1" v-model="picked" >
 
                                 <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
                                     Filter by specific date

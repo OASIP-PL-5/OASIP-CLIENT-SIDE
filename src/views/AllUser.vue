@@ -1,9 +1,11 @@
 <script setup>
+// modal-addUser
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CreateUser from '../components/CreateUser.vue'
 const myRouter = useRouter()
 const goToUserDetail = () => myRouter.push({ name: 'UserDetail' })
+const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 
 const users = ref([])
 
@@ -63,22 +65,29 @@ const addUser = async (
     if (checkName.length == 0) {
       if (checkEmail.length == 0) {
         if (newPassword.localeCompare(confirm) == 0) {
-          const res = await fetch(`${baseUrl}/users`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-              //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
-              name: newName,
-              email: newEmail,
-              password: newPassword,
-              role: newRole
+          if (newPassword.length > 7) {
+            const res = await fetch(`${baseUrl}/users`, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
+                name: newName,
+                email: newEmail,
+                password: newPassword,
+                role: newRole
+              })
             })
-          })
-          if (res.status === 201) {
-            const addedUser = await res.json()
-            users.value.push(addedUser)
-            alert(`User: ${newName} is created successfully`)
-            location.reload()
+
+            if (res.status === 201) {
+              const addedUser = await res.json()
+              users.value.push(addedUser)
+              alert(`User: ${newName} is created successfully`)
+              location.reload()
+
+            }
+          }
+          if (newPassword.length < 7) {
+            alert("password must 8-14")
           }
         } else {
           alert("password not match please try again")
@@ -108,7 +117,9 @@ const addUser = async (
   //   alert('user-name or user-email is already used. !')
   // }
 
+
 }
+
 
 const noUsersImg =
   'https://img.freepik.com/free-vector/empty-concept-illustration_114360-1253.jpg?w=826&t=st=1661052554~exp=1661053154~hmac=e91c27a84a9612e6b7b0edd5e394264f3ec6ea7c46a13ef33bfec2fb404cbe8f'
@@ -133,10 +144,9 @@ const noUsersImg =
     <div v-if="users != 0">
       <h2 class="font-bold text-5xl mx-20 mt-16 text-slate-700">
         USER MANAGEMENT
-        <span class="text-3xl text-blue-300 mb-4">total {{ users.length }} user(s)
+        <span class="text-3xl text-blue-300 mb-4">total {{  users.length  }} user(s)
         </span>
       </h2>
-
 
       <!-- <button class="text-blue-400 hover:text-white border border-blue-700 
             hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 
@@ -145,9 +155,9 @@ const noUsersImg =
             dark:hover:bg-blue-600 dark:focus:ring-blue-800 absolute top-56 lg:top-36 right-20">Add user +</button> -->
       <div>
         <div class="min-w-screen flex items-center justify-center">
-          <div class="w-full md:w-11/12 ">
+          <div class="w-full md:w-11/12">
             <div class="bg-white shadow-md rounded-lg my-6">
-              <table class="min-w-max w-full table-auto ">
+              <table class="min-w-max w-full table-auto">
                 <thead>
                   <tr class="bg-blue-400 text-white uppercase text-lg leading-normal">
                     <th class="py-3 pl-4 text-left">#</th>
@@ -159,24 +169,24 @@ const noUsersImg =
                 </thead>
 
                 <tbody class="text-gray-600 text-lg font-light">
-                  <tr v-for="(user, index) in users" :key="index" class="border-b border-gray-200 hover:bg-gray-100 ">
+                  <tr v-for="(user, index) in users" :key="index" class="border-b border-gray-200 hover:bg-gray-100">
                     <td class="py-3 pl-4 text-left">
                       <div class="flex items-left">
-                        {{ index + 1 }}
+                        {{  index + 1  }}
                       </div>
                     </td>
                     <td class="py-3 px-6 text-left whitespace-nowrap">
                       <div class="flex items-center">
                         <div class="mr-2">
                           <!---user name here-->
-                          {{ user.name }}
+                          {{  user.name  }}
                         </div>
                       </div>
                     </td>
                     <td class="py-3 px-4 text-left">
                       <div class="flex items-center">
                         <div class="mr-2">
-                          {{ user.email }}
+                          {{  user.email  }}
                         </div>
                       </div>
                     </td>
@@ -184,15 +194,15 @@ const noUsersImg =
                       <div class="flex items-center justify-center">
                         <div v-if="user.role == 'student'"
                           class="font-bold text-white bg-blue-300 rounded-full px-3 py-1 capitalize">
-                          {{ user.role }}
+                          {{  user.role  }}
                         </div>
                         <div v-if="user.role == 'lecturer'"
                           class="font-bold text-white bg-orange-300 rounded-full px-3 py-1 capitalize">
-                          {{ user.role }}
+                          {{  user.role  }}
                         </div>
                         <div v-if="user.role == 'admin'"
                           class="font-bold text-white bg-red-400 rounded-full px-5 py-1 capitalize">
-                          {{ user.role }}
+                          {{  user.role  }}
                         </div>
                       </div>
                     </td>

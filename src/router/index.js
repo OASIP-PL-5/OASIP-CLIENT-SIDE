@@ -8,6 +8,8 @@ import EventCategoryDetailBase from '../views/EventCategoryDetailBase.vue'
 import AllUser from '../views/AllUser.vue'
 import UserDetail from '../views/UserDetail.vue'
 import SignUp from '../views/SignUp.vue'
+import SignIn from '../views/SignIn.vue'
+
 
 const history = createWebHistory()
 
@@ -59,6 +61,11 @@ const routes = [
         path: '/sign-up',
         name: 'SignUp',
         component: SignUp
+    },
+    {
+        path: '/sign-in',
+        name: 'SignIn',
+        component: SignIn
     }
     
 
