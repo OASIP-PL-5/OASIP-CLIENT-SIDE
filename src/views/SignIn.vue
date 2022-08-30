@@ -1,6 +1,7 @@
 <script setup>
 import SignInUserVue from '../components/SignInUser.vue';
 import { ref, onBeforeMount, computed } from 'vue'
+const goToSignUp = () => myRouter.push({ name: 'SignUp' })
 
 const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`

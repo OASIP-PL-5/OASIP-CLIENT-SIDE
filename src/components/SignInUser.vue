@@ -50,7 +50,7 @@ const matching = computed(() => {
                                                         d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5l-8-5h16zm0 12H4V8l8 5l8-5v10z" />
                                                 </svg>
                                             </div>
-                                            <input required v-model="matching.newEmail" type="email"
+                                            <input required v-model.trim="matching.newEmail" type="email"
                                                 placeholder="Somchai.jairuk@gmail.com" maxlength="50"
                                                 class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500">
                                         </div>
@@ -91,7 +91,7 @@ const matching = computed(() => {
                                 </div>
                                 <div class="flex justify-center mt-2 text-xl">New here?&nbsp;
                                     <button @click="goToSignUp" class="font-bold text-blue-400 
-                                     hover:underline hover:scale-110 
+                                     hover:underline hover:scale-105 
                                      transition-transform">Create an account</button>
                                 </div>
                             </div>

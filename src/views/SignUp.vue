@@ -1,10 +1,14 @@
 <script setup>
 // หน้า signup ใหญ่
 import { ref, onBeforeMount, computed } from 'vue'
-
+import { useRoute, useRouter } from 'vue-router'
 import SignUpUser from '../components/SignUpUser.vue'
 
+
+const myRouter = useRouter()
+
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
+const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 
 const users = ref([])
 // const check = ref(false)
@@ -55,8 +59,9 @@ const addUser = async (
     console.log(newName)
     console.log(newEmail)
     console.log(newRole)
-    console.log(newPassword)
-    console.log(confirm)
+    // ไม่ครรแสดงข้อมูล password ใน console
+    // console.log(newPassword)
+    // console.log(confirm)
 
     console.log(newPassword.localeCompare(confirm))
     // if (newPassword.length > 7) {
@@ -87,10 +92,10 @@ const addUser = async (
                             alert(`User: ${newName} is created successfully`)
                             // location.reload()
                             // go back to all user
-                            goToAllUser()
+                            goToSignIn()
                         }
                     }
-                    if (newPassword.length <7) {
+                    if (newPassword.length < 7) {
                         alert("password must 8-14")
                     }
                 } else {
@@ -122,12 +127,13 @@ const addUser = async (
     // }
 }
 </script>
-
-<template>
+    
+    <template>
     <div class="-my-6">
         <SignUpUser @addUser="addUser" />
     </div>
 </template>
-
-<style>
-</style>
+    
+    <style>
+    </style>
+    

@@ -33,33 +33,17 @@ const showMenu = ref(true)
                         </div>
                     </div>
 
-                    <div class="hidden md:grid grid-cols-4 items-center space-x-1">
-                        <button type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
-                            font-medium text-xs leading-tight uppercase rounded 
-                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
-                            active:shadow-lg transition duration-150 ease-in-out" @click="goToHome">HOME</button>
+                    <div class="hidden md:flex flex-cols-4 items-center gap-x-14 text-xl">
+                        <button type="button" class="text-blue-400" @click="goToHome">HOME</button>
 
-                        <button type="button" class="inline-block px-6 py-2.5 bg-gray-200 text-gray-700
-                            font-medium text-xs leading-tight uppercase rounded 
-                            shadow-sm hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400
-                            active:shadow-lg transition duration-150 ease-in-out" @click="goToAllEvent">ALL
+                        <button type="button" class="link link-underline link-underline-black" @click="goToAllEvent">ALL
                             EVENTS</button>
 
-                        <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
-                            font-medium text-xs leading-tight uppercase rounded shadow-sm 
-                            hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
-                            focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
-                            transition duration-150 ease-in-out" @click="goToContact">ABOUT US</button>
+                        <button type="button" class="link link-underline link-underline-black"
+                            @click="goToContact">ABOUT US</button>
 
-                        <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
-                            font-medium text-xs leading-tight uppercase rounded shadow-sm 
-                            hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
-                            focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
-                            transition duration-150 ease-in-out" @click="goToSignUp">SIGN UP</button>
-
-
+                        <button type="button" class="link link-underline link-underline-black" @click="goToSignUp">SIGN
+                            UP</button>
 
                     </div>
 
@@ -105,6 +89,24 @@ const showMenu = ref(true)
 .fade-enter-active,
 .fade-leave.active {
     transition: opacity 1.2s ease-out;
+}
+
+.link-underline {
+    border-bottom-width: 0;
+    background-image: linear-gradient(transparent, transparent), linear-gradient(#fff, #fff);
+    background-size: 0 3px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size .5s ease-in-out;
+}
+
+.link-underline-black {
+    background-image: linear-gradient(transparent, transparent), linear-gradient(#7299f1, #7299f1)
+}
+
+.link-underline:hover {
+    background-size: 100% 3px;
+    background-position: 0 100%
 }
 </style>
 

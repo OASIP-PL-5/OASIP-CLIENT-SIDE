@@ -41,7 +41,7 @@ const getAllEventCategory = async () => {
     const res = await fetch(`${baseUrl}/event-categories`)
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     eventCategoryCard.value = await res.json()
-    eventCategoryCard.value.push({ img_path: 'https://img.freepik.com/free-vector/server-concept-illustration_114360-147.jpg?t=st=1653815388~exp=1653815988~hmac=2a39c6bf2f79464a865832515586160c01884eb7f6566fc41f18a4e3f00a8fbe&w=826' })
+    // eventCategoryCard.value.push({ img_path: 'https://img.freepik.com/free-vector/server-concept-illustration_114360-147.jpg?t=st=1653815388~exp=1653815988~hmac=2a39c6bf2f79464a865832515586160c01884eb7f6566fc41f18a4e3f00a8fbe&w=826' })
 
     console.clear()
     console.log('data from api: ', eventCategoryCard.value)

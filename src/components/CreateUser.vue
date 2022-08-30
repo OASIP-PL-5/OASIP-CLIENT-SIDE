@@ -45,7 +45,7 @@ const newUser = computed(() => {
               <label class="mb-2 font-bold text-lg text-gray-900">Email address<span class="text-sm font-thin"> |
                   maximum 50
                   characters</span></label>
-              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model="newUser.newEmail" type="email"
+              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model.trim="newUser.newEmail" type="email"
                 placeholder="Somchai.jairuk@gmail.com" maxlength="50" />
             </div>
             <!-- input password -->
