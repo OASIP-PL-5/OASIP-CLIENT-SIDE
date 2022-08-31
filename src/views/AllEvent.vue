@@ -276,7 +276,7 @@
                                 </div>
                             </div>
                             <input v-if="picked == 3" class="border py-2 px-3 text-grey-800 rounded-lg"
-                                type="datetime-local" v-model="modelDate" @change="filterByDate" />
+                                type="date" v-model="modelDate" @change="filterByDate" />
                             <button @click="refresh"
                                 class="bg-gray-400 
                                 font-medium text-lg leading-tight uppercase rounded text-white
