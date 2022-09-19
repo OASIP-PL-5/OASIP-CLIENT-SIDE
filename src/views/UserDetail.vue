@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import BtnEditUser from '../components/BtnEditUser.vue'
 const myRouter = useRouter()
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
+const token = VueCookies.get('jwtToken');
 
 // const myRouter = useRouter()
 const { params } = useRoute()
@@ -25,7 +26,12 @@ const baseUrl = import.meta.env.PROD
 const users = ref([]);
 //GET
 const getUser = async () => {
-    const resUser = await fetch(`${baseUrl}/users`);
+    const resUser = await fetch(`${baseUrl}/users`,{
+        headers:{
+       'content-type': 'application/json',
+       'Authorization': `Bearer ${token}`
+       }
+    })
     if (resUser.status === 200) {
         users.value = await resUser.json();
         console.log(users.value);
@@ -38,7 +44,7 @@ onBeforeMount(async () => {
 //GET
 const getThisUser = async () => {
     const id = params.id
-    const res = await fetch(`${baseUrl}/users/${id}`)
+    const res = await fetch(`${baseUrl}/users/${id}`,{headers:{ 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }})
     thisUser.value = await res.json()
     console.log(`model Name:: ${thisUser.value[0].name}`)
     console.log(`model Role:: ${thisUser.value[0].role}`)
@@ -63,7 +69,8 @@ const cancelEvent = async () => {
     const confirmDel = 'Are you sure to delete this user?'
     if (confirm(confirmDel) == true) {
         const res = await fetch(`${baseUrl}/users/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
         })
         if (res.status === 200) {
             console.log('cancel userId: [' + id + '] success')
@@ -78,7 +85,7 @@ const isEmailExist = ref(false)
 //PUT
 const editUser = async () => {
     const id = params.id
-    const getUserid = await fetch(`${baseUrl}/users/${id}`)
+    const getUserid = await fetch(`${baseUrl}/users/${id}`,{headers:{ 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }})
     // console.clear()
     console.log(`Name:: ${thisUser.value[0].name}`)
     // const nameValidate = (false)
@@ -98,7 +105,7 @@ const editUser = async () => {
         if (checkEmail.length == 0) {
             const resEdit = await fetch(`${baseUrl}/users/${id}`, {
                 method: 'PUT',
-                headers: { 'content-type': 'application/json' },
+                headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}`},
                 body: JSON.stringify({
                     id: thisUser.value.id,
                     name: editUserNameModel.value,

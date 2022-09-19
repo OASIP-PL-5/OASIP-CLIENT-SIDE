@@ -3,7 +3,8 @@
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SignUpUser from '../components/SignUpUser.vue'
-
+import VueCookies from 'vue-cookies'
+const token = VueCookies.get('jwtToken');
 
 const myRouter = useRouter()
 
@@ -18,7 +19,7 @@ const baseUrl = import.meta.env.PROD
 
 //GET
 const getUser = async () => {
-    const resUser = await fetch(`${baseUrl}/users`)
+    const resUser = await fetch(`${baseUrl}/users`,{headers:{ 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }})
     if (resUser.status === 200) {
         users.value = await resUser.json()
         console.log(users.value)
@@ -77,7 +78,7 @@ const addUser = async (
                         // throw new Error('Password must be at least 8 characters')
                         const res = await fetch(`${baseUrl}/users`, {
                             method: 'POST',
-                            headers: { 'content-type': 'application/json' },
+                            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}`},
                             body: JSON.stringify({
                                 //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
                                 name: newName,

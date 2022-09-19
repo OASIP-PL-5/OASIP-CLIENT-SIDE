@@ -1,7 +1,10 @@
 <script setup>
 import SignInUserVue from '../components/SignInUser.vue';
 import { ref, onBeforeMount, computed } from 'vue'
+import VueCookies from 'vue-cookies'
+
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
+
 
 const tokens = ref([]);
 const baseUrl = import.meta.env.PROD
@@ -50,7 +53,8 @@ const matchUser = async (newEmail, newPassword) => {
         tokens.value = await res.json();
         console.log(tokens.value);
         console.log(tokens.value.jwtToken);
-        localStorage.setItem('tokens.value.jwtToken', response.data.tokens);
+        // this.$cookies.set(tokens,tokens.value.jwtToken)
+        VueCookies.set('jwtToken', tokens.value.jwtToken)
         alert('Login Success')
     }
     // else if (res.status === 401) {

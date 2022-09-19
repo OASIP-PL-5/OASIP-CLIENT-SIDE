@@ -3,13 +3,16 @@
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CreateUser from '../components/CreateUser.vue'
+import VueCookies from 'vue-cookies'
+const token = VueCookies.get('jwtToken');
+
+
 const myRouter = useRouter()
 const goToUserDetail = () => myRouter.push({ name: 'UserDetail' })
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 
 const users = ref([])
-
-const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0M0BnbWFpbC5jb20iLCJleHAiOjE2NjM2MzQ2NDksImlhdCI6MTY2MzU5ODY0OX0.rRXBA0A6iOAytOlkFoy6GEVYZyhFibRGwBd93Q4XEsS1qhgSzUibtr5IWKPf_U5F_dwoS9smR9IVZtWMe2GzAg"
+console.log(VueCookies.get('jwtToken'))
 
 
 const baseUrl = import.meta.env.PROD
@@ -76,7 +79,7 @@ const addUser = async (
           if (newPassword.length > 7) {
             const res = await fetch(`${baseUrl}/users`, {
               method: 'POST',
-              headers: { 'content-type': 'application/json' },
+              headers: { 'content-type': 'application/json' , 'Authorization': `Bearer ${token}`},
               body: JSON.stringify({
                 //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
                 name: newName,

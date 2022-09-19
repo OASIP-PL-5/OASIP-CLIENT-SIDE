@@ -8,6 +8,7 @@ const goToNotFound = () => myRouter.push({ name: 'NotFound' })
 console.clear()
 const { params } = useRoute()
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
+const token = VueCookies.get('jwtToken');
 
 // model สำหรับเก็บค่า edit จาก user
 const editStartTimeModel = ref('')
@@ -20,7 +21,7 @@ const baseUrl = import.meta.env.PROD
 
 const getThisEventCard = async () => {
   const id = params.id
-  const res = await fetch(`${baseUrl}/events/${id}`)
+  const res = await fetch(`${baseUrl}/events/${id}`,{headers: { 'content-Type': 'application/json','Authorization': `Bearer ${token}` }})
   // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
   // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
   thisEventDetail.value = await res.json()
@@ -49,7 +50,8 @@ const cancelEvent = async () => {
   let confirmation = 'Are you sure?'
   if (confirm(confirmation) == true) {
     const res = await fetch(`${baseUrl}/events/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers:{ 'content-type': 'application/json', 'Authorization': `Bearer ${token}`}
     })
     if (res.status === 200) {
       console.log('cancel bookingId: [' + id + '] success')
@@ -87,7 +89,7 @@ const cancelEdit = () => {
 
 const updateEvent = async () => {
   const id = params.id
-  const resGet = await fetch(`${baseUrl}/events/${id}`)
+  const resGet = await fetch(`${baseUrl}/events/${id}`,{headers:{ 'content-type': 'application/json', 'Authorization': `Bearer ${token}`}})
   // const bookingName = params.bookingName
   // method: GET
   console.clear()
@@ -96,7 +98,7 @@ const updateEvent = async () => {
   // method: PUT
   const resPut = await fetch(`${baseUrl}/events/${id}`, {
     method: 'PUT',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}`},
     body: JSON.stringify({
       id: thisEventDetail.value[0].id,
       eventStartTime: editStartTimeModel.value, // รับค่าจาก model
