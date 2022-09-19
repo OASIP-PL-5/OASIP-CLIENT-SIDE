@@ -48,8 +48,9 @@ const matchUser = async (newEmail, newPassword) => {
     })
     if (res.status === 200) {
         tokens.value = await res.json();
-        // console.log(tokens.value);
-        // console.log(tokens.value.jwtToken);
+        console.log(tokens.value);
+        console.log(tokens.value.jwtToken);
+        localStorage.setItem('tokens.value.jwtToken', response.data.tokens);
         alert('Login Success')
     }
     // else if (res.status === 401) {

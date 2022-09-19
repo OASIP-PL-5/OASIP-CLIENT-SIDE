@@ -9,13 +9,21 @@ const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 
 const users = ref([])
 
+const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0M0BnbWFpbC5jb20iLCJleHAiOjE2NjM2MzQ2NDksImlhdCI6MTY2MzU5ODY0OX0.rRXBA0A6iOAytOlkFoy6GEVYZyhFibRGwBd93Q4XEsS1qhgSzUibtr5IWKPf_U5F_dwoS9smR9IVZtWMe2GzAg"
+
+
 const baseUrl = import.meta.env.PROD
   ? `${import.meta.env.VITE_BASE_URL}/api`
   : '/api'
 
 //GET
 const getUser = async () => {
-  const resUser = await fetch(`${baseUrl}/users`)
+  const resUser = await fetch(`${baseUrl}/users`,{
+    headers:{
+       'content-type': 'application/json',
+       'Authorization': `Bearer ${token}`
+       }
+  })
   if (resUser.status === 200) {
     users.value = await resUser.json()
     console.log(users.value)

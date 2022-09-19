@@ -4,7 +4,7 @@ import { ref, onBeforeMount, computed } from 'vue'
 
 const myRouter = useRouter()
 
-const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0M0BnbWFpbC5jb20iLCJleHAiOjE2NjM1NTIyNjYsImlhdCI6MTY2MzUxNjI2Nn0.Wtcp8DLGK9Nl5Lhjv0ZTLKx4C5ToQbxwYhsqJ1R6hdL1FqljlM0K9yO2F_K4XNyeKXC3Sow4OaPILF_ZduuKuQ"
+const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0M0BnbWFpbC5jb20iLCJleHAiOjE2NjM2MzQ2NDksImlhdCI6MTY2MzU5ODY0OX0.rRXBA0A6iOAytOlkFoy6GEVYZyhFibRGwBd93Q4XEsS1qhgSzUibtr5IWKPf_U5F_dwoS9smR9IVZtWMe2GzAg"
 
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
@@ -40,14 +40,19 @@ const getAllEventCategory = async () => {
     console.log(`${baseUrl}/event-categories`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const res = await fetch(`${baseUrl}/event-categories`)
+    const res = await fetch(`${baseUrl}/event-categories`,{
+        headers:{
+       'content-type': 'application/json',
+       'Authorization': `Bearer ${token}`
+       }
+    })
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     eventCategoryCard.value = await res.json()
     // eventCategoryCard.value.push({ img_path: 'https://img.freepik.com/free-vector/server-concept-illustration_114360-147.jpg?t=st=1653815388~exp=1653815988~hmac=2a39c6bf2f79464a865832515586160c01884eb7f6566fc41f18a4e3f00a8fbe&w=826' })
 
     console.clear()
     console.log('data from api: ', eventCategoryCard.value)
-    console.log('find img:', eventCategoryCard.value[5].img_path);
+    // console.log('find img:', eventCategoryCard.value[5].img_path);
 }
 
 onBeforeMount(async () => {

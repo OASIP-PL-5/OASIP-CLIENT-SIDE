@@ -4,6 +4,10 @@
     import EventList from '../components/EventList.vue'
     import CreateEditEvent from '../components/CreateEditEvent.vue'
     import IconFilter from '../components/icons/IconFilter.vue'
+
+    const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0M0BnbWFpbC5jb20iLCJleHAiOjE2NjM2MzQ2NDksImlhdCI6MTY2MzU5ODY0OX0.rRXBA0A6iOAytOlkFoy6GEVYZyhFibRGwBd93Q4XEsS1qhgSzUibtr5IWKPf_U5F_dwoS9smR9IVZtWMe2GzAg"
+
+
     console.clear()
     // binding-CSS
     const btnTailWind =
@@ -30,7 +34,9 @@
         // console.log(`${baseUrl}/events`)
         // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
         // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-        const resEvent = await fetch(`${baseUrl}/events`)
+        const resEvent = await fetch(`${baseUrl}/events`,{
+            headers:{ 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        })
         // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
         eventCard.value = await resEvent.json()
     }
