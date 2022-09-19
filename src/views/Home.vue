@@ -4,6 +4,8 @@ import { ref, onBeforeMount, computed } from 'vue'
 
 const myRouter = useRouter()
 
+const token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0M0BnbWFpbC5jb20iLCJleHAiOjE2NjM1NTIyNjYsImlhdCI6MTY2MzUxNjI2Nn0.Wtcp8DLGK9Nl5Lhjv0ZTLKx4C5ToQbxwYhsqJ1R6hdL1FqljlM0K9yO2F_K4XNyeKXC3Sow4OaPILF_ZduuKuQ"
+
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
