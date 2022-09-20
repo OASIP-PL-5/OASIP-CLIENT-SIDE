@@ -20,6 +20,10 @@ const matching = computed(() => {
 })
 
 
+const test = ()=>{
+    alert('hello')
+}
+
 </script>
  
 <template>
@@ -77,7 +81,7 @@ const matching = computed(() => {
                                 <div class="flex justify-center">
                                     <div>
                                         <button
-                                            @click="$emit('matchUser', matching.newEmail, matching.newPassword)"
+                                            @click="test,$emit('matchUser', matching.newEmail, matching.newPassword)"
                                             class="inline-block px-8 py-2.5 bg-blue-400
                         text-white font-bold text-2xl leading-tight
                         uppercase rounded-lg shadow-sm hover:bg-blue-500 

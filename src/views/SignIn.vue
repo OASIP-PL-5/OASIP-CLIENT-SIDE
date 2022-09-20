@@ -9,6 +9,7 @@ import { useRouter } from 'vue-router';
 const myRouter = useRouter()
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
 const goToHome = () => myRouter.push({ name: 'Home' })
+const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 
 const tokens = ref([]);
 const baseUrl = import.meta.env.PROD
@@ -60,15 +61,24 @@ const matchUser = async (newEmail, newPassword) => {
         // this.$cookies.set(tokens,tokens.value.jwtToken)
         // VueCookies.set('jwtToken', tokens.value.jwtToken)
         localStorage.setItem('jwtToken', tokens.value.jwtToken)
-        alert('Login Success')
-        goToHome()
+        alert('Login Successful')
         // goToHome()
-        // goToHome();
+        // window.location.reload()
+        await myRouter.push({ path: '/' })
+        myRouter.go(0)
     }
+    // ตรงนี้ต้องทำเพิ่มอีก back ส่ง 401 กรณี password ผิด alert "Incorrect password" 
+    // back ส่ง 404 กรณี email ไม่มีใน database alert "A user with the specified email DOES NOT exist"
     // else if (res.status === 401) {
     //     wrongPassword.value = true;
-    //     alert('Wrong Password')
+    //     alert('Incorrect password')
     // }
+    // else{
+    //     notFound.value = true;
+    //     alert('A user with the specified email DOES NOT exist')
+    // }
+
+
     else {
         notFound.value = true;
         alert('Not Found')

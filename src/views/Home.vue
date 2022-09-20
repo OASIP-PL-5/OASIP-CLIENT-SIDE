@@ -2,6 +2,8 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ref, onBeforeMount, computed } from 'vue'
 // import VueCookies from 'vue-cookies'
+
+
 const token = localStorage.getItem('jwtToken');
 const myRouter = useRouter()
 

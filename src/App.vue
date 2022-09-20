@@ -14,25 +14,30 @@ const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 
 
 const loggingIn = ref(false)
-const checkIsLogin = () => {
+const checkIsLogin = computed(() => {
     if (localStorage.getItem('jwtToken')) {
         console.log('token: ', localStorage.getItem('jwtToken'))
         return loggingIn.value = true
     }
     else {
-        loggingIn.value = false
+        return loggingIn.value = false
     }
 
-}
-console.log('login? : ', checkIsLogin());
+})
+// console.log('login? : ', checkIsLogin());
 const showMenu = ref(true)
 
-const logOut = () => {
+const logout= () => {
     localStorage.removeItem('jwtToken')
     loggingIn.value = false
     console.log('logout');
+    location.reload();
     goToHome()
+    // ถ้้าเป็นแบบนี้มันจะทำ"แค่ function สุดท้าย" ก็มันจะไม่ทำ reload อะ มันจะไป home อย่างเดียว ประเด็นมันอยู่ที่ sign in มากกว่ามั้ง
+    // ยังไงวะ
 }
+
+
 
 </script>
  
@@ -76,9 +81,10 @@ const logOut = () => {
                                 font-bold rounded-lg text-center
                                 shadow-sm hover:bg-gray-600 hover:shadow-lg focus:bg-gray-600
                                 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-700
-                                active:shadow-lg transition duration-150 ease-in-out"
-                            @click="logOut">SIGN
+                                active:shadow-lg transition duration-150 ease-in-out" @click="logOut">SIGN
                             OUT</button>
+
+                            <button>isLogin: {{checkIsLogin}}</button>
 
 
                     </div>
@@ -96,7 +102,7 @@ const logOut = () => {
                 <button type="button" class="font-semibold text-gray-400" @click="goToAllEvent">ALL
                     EVENTS</button>
                 <button type="button" class="font-semibold text-gray-800" @click="goToContact">ABOUT US</button>
-                <button type="button" class="font-semibold text-gray-800" @click="goToSignUp">SIGN UP</button>
+                <button type="button" class="font-semibold text-gray-800" @click="goToSignIn">SIGN IN</button>
             </div>
         </nav>
         <!-- <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>
