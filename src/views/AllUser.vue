@@ -3,8 +3,9 @@
   import { ref, onBeforeMount, computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import CreateUser from '../components/CreateUser.vue'
-  import VueCookies from 'vue-cookies'
-  const token = VueCookies.get('jwtToken');
+  // import VueCookies from 'vue-cookies'
+  // const token = VueCookies.get('jwtToken');
+  const token = localStorage.getItem('jwtToken')
   
   
   const myRouter = useRouter()
@@ -12,7 +13,8 @@
   const goToAllUser = () => myRouter.push({ name: 'AllUser' })
   
   const users = ref([])
-  console.log(VueCookies.get('jwtToken'))
+  // console.log(VueCookies.get('jwtToken'))
+  console.log('localStorage token : ',localStorage.getItem('jwtToken'));
   
   
   const baseUrl = import.meta.env.PROD

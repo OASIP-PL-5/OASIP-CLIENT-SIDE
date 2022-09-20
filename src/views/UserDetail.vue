@@ -2,9 +2,11 @@
     import { ref, onBeforeMount } from 'vue'
     import { useRoute, useRouter } from 'vue-router'
     import BtnEditUser from '../components/BtnEditUser.vue'
+    // import VueCookies from 'vue-cookies'
     const myRouter = useRouter()
     const goToAllUser = () => myRouter.push({ name: 'AllUser' })
-    const token = VueCookies.get('jwtToken');
+    // const token = VueCookies.get('jwtToken');
+    const token = localStorage.getItem('jwtToken');
     
     // const myRouter = useRouter()
     const { params } = useRoute()

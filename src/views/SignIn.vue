@@ -1,10 +1,14 @@
 <script setup>
 import SignInUserVue from '../components/SignInUser.vue';
+import Home from './Home.vue';
 import { ref, onBeforeMount, computed } from 'vue'
-import VueCookies from 'vue-cookies'
+import { useRouter } from 'vue-router';
 
+// import VueCookies from 'vue-cookies'
+
+const myRouter = useRouter()
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
-
+const goToHome = () => myRouter.push({ name: 'Home' })
 
 const tokens = ref([]);
 const baseUrl = import.meta.env.PROD
@@ -54,8 +58,12 @@ const matchUser = async (newEmail, newPassword) => {
         console.log(tokens.value);
         console.log(tokens.value.jwtToken);
         // this.$cookies.set(tokens,tokens.value.jwtToken)
-        VueCookies.set('jwtToken', tokens.value.jwtToken)
+        // VueCookies.set('jwtToken', tokens.value.jwtToken)
+        localStorage.setItem('jwtToken', tokens.value.jwtToken)
         alert('Login Success')
+        goToHome()
+        // goToHome()
+        // goToHome();
     }
     // else if (res.status === 401) {
     //     wrongPassword.value = true;

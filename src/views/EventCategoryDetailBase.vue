@@ -2,8 +2,8 @@
     import { ref, onBeforeMount } from 'vue'
     import { useRoute, useRouter } from 'vue-router'
     import BtnEditEventCategory from '../components/BtnEditEventCategory.vue'
-    import VueCookies from 'vue-cookies'
-    const token = VueCookies.get('jwtToken');
+    // import VueCookies from 'vue-cookies'
+    const token = localStorage.getItem('jwtToken');
     
     const myRouter = useRouter()
     const goToNotFound = () => myRouter.push({ name: 'NotFound' })

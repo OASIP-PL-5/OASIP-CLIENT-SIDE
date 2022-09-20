@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, onBeforeMount } from 'vue'
+const token = localStorage.getItem('jwtToken')
 defineEmits(['closeToggle', 'addEventComp', 'updateEventComp'])
 const props = defineProps({
   currentEvent: {
@@ -30,7 +31,12 @@ const baseUrl = import.meta.env.PROD
   : '/api'
 const getEventCategory = async () => {
   console.log(`${baseUrl}/event-categories`)
-  const res = await fetch(`${baseUrl}/event-categories`)
+  const res = await fetch(`${baseUrl}/event-categories`,{
+      headers:{
+         'content-type': 'application/json',
+         'Authorization': `Bearer ${token}`
+         }
+    })
   eventCategory.value = await res.json()
   console.log('data from api: ' + eventCategory.value)
 }

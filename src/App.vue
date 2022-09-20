@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from '@vue/reactivity';
 import { ref, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router';
 import IconHamburger from './components/icons/IconHamburger.vue';
@@ -8,9 +9,30 @@ const goToHome = () => myRouter.push({ name: 'Home' })
 const goToContact = () => myRouter.push({ name: 'ContactUs' })
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
+const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 
 
+
+const loggingIn = ref(false)
+const checkIsLogin = () => {
+    if (localStorage.getItem('jwtToken')) {
+        console.log('token: ', localStorage.getItem('jwtToken'))
+        return loggingIn.value = true
+    }
+    else {
+        loggingIn.value = false
+    }
+
+}
+console.log('login? : ', checkIsLogin());
 const showMenu = ref(true)
+
+const logOut = () => {
+    localStorage.removeItem('jwtToken')
+    loggingIn.value = false
+    console.log('logout');
+    goToHome()
+}
 
 </script>
  
@@ -42,8 +64,22 @@ const showMenu = ref(true)
                         <button type="button" class="link link-underline link-underline-black"
                             @click="goToContact">ABOUT US</button>
 
-                        <button type="button" class="link link-underline link-underline-black" @click="goToSignUp">SIGN
-                            UP</button>
+
+                        <button v-if="loggingIn==false" type="button" class=" rounded-lg px-4  bg-blue-400 text-white 
+                                font-bold rounded-lg text-center
+                                shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                                active:shadow-lg transition duration-150 ease-in-out" @click="goToSignIn">SIGN
+                            IN</button>
+
+                        <button v-if="loggingIn==true" type="button" class="rounded-lg px-4  bg-gray-500 text-white 
+                                font-bold rounded-lg text-center
+                                shadow-sm hover:bg-gray-600 hover:shadow-lg focus:bg-gray-600
+                                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-700
+                                active:shadow-lg transition duration-150 ease-in-out"
+                            @click="logOut">SIGN
+                            OUT</button>
+
 
                     </div>
 

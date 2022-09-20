@@ -2,13 +2,14 @@
   import { ref, onBeforeMount } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import BtnEditEvent from '../components/BtnEditEvent.vue'
+  // import VueCookies from 'vue-cookies'
   const myRouter = useRouter()
   const goToNotFound = () => myRouter.push({ name: 'NotFound' })
   
   console.clear()
   const { params } = useRoute()
   const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
-  const token = VueCookies.get('jwtToken');
+  const token = localStorage.getItem('jwtToken');
   
   // model สำหรับเก็บค่า edit จาก user
   const editStartTimeModel = ref('')
