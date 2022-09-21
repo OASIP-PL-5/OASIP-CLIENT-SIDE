@@ -27,14 +27,12 @@ const checkIsLogin = computed(() => {
 // console.log('login? : ', checkIsLogin());
 const showMenu = ref(true)
 
-const logout= () => {
+const logOut= () => {
     localStorage.removeItem('jwtToken')
     loggingIn.value = false
     console.log('logout');
     location.reload();
     goToHome()
-    // ถ้้าเป็นแบบนี้มันจะทำ"แค่ function สุดท้าย" ก็มันจะไม่ทำ reload อะ มันจะไป home อย่างเดียว ประเด็นมันอยู่ที่ sign in มากกว่ามั้ง
-    // ยังไงวะ
 }
 
 
