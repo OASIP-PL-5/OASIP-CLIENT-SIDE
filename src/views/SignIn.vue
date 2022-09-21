@@ -77,12 +77,20 @@ const matchUser = async (newEmail, newPassword) => {
     //     notFound.value = true;
     //     alert('A user with the specified email DOES NOT exist')
     // }
-
-
-    else {
-        notFound.value = true;
-        alert('Not Found')
+    else if (res.status === 401) {
+        wrongPassword.value = true;
+        alert('Password Incorrect')
     }
+    else{
+        notFound.value = true;
+        alert('A user with the specified email DOES NOT exist')
+    }
+
+
+    // else {
+    //     notFound.value = true;
+    //     alert('Not Found')
+    // }
 }
 </script>
      

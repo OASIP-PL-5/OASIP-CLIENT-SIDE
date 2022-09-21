@@ -45,7 +45,7 @@ const getAllEventCategory = async () => {
     const res = await fetch(`${baseUrl}/event-categories`, {
         headers: {
             'content-type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            
         }
     })
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)

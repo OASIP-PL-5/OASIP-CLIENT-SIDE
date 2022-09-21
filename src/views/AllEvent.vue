@@ -32,9 +32,7 @@ const getEventCard = async () => {
     // console.log(`${baseUrl}/events`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const resEvent = await fetch(`${baseUrl}/events`, {
-        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
-    })
+    const resEvent = await fetch(`${baseUrl}/events`)
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     eventCard.value = await resEvent.json()
 }
@@ -58,7 +56,7 @@ const addEvent = async (
     console.log(`${baseUrl}/events`)
     const res = await fetch(`${baseUrl}/events`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 'content-type': 'application/json'},
         body: JSON.stringify({
             // มีผลต่อ payload ต้องใส่
             bookingName: newBookingName,
@@ -93,7 +91,7 @@ const eventCategory = ref([])
 const getEventCategory = async () => {
     console.log(`${baseUrl}/event-categories`)
     const res = await fetch(`${baseUrl}/event-categories`, {
-        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        headers: { 'content-type': 'application/json'}
     })
     eventCategory.value = await res.json()
     console.log('data from api: ' + eventCategory.value)
@@ -109,14 +107,14 @@ const filterByCategory = async () => {
     // const test = modelId.value
     if (modelId.value == 'all') {
         const res = await fetch(`${baseUrl}/events`, {
-            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+            headers: { 'content-type': 'application/json'}
         })
         eventCard.value = await res.json()
     }
     else {
         var id = modelId.value.eventCategoryId
         const res = await fetch(`${baseUrl}/events/getByEventCategories/${id}`, {
-            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+            headers: { 'content-type': 'application/json' }
         })
         if (res.status == 204) {
             eventCard.value = 0;
@@ -146,7 +144,7 @@ const filterByPeriod = async () => {
         isFilterUp.value = false
         isFilterPast.value = false
         const res = await fetch(`${baseUrl}/events`, {
-            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+            headers: { 'content-type': 'application/json'}
         })
         eventCard.value = await res.json()
         haveAll.value = true
@@ -157,7 +155,7 @@ const filterByPeriod = async () => {
     else if (modelTime.value == 'upcoming') {
         // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no past 
         const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`, {
-            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+            headers: { 'content-type': 'application/json'}
         })
         havePast.value = false
         haveAll.value = false
@@ -173,7 +171,7 @@ const filterByPeriod = async () => {
         }
     } else if (modelTime.value == 'past') {
         const resPast = await fetch(`${baseUrl}/events/getEventByPast`, {
-            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+            headers: { 'content-type': 'application/json'}
         })
         isFilterPast.value = true
         isFilterAll.value = false
@@ -192,7 +190,7 @@ const modelDate = ref()
 const filterByDate = async () => {
     var date = modelDate.value
     const res = await fetch(`${baseUrl}/events/getEventsByEventStartTime/${date}`, {
-        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        headers: { 'content-type': 'application/json' }
     })
     if (res.status == 204) {
         eventCard.value = 0
