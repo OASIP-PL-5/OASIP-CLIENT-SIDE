@@ -160,7 +160,7 @@ const noUsersImg =
         <button @click="goToSignIn" 
         class="underline font-bold text-blue-400  hover:scale-105 
         transition-transform">sign in
-        </button> to see user details.
+        </button> to see users.
       </h1>
       <!-- <button
           class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-2xl px-4 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800"
