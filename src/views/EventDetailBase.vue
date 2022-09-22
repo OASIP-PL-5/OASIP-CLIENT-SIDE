@@ -22,7 +22,7 @@
   
   const getThisEventCard = async () => {
     const id = params.id
-    const res = await fetch(`${baseUrl}/events/${id}`,{headers: { 'content-Type': 'application/json','Authorization': `Bearer ${token}` }})
+    const res = await fetch(`${baseUrl}/events/${id}`,{headers: { 'content-Type': 'application/json'}})
     // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
     // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
     thisEventDetail.value = await res.json()
@@ -52,7 +52,7 @@
     if (confirm(confirmation) == true) {
       const res = await fetch(`${baseUrl}/events/${id}`, {
         method: 'DELETE',
-        headers:{ 'content-type': 'application/json', 'Authorization': `Bearer ${token}`}
+        headers:{ 'content-type': 'application/json'}
       })
       if (res.status === 200) {
         console.log('cancel bookingId: [' + id + '] success')
@@ -90,7 +90,7 @@
   
   const updateEvent = async () => {
     const id = params.id
-    const resGet = await fetch(`${baseUrl}/events/${id}`,{headers:{ 'content-type': 'application/json', 'Authorization': `Bearer ${token}`}})
+    const resGet = await fetch(`${baseUrl}/events/${id}`,{headers:{ 'content-type': 'application/json'}})
     // const bookingName = params.bookingName
     // method: GET
     console.clear()
@@ -99,7 +99,7 @@
     // method: PUT
     const resPut = await fetch(`${baseUrl}/events/${id}`, {
       method: 'PUT',
-      headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}`},
+      headers: { 'content-type': 'application/json'},
       body: JSON.stringify({
         id: thisEventDetail.value[0].id,
         eventStartTime: editStartTimeModel.value, // รับค่าจาก model

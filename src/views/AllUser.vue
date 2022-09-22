@@ -82,7 +82,7 @@ const addUser = async (
           if (newPassword.length > 7) {
             const res = await fetch(`${baseUrl}/users`, {
               method: 'POST',
-              headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
+              headers: { 'content-type': 'application/json'},
               body: JSON.stringify({
                 //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
                 name: newName,
