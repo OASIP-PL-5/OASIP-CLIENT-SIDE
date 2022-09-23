@@ -19,7 +19,7 @@ const baseUrl = import.meta.env.PROD
 
 //GET
 const getUser = async () => {
-    const resUser = await fetch(`${baseUrl}/users`, { headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` } })
+    const resUser = await fetch(`${baseUrl}/users`, { headers: { 'content-type': 'application/json' } })
     if (resUser.status === 200) {
         users.value = await resUser.json()
         console.log(users.value)
