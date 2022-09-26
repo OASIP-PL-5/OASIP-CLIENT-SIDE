@@ -34,7 +34,7 @@ const getEventCategory = async () => {
   const res = await fetch(`${baseUrl}/event-categories`,{
       headers:{
          'content-type': 'application/json',
-         'Authorization': `Bearer ${token}`
+         
          }
     })
   eventCategory.value = await res.json()

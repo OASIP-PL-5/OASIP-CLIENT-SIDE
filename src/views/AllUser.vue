@@ -12,10 +12,13 @@ const myRouter = useRouter()
 const goToUserDetail = () => myRouter.push({ name: 'UserDetail' })
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
+const goToHome = () => myRouter.push({ name: 'Home' })
 
 const users = ref([])
 // console.log(VueCookies.get('jwtToken'))
 console.log('localStorage token : ', localStorage.getItem('jwtToken'));
+
+const IsAuthorized = ref(true)
 
 
 const baseUrl = import.meta.env.PROD
@@ -34,7 +37,15 @@ const getUser = async () => {
     users.value = await resUser.json()
     console.log(users.value)
     console.log(resUser)
-  } else console.log('error cannot get users')
+  }
+  else if (resUser.status === 403) {
+    alert('You are not authorized to access this page')
+    IsAuthorized.value = false
+    console.log("Is this user allow to access this page:", IsAuthorized.value);
+    goToHome()
+  }
+
+  else console.log('error cannot get users')
 }
 onBeforeMount(async () => {
   await getUser()
@@ -82,7 +93,7 @@ const addUser = async (
           if (newPassword.length > 7) {
             const res = await fetch(`${baseUrl}/users`, {
               method: 'POST',
-              headers: { 'content-type': 'application/json'},
+              headers: { 'content-type': 'application/json' },
               body: JSON.stringify({
                 //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
                 name: newName,
@@ -157,11 +168,11 @@ const noUsersImg =
     <div v-show="users == 0" class="grid place-items-center h-screen">
       <h1 class="font-bold text-6xl text-blue-500 my-6">"No Users"</h1>
       <h1 v-if="loggingIn==false" class="text-xl text-slate-800">Please
-        <button @click="goToSignIn" 
-        class="underline font-bold text-blue-400  hover:scale-105 
+        <button @click="goToSignIn" class="underline font-bold text-blue-400  hover:scale-105 
         transition-transform">sign in
         </button> to see users.
       </h1>
+      <!-- <h1 v-if="IsAuthorized==false" class="text-xl text-slate-800">You are not allow to access this page.</h1> -->
       <!-- <button
           class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-2xl px-4 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800"
         >
