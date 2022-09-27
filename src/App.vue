@@ -29,6 +29,7 @@ const showMenu = ref(true)
 
 const logOut= () => {
     localStorage.removeItem('jwtToken')
+    localStorage.removeItem('refreshToken')
     loggingIn.value = false
     console.log('logout');
     location.reload();

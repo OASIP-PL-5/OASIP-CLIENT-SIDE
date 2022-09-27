@@ -6,6 +6,8 @@ import CreateUser from '../components/CreateUser.vue'
 // import VueCookies from 'vue-cookies'
 // const token = VueCookies.get('jwtToken');
 const token = localStorage.getItem('jwtToken')
+const newToken = localStorage.getItem('refreshToken')
+
 
 
 const myRouter = useRouter()
@@ -17,6 +19,7 @@ const goToHome = () => myRouter.push({ name: 'Home' })
 const users = ref([])
 // console.log(VueCookies.get('jwtToken'))
 console.log('localStorage token : ', localStorage.getItem('jwtToken'));
+console.log('localStorage refreshToken : ', localStorage.getItem('refreshToken'));
 
 const IsAuthorized = ref(true)
 
@@ -33,6 +36,42 @@ const getUser = async () => {
       'Authorization': `Bearer ${token}`
     }
   })
+  // พอ access token หมดอายุ จะไป fetch /refresh เพื่อเอา refreshToken มาใช้
+  if (resUser.status === 401) {
+    const resRefresh = await fetch(`${baseUrl}/refresh`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${newToken}`
+      },
+      body: JSON.stringify({
+        token: newToken
+      })
+    })
+    if (resRefresh.status === 200) {
+      const data = await resRefresh.json()
+      localStorage.setItem('jwtToken', data.refreshToken)
+      // localStorage.setItem('refreshToken', data.refreshToken)
+      const resUser = await fetch(`${baseUrl}/users`, {
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': `Bearer ${newToken}`
+        }
+      })
+      if (resUser.status === 200) {
+        users.value = await resUser.json()
+        console.log(users.value)
+        console.log(resUser)
+      } else console.log('error cannot get users')
+    } else {
+      console.log('error cannot refresh token')
+    }
+  } else if (resUser.status === 200) {
+    users.value = await resUser.json()
+    console.log(users.value)
+    console.log(resUser)
+  } else console.log('error cannot get users')
+
   if (resUser.status === 200) {
     users.value = await resUser.json()
     console.log(users.value)
@@ -44,9 +83,12 @@ const getUser = async () => {
     console.log("Is this user allow to access this page:", IsAuthorized.value);
     goToHome()
   }
-
   else console.log('error cannot get users')
+
+
+
 }
+
 onBeforeMount(async () => {
   await getUser()
 })

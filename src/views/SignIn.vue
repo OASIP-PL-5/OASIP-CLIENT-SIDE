@@ -61,6 +61,7 @@ const matchUser = async (newEmail, newPassword) => {
         // this.$cookies.set(tokens,tokens.value.jwtToken)
         // VueCookies.set('jwtToken', tokens.value.jwtToken)
         localStorage.setItem('jwtToken', tokens.value.jwtToken)
+        localStorage.setItem('refreshToken', tokens.value.refreshToken)
         alert('Login Successful')
         // goToHome()
         // window.location.reload()
