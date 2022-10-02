@@ -48,6 +48,15 @@ const getUser = async () => {
         token: newToken
       })
     })
+    // ใช้ตอน refreshToken หมดอายุ ให้ทำการ sign out และกลับไปหน้า sign in ใหม่
+    if (resRefresh.status === 401) {
+      localStorage.removeItem('jwtToken')
+      localStorage.removeItem('refreshToken')
+      alert('Please login again')
+      await myRouter.push({ path: '/sign-in' })
+      myRouter.go(0)
+    
+    }
     if (resRefresh.status === 200) {
       const data = await resRefresh.json()
       localStorage.setItem('jwtToken', data.refreshToken)

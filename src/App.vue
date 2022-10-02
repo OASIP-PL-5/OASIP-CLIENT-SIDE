@@ -10,7 +10,7 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
-
+const userEmail = localStorage.getItem('email')
 
 
 const loggingIn = ref(false)
@@ -24,12 +24,14 @@ const checkIsLogin = computed(() => {
     }
 
 })
-// console.log('login? : ', checkIsLogin());
+// console.log('login? : ', checkIsLogin.value);
 const showMenu = ref(true)
 
-const logOut= () => {
-    localStorage.removeItem('jwtToken')
-    localStorage.removeItem('refreshToken')
+const logOut = () => {
+    // localStorage.removeItem('jwtToken')
+    // localStorage.removeItem('refreshToken')
+    // localStorage.removeItem('email')
+    localStorage.clear()
     loggingIn.value = false
     console.log('logout');
     location.reload();
@@ -59,7 +61,7 @@ const logOut= () => {
                         </div>
                     </div>
 
-                    <div class="hidden md:flex flex-cols-4 items-center gap-x-14 text-xl">
+                    <div class="hidden md:flex flex-cols-5 items-center gap-x-14 text-xl">
                         <button type="button" class="text-blue-400" @click="goToHome">HOME</button>
 
                         <button type="button" class="link link-underline link-underline-black" @click="goToAllEvent">ALL
@@ -82,14 +84,17 @@ const logOut= () => {
                                 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-700
                                 active:shadow-lg transition duration-150 ease-in-out" @click="logOut">SIGN
                             OUT</button>
+                        <button v-show="checkIsLogin"
+                            class="rounded-lg shadow-lg px-2 py-1 bg-white">{{userEmail}}</button>
 
-                            <button>isLogin: {{checkIsLogin}}</button>
+                            
 
 
                     </div>
+                    
 
                     <div class="md:hidden flex items-center">
-                        <button class="py-2 px-2">
+                        <button class="py-2 px-2 mt-1">
                             <icon-hamburger @click="showMenu = !showMenu" class="text-gray-700" />
                         </button>
                     </div>
@@ -101,7 +106,10 @@ const logOut= () => {
                 <button type="button" class="font-semibold text-gray-400" @click="goToAllEvent">ALL
                     EVENTS</button>
                 <button type="button" class="font-semibold text-gray-800" @click="goToContact">ABOUT US</button>
-                <button type="button" class="font-semibold text-gray-800" @click="goToSignIn">SIGN IN</button>
+                <button v-if="loggingIn==false" type="button" class="font-semibold text-gray-800"
+                    @click="goToSignIn">SIGN IN</button>
+                <button v-if="loggingIn==true" type="button" class="font-semibold text-gray-800" @click="logOut">SIGN
+                    OUT</button>
             </div>
         </nav>
         <!-- <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>

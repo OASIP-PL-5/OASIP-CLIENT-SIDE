@@ -9,6 +9,7 @@ const goToNotFound = () => myRouter.push({ name: 'NotFound' })
 console.clear()
 const { params } = useRoute()
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
+const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 const token = localStorage.getItem('jwtToken');
 const IsAuthorized = ref(true)
 
@@ -32,6 +33,12 @@ const getThisEventCard = async () => {
     }
   }
   )
+  // ต้องการให้ เมื่อ token หมดอายุแล้วไปเรียก refreshToken ที่หน้า list-all-user แล้วกลับมาหน้าเดิมก่อนไปเรียก refreshToken
+  if (res.status === 401) {
+    alert("Please login again")
+    await myRouter.push({ path: '/list-all-user' }) // เพื่อไปขอ refreshToken มาใหม่
+    myRouter.go(-1) // กลับมาหน้าเดิมหลังไปเรียก refreshToken
+  }
   // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
   // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
   if (res.status === 200) {
@@ -50,10 +57,10 @@ const getThisEventCard = async () => {
   }
 
 
-  else {
-    await goToNotFound()
-    console.log(`event: ${id} is not exist!`)
-  }
+  // else {
+  //   await goToNotFound()
+  //   console.log(`event: ${id} is not exist!`)
+  // }
 
 }
 onBeforeMount(async () => {
@@ -73,6 +80,7 @@ const cancelEvent = async () => {
         'Authorization': `Bearer ${token}`
       }
     })
+
     if (res.status === 200) {
       console.log('cancel bookingId: [' + id + '] success')
       await goToAllEvent()

@@ -26,25 +26,55 @@ const eventCat = ref([])
 const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`
     : '/api'
-// const checkURL = `${import.meta.env.PROD}`
-// console.log(checkURL);
+
+// ตัวแปรไว้เก็บ email
+const userEmail = ref()
+
 const getEventCard = async () => {
+
     // console.log(`${baseUrl}/events`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const resEvent = await fetch(`${baseUrl}/events`)
+    const resEvent = await fetch(`${baseUrl}/events`, {
+        headers: {
+            'content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-    eventCard.value = await resEvent.json()
+    if (resEvent.status === 200) {
+        eventCard.value = await resEvent.json()
+        userEmail.value = localStorage.getItem('email')
+        console.log("userEmail : ", userEmail.value);
+    }
+
 }
 onBeforeMount(async () => {
     await getEventCard()
     console.log('length of eventCard: ', eventCard.value)
+    // console.log('student email :', eventCard.value[0].bookingEmail);
 })
 const noScheduleImg =
     'https://img.freepik.com/free-vector/man-reading-concept-illustration_114360-8705.jpg?t=st=1651136740~exp=1651137340~hmac=d17fed796546aa370aea3c826f9743b6eb558fd34399d6cf89663051933ab10f&w=826'
 // console.log(toggleModal.value);
 const toggleModal = ref(false)
 const closeToggle = () => window.location.reload()
+
+
+const loggingIn = ref(false)
+
+const checkIsLogin = computed(() => {
+    if (localStorage.getItem('email')) {
+        console.log('email value  : ', localStorage.getItem('email'))
+        return loggingIn.value = true
+    }
+    else {
+        return loggingIn.value = false
+    }
+
+})
+
+console.log("IsThisBitchLogIn", checkIsLogin.value);
 // method: POST -- add event
 const addEvent = async (
     newBookingName,
@@ -54,36 +84,57 @@ const addEvent = async (
     categorySelection
 ) => {
     console.log(`${baseUrl}/events`)
-    const res = await fetch(`${baseUrl}/events`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json'},
-        body: JSON.stringify({
-            // มีผลต่อ payload ต้องใส่
-            bookingName: newBookingName,
-            bookingEmail: newBookingEmail,
-            eventStartTime: newStartTime,
-            eventDuration: categorySelection.eventDuration,
-            eventNotes: newNotes,
-            eventCategoryId: categorySelection.eventCategoryId,
-            eventCategoryName: categorySelection.eventCategoryName
-        })
-    })
-    if (newBookingName.trim().length == 0) {
-        newBookingName = null
-        alert('Booking Name must be filled out!')
-        res.status = 400
-    } if (res.status == 400) {
-        console.log(currentDateTime);
-        alert('Appointment start time must be present or future.')
-        // return res.status = 400
+    console.log(newBookingEmail)
+    console.log(localStorage.getItem('email')) //เดี๋ยวไปสร้างตัวแปรไว้เก็บเฉพาะ....
+    // ถ้าเท่ากันจะได้ 0 ถ้าไม่เท่ากันจะได้ -1
+    console.log(newBookingEmail.localeCompare(userEmail.value));
+    // if (newBookingEmail.localeCompare(userEmail.value) == 0) {  // ไว้ check สำหรับ login แล้ว email ตรงกับตอนจะ new event มั้ย
+    // ยังมีปัญหาอยู่ คาดว่าเกิดจากการเมาปีกกา
+    // ไว้ check 2 กรณีคือ สำหรับ login ถ้า login อย่ localeCompare จะเป็น 0 หรือ ถ้าเป็น guest checkIsLogin จะเป็น false
+    if (newBookingEmail.localeCompare(localStorage.getItem('email')) == 0 || checkIsLogin.value == false) {
+        const res = await fetch(`${baseUrl}/events`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                // มีผลต่อ payload ต้องใส่
+                bookingName: newBookingName,
+                bookingEmail: newBookingEmail,
+                eventStartTime: newStartTime,
+                eventDuration: categorySelection.eventDuration,
+                eventNotes: newNotes,
+                eventCategoryId: categorySelection.eventCategoryId,
+                eventCategoryName: categorySelection.eventCategoryName
+            })
+        }
+        )
+        if (res.status === 201) {
+            const addedEvent = await res.json()
+            eventCard.value.push(addedEvent)
+            console.log("after submit", newBookingEmail);
+            console.log('added sucessfully')
+            alert(`Booking Name: ${newBookingName} is created successfully`)
+            window.location.reload()
+        } if (newBookingName.trim().length == 0) {
+            newBookingName = null
+            alert('Booking Name must be filled out!')
+            res.status = 400
+        } if (res.status == 400) {
+            console.log(currentDateTime);
+            alert('Appointment start time must be present or future.')
+            // return res.status = 400
+        }
     }
-    if (res.status === 201) {
-        const addedEvent = await res.json()
-        eventCard.value.push(addedEvent)
-        console.log('added sucessfully')
-        alert(`Booking Name: ${newBookingName} is created successfully`)
-        window.location.reload()
-    }
+
+
+    // }
+    // ไม่ได้ใช้เพราะว่าให้ email ตรงกันกับที่ login แล้ว ซึ่งเป็น ReadOnlyFans
+    // else {
+    //     alert("Please check your email")
+    // }
+
+
+
+
 }
 // SEARCHING METHOD
 // search-catName-option
@@ -91,7 +142,7 @@ const eventCategory = ref([])
 const getEventCategory = async () => {
     console.log(`${baseUrl}/event-categories`)
     const res = await fetch(`${baseUrl}/event-categories`, {
-        headers: { 'content-type': 'application/json'}
+        headers: { 'content-type': 'application/json' }
     })
     eventCategory.value = await res.json()
     console.log('data from api: ' + eventCategory.value)
@@ -107,7 +158,7 @@ const filterByCategory = async () => {
     // const test = modelId.value
     if (modelId.value == 'all') {
         const res = await fetch(`${baseUrl}/events`, {
-            headers: { 'content-type': 'application/json'}
+            headers: { 'content-type': 'application/json' }
         })
         eventCard.value = await res.json()
     }
@@ -144,7 +195,7 @@ const filterByPeriod = async () => {
         isFilterUp.value = false
         isFilterPast.value = false
         const res = await fetch(`${baseUrl}/events`, {
-            headers: { 'content-type': 'application/json'}
+            headers: { 'content-type': 'application/json' }
         })
         eventCard.value = await res.json()
         haveAll.value = true
@@ -155,7 +206,7 @@ const filterByPeriod = async () => {
     else if (modelTime.value == 'upcoming') {
         // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no past 
         const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`, {
-            headers: { 'content-type': 'application/json'}
+            headers: { 'content-type': 'application/json' }
         })
         havePast.value = false
         haveAll.value = false
@@ -171,7 +222,7 @@ const filterByPeriod = async () => {
         }
     } else if (modelTime.value == 'past') {
         const resPast = await fetch(`${baseUrl}/events/getEventByPast`, {
-            headers: { 'content-type': 'application/json'}
+            headers: { 'content-type': 'application/json' }
         })
         isFilterPast.value = true
         isFilterAll.value = false

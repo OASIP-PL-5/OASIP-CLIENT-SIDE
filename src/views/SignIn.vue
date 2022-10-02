@@ -19,30 +19,8 @@ const baseUrl = import.meta.env.PROD
 const wrongPassword = ref(false);
 const notFound = ref(false)
 
-// const matchUser = async (newEmail, newPassword) => {
-//     console.log(`${baseUrl}/match`)
-//     const res = await fetch(`${baseUrl}/match`, {
-//         method: 'POST',
-//         headers: { 'content-type': 'application/json' },
-//         body: JSON.stringify({
-//             // มีผลต่อ payload ต้องใส่
-//             email: newEmail,
-//             password: newPassword
-//         })
-//     })
-//     if (res.status === 200) {
-//         // const matched = await res.json()
-//         alert('Login Success')
-//     }
-//     else if (res.status === 401) {
-//         wrongPassword.value = true;
-//         alert('Wrong Password')
-//     }
-//     else{
-//         notFound.value = true;
-//         alert('Not Found')
-//     }
-// }
+
+const userEmail = ref()
 const matchUser = async (newEmail, newPassword) => {
     console.log(`${baseUrl}/login`)
     const res = await fetch(`${baseUrl}/login`, {
@@ -62,6 +40,9 @@ const matchUser = async (newEmail, newPassword) => {
         // VueCookies.set('jwtToken', tokens.value.jwtToken)
         localStorage.setItem('jwtToken', tokens.value.jwtToken)
         localStorage.setItem('refreshToken', tokens.value.refreshToken)
+        localStorage.setItem('email',newEmail) //เพิ่ม1/10/22
+        userEmail.value = newEmail
+        console.log("userEmail: ",userEmail.value);
         alert('Login Successful')
         // goToHome()
         // window.location.reload()

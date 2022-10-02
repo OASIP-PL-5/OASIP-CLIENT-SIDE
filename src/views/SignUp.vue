@@ -88,12 +88,16 @@ const addUser = async (
                             })
                         })
                         if (res.status === 201) {
-                            const addedUser = await res.json()
-                            users.value.push(addedUser)
+                            // error occur here
+                            // const addedUser = await res.json() //<--method นี้ใช้ทำไรนะ
+                            // users.value.push(addedUser)
                             alert(`User: ${newName} is created successfully`)
                             // location.reload()
                             // go back to all user
                             goToSignIn()
+                        }
+                        if(res.status === 400){
+                            alert('Email is already in use')
                         }
                     }
                     if (newPassword.length < 7) {
