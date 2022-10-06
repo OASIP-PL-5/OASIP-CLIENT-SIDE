@@ -13,6 +13,8 @@ const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 const token = localStorage.getItem('jwtToken');
 const IsAuthorized = ref(true)
 
+const userRole = localStorage
+
 
 // model สำหรับเก็บค่า edit จาก user
 const editStartTimeModel = ref('')
@@ -54,6 +56,8 @@ const getThisEventCard = async () => {
   } else if (res.status === 403) {
     alert("You are not authorized to view this page")
     goToAllEvent()
+  } else if (res.status === 400) {
+    goToNotFound()
   }
 
 
@@ -84,7 +88,10 @@ const cancelEvent = async () => {
     if (res.status === 200) {
       console.log('cancel bookingId: [' + id + '] success')
       await goToAllEvent()
-    } else {
+    } else if (res.status === 403) {
+      alert("You are not authorized to this action")
+    }
+    else {
       console.log(
         'ERROR, cannot delete this note \n"please check your response status code"'
       )
@@ -140,6 +147,12 @@ const updateEvent = async () => {
   })
   if (resPut.status == 400) {
     alert("Appointment date can not be time in the past.")
+  }
+  if (resPut.status === 403) {
+    alert("You are not authorized to this action")
+    myRouter.go(0)
+
+
   }
   // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
   if (resPut.status == 200) {

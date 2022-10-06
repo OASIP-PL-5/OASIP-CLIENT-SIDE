@@ -16,6 +16,7 @@ const goToDetail = () => myRouter.push({ name: 'EventDetailBase' })
 const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
 // goHome จาก component create
 const goToHome = () => myRouter.push({ path: '/' })
+const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 const goToAboutProject = () => myRouter.push({ name: 'AboutProject' })
 // object -- แสดงรายการ event เป็น card ต่างๆ
 const eventCard = ref([])
@@ -47,6 +48,7 @@ const getEventCard = async () => {
         userEmail.value = localStorage.getItem('email')
         console.log("userEmail : ", userEmail.value);
     }
+   
 
 }
 onBeforeMount(async () => {

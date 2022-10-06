@@ -72,9 +72,8 @@ console.log('currentDateTime ', currentDateTime);
 
 const showWarning = ref()
 
-// สำหรับ จัดการ input: Email 
-//  localeCompare ถ้าเท่ากันจะได้ 0 ถ้าไม่เท่ากันจะได้ -1
-
+// สำหรับ จัดการ input: Email เทียบว่า login มีอีเมลอยู่หรือไม่
+// แต่ logic function นี้ คือ "เริ่มด้วย ถ้า email == null จะ return true"
 const isLoginNull = () => {
   if (localStorage.getItem('email') == null) {
     console.log("islogin = true ");
@@ -108,7 +107,7 @@ const isLoginNull = () => {
 
 
             <!-- input Email if has-login -->
-            <div class="flex flex-col mb-4" v-if="isLoginNull() == false">
+            <div class="flex flex-col mb-4" v-if="isLoginNull() == false"> 
               <label class="mb-2 font-bold text-lg text-gray-900">Email<span class="text-sm font-thin"> | maximum 50
                   characters</span></label>
               <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model="newBookingEmail" type="email"

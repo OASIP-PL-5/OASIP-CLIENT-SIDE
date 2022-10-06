@@ -1,4 +1,4 @@
-<script setup>
+    <script setup>
 import SignInUserVue from '../components/SignInUser.vue';
 import Home from './Home.vue';
 import { ref, onBeforeMount, computed } from 'vue'
