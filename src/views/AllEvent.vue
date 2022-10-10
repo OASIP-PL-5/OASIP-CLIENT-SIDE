@@ -25,8 +25,8 @@ const searchingInfo = ref([])
 const eventCat = ref([])
 // GET:: Card
 const baseUrl = import.meta.env.PROD
-    ? `${import.meta.env.VITE_BASE_URL}/api`
-    : '/api'
+  ? `${import.meta.env.VITE_BASE_URL}/api`
+  : '/api'
 
 // ตัวแปรไว้เก็บ email
 const userEmail = ref()
@@ -42,13 +42,21 @@ const getEventCard = async () => {
             'Authorization': `Bearer ${token}`
         }
     })
+    if(resEvent.status === 401 & checkIsLogin.value === true ){
+        const resRefresh = await fetch(`${baseUrl}/refresh`, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+    }
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
     if (resEvent.status === 200) {
         eventCard.value = await resEvent.json()
         userEmail.value = localStorage.getItem('email')
         console.log("userEmail : ", userEmail.value);
     }
-   
 
 }
 onBeforeMount(async () => {

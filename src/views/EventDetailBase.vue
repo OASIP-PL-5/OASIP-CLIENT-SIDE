@@ -27,7 +27,7 @@ const baseUrl = import.meta.env.PROD
 
 const getThisEventCard = async () => {
   const id = params.id
-  const res = await fetch(`${baseUrl}/events/${id}`, {
+  const res = await fetch(`${baseUrl}/events/${id}/`, {
     headers:
     {
       'content-Type': 'application/json',
