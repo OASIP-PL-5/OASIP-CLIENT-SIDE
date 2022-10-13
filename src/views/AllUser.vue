@@ -55,7 +55,6 @@ const getUser = async () => {
       alert('Please login again')
       await myRouter.push({ path: '/sign-in' })
       myRouter.go(0)
-
     }
     if (resRefresh.status === 200) {
       const data = await resRefresh.json()

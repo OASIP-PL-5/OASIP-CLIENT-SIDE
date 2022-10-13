@@ -2,9 +2,20 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ref, onBeforeMount, computed } from 'vue'
 // import VueCookies from 'vue-cookies'
+import jwt_decode from 'jwt-decode'
 
 
 const token = localStorage.getItem('jwtToken');
+const isLogin = localStorage.getItem('email') ? true : false
+const isAdmin = ref(false)
+
+if (isLogin == true) {
+    var decoded = jwt_decode(token);
+    if (decoded.role === 'admin') {
+        isAdmin.value = true
+    }
+}
+
 const myRouter = useRouter()
 
 
@@ -21,23 +32,9 @@ const baseUrl = import.meta.env.PROD
 // console.log(checkURL);
 const eventCategoryCard = ref([])
 
-const imgEventCat = ref([
-    //server
-    { img_path: 'https://img.freepik.com/free-vector/server-concept-illustration_114360-147.jpg?t=st=1653815388~exp=1653815988~hmac=2a39c6bf2f79464a865832515586160c01884eb7f6566fc41f18a4e3f00a8fbe&w=826' },
-    // devops
-    { img_path: 'https://img.freepik.com/free-vector/gradient-devops-illustration_23-2149368729.jpg?t=st=1653815435~exp=1653816035~hmac=8f677617fa27f08ed14fd9174d88c7ef7e92a0a06b9a6b6e9a3583309594dc67&w=1060' },
-    // front
-    { img_path: 'https://img.freepik.com/free-vector/people-drawing-web-page-elements-smartphone-lcd-screen-front-end-development-it-concept-software-development-process-pinkish-coral-blue-palette-vector-illustration_335657-1640.jpg?t=st=1653815508~exp=1653816108~hmac=b7c1755e8277e822a333fe1583a25a68a254cc1f38d92082f606b074225f12a0&w=1380' },
-    // project
-    { img_path: 'https://img.freepik.com/free-vector/business-people-working-project-flat-icon_1262-18770.jpg?t=st=1653815570~exp=1653816170~hmac=1e5b7d86beeb311d5a87d064a7d3125c3bbf9a1c8a6ab9265774a8cc9e3c28a1&w=826' },
-    // db
-    { img_path: 'https://img.freepik.com/free-vector/data-management-collective-database-tower-people-share-commonplace-centralized-mainframe-widespread-info-stored-files-custom-regulation-vector-isolated-concept-metaphor-illustration_335657-2129.jpg?t=st=1653815600~exp=1653816200~hmac=eba91db5d8cd6f04f0bf56885a2eb471b477631c7ad50988312fed0e1fcc1e22&w=826' }
-])
+
 console.clear()
-for (let i = 0; i < imgEventCat.value.length; i++) {
-    console.log(`test:::::${imgEventCat.value[i]}`)
-}
-console.log(imgEventCat.value.length);
+
 const getAllEventCategory = async () => {
     console.log(`${baseUrl}/event-categories`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
@@ -45,7 +42,7 @@ const getAllEventCategory = async () => {
     const res = await fetch(`${baseUrl}/event-categories`, {
         headers: {
             'content-type': 'application/json',
-            
+
         }
     })
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
@@ -54,13 +51,23 @@ const getAllEventCategory = async () => {
 
     console.clear()
     console.log('data from api: ', eventCategoryCard.value)
+    // console.log(token);
+    if (isLogin == true) {
+        console.log(`isLogin: ${isLogin}`);
+        console.log(`decoded: ${decoded.role}`);
+        // isAdmin = true
+    }
+
     // console.log('find img:', eventCategoryCard.value[5].img_path);
 }
 
 onBeforeMount(async () => {
     await getAllEventCategory()
     console.log('length of eventCard: ', eventCategoryCard.value)
+    // console.log('decoded',jwt_decode(token));
+
 })
+
 
 const toggleModal = ref(false)
 </script>
@@ -95,7 +102,7 @@ const toggleModal = ref(false)
                             text-center mb-2 hover:shadow-xl" @click="goToAllEvent">
                         SCHEDULE
                     </button>
-                    <button class="inline-block rounded-lg text-2xl px-1.5 py-1.5 bg-blue-400 text-white 
+                    <button v-show="isAdmin" class="inline-block rounded-lg text-2xl px-1.5 py-1.5 bg-blue-400 text-white 
                                 font-bold rounded-lg text-center mb-2
                                 shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
                                 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600

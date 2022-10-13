@@ -4,7 +4,7 @@ import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SignUpUser from '../components/SignUpUser.vue'
 // import VueCookies from 'vue-cookies'
-const token = localStorage.getItem('jwtToken');
+const token = localStorage.getItem('jwtToken')
 
 const myRouter = useRouter()
 
@@ -14,20 +14,22 @@ const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 const users = ref([])
 // const check = ref(false)
 const baseUrl = import.meta.env.PROD
-    ? `${import.meta.env.VITE_BASE_URL}/api`
-    : '/api'
+  ? `${import.meta.env.VITE_BASE_URL}/api`
+  : '/api'
 
 //GET
 const getUser = async () => {
-    const resUser = await fetch(`${baseUrl}/users`, { headers: { 'content-type': 'application/json' } })
-    if (resUser.status === 200) {
-        users.value = await resUser.json()
-        console.log(users.value)
-        console.log(resUser)
-    } else console.log('error cannot get users')
+  const resUser = await fetch(`${baseUrl}/users`, {
+    headers: { 'content-type': 'application/json' }
+  })
+  if (resUser.status === 200) {
+    users.value = await resUser.json()
+    console.log(users.value)
+    console.log(resUser)
+  } else console.log('error cannot get users')
 }
 onBeforeMount(async () => {
-    await getUser()
+  await getUser()
 })
 
 // toggle add-user
@@ -56,20 +58,17 @@ const addUser = async (
     })
     console.log(checkName)
     console.log(checkEmail)
-
     console.log(newName)
     console.log(newEmail)
     console.log(newRole)
     // ไม่ครรแสดงข้อมูล password ใน console
     // console.log(newPassword)
     // console.log(confirm)
-
     console.log(newPassword.localeCompare(confirm))
     // if (newPassword.length > 7) {
     //     return (check = true)
     // }
     // console.log(check)
-
     if (newName.length !== 0 && newEmail.length !== 0 && newRole.length !== 0) {
         if (checkName.length == 0) {
             if (checkEmail.length == 0) {
@@ -96,8 +95,11 @@ const addUser = async (
                             // go back to all user
                             goToSignIn()
                         }
+                        if(res.status === 417){
+                            alert('user name already exists')
+                        }
                         if(res.status === 400){
-                            alert('Email is already in use')
+                            alert('Email is already exists')
                         }
                     }
                     if (newPassword.length < 7) {
@@ -118,7 +120,6 @@ const addUser = async (
             console.log('is name exist ? : ', isNameExist.value)
         }
     }
-
     if (newName.trim().length == 0) {
         newName = null
         alert('name must not be null')
@@ -132,14 +133,11 @@ const addUser = async (
     // }
 }
 </script>
-        
-<template>
-    <div class="-my-6">
-        <SignUpUser @addUser="addUser" />
-    </div>
-</template>
-        
-<style>
 
-</style>
-        
+<template>
+  <div class="-my-6">
+    <SignUpUser @addUser="addUser" />
+  </div>
+</template>
+
+<style></style>
