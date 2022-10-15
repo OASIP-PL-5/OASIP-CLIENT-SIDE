@@ -78,13 +78,13 @@ const getUser = async () => {
     users.value = await resUser.json()
     console.log(users.value)
     console.log(resUser)
-  } else console.log('error cannot get users')
-
-  if (resUser.status === 200) {
-    users.value = await resUser.json()
-    console.log(users.value)
-    console.log(resUser)
   }
+
+  // if (resUser.status === 200) {
+  //   users.value = await resUser.json()
+  //   console.log(users.value)
+  //   console.log(resUser)
+  // }
   else if (resUser.status === 403) {
     alert('You are not authorized to access this page')
     IsAuthorized.value = false
@@ -143,7 +143,7 @@ const addUser = async (
           if (newPassword.length > 7) {
             const res = await fetch(`${baseUrl}/users`, {
               method: 'POST',
-              headers: { 'content-type': 'application/json' },
+              headers: { 'content-type': 'application/json', },
               body: JSON.stringify({
                 //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
                 name: newName,
@@ -154,11 +154,10 @@ const addUser = async (
             })
 
             if (res.status === 201) {
-              const addedUser = await res.json()
-              users.value.push(addedUser)
+              // const addedUser = await res.json()
+              // users.value.push(addedUser) <- what is this
               alert(`User: ${newName} is created successfully`)
               location.reload()
-
             }
           }
           if (newPassword.length < 7) {

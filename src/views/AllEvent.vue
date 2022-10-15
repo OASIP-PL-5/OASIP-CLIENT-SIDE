@@ -124,7 +124,40 @@ const addEvent = async (
     // if (newBookingEmail.localeCompare(userEmail.value) == 0) {  // ไว้ check สำหรับ login แล้ว email ตรงกับตอนจะ new event มั้ย
     // ยังมีปัญหาอยู่ คาดว่าเกิดจากการเมาปีกกา
     // ไว้ check 2 กรณีคือ สำหรับ login ถ้า login อย่ localeCompare จะเป็น 0 หรือ ถ้าเป็น guest checkIsLogin จะเป็น false
-    if (newBookingEmail.localeCompare(localStorage.getItem('email')) == 0 || checkIsLogin.value == false) {
+    if (newBookingEmail.localeCompare(localStorage.getItem('email')) == 0) {
+        const res = await fetch(`${baseUrl}/events`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({
+                // มีผลต่อ payload ต้องใส่
+                bookingName: newBookingName,
+                bookingEmail: newBookingEmail,
+                eventStartTime: newStartTime,
+                eventDuration: categorySelection.eventDuration,
+                eventNotes: newNotes,
+                eventCategoryId: categorySelection.eventCategoryId,
+                eventCategoryName: categorySelection.eventCategoryName
+            })
+        }
+        )
+        if (res.status === 201) {
+            const addedEvent = await res.json()
+            eventCard.value.push(addedEvent)
+            console.log("after submit", newBookingEmail);
+            console.log('added sucessfully')
+            alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
+            window.location.reload()
+        } if (newBookingName.trim().length == 0) {
+            newBookingName = null
+            alert('Booking Name must be filled out!')
+            res.status = 400
+        } if (res.status == 400) {
+            console.log(currentDateTime);
+            alert('Appointment start time must be present or future.')
+            // return res.status = 400
+        }
+    }
+    else {
         const res = await fetch(`${baseUrl}/events`, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
@@ -145,7 +178,7 @@ const addEvent = async (
             eventCard.value.push(addedEvent)
             console.log("after submit", newBookingEmail);
             console.log('added sucessfully')
-            alert(`Booking Name: ${newBookingName} is created successfully`)
+            alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
             window.location.reload()
         } if (newBookingName.trim().length == 0) {
             newBookingName = null
@@ -231,7 +264,7 @@ const filterByPeriod = async () => {
         isFilterUp.value = false
         isFilterPast.value = false
         const res = await fetch(`${baseUrl}/events`, {
-            headers: { 'content-type': 'application/json' }
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
         })
         eventCard.value = await res.json()
         haveAll.value = true
@@ -242,7 +275,7 @@ const filterByPeriod = async () => {
     else if (modelTime.value == 'upcoming') {
         // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no past 
         const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`, {
-            headers: { 'content-type': 'application/json' }
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
         })
         havePast.value = false
         haveAll.value = false
@@ -258,7 +291,7 @@ const filterByPeriod = async () => {
         }
     } else if (modelTime.value == 'past') {
         const resPast = await fetch(`${baseUrl}/events/getEventByPast`, {
-            headers: { 'content-type': 'application/json' }
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
         })
         isFilterPast.value = true
         isFilterAll.value = false
@@ -277,7 +310,7 @@ const modelDate = ref()
 const filterByDate = async () => {
     var date = modelDate.value
     const res = await fetch(`${baseUrl}/events/getEventsByEventStartTime/${date}`, {
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
     })
     if (res.status == 204) {
         eventCard.value = 0
