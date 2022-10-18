@@ -45,7 +45,7 @@ const logOut = () => {
 <template>
     <div>
 
-        <nav class="bg-white drop-shadow-md rounded-lg ">
+        <nav class="bg-white drop-shadow-md rounded-lg sticky top-0 z-50 ">
             <div class="max-w-full mx-16">
                 <div class="flex justify-between">
                     <div class="flex space-x-4">
@@ -84,6 +84,7 @@ const logOut = () => {
                                 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-700
                                 active:shadow-lg transition duration-150 ease-in-out" @click="logOut">SIGN
                             OUT</button>
+
                         <button v-show="checkIsLogin"
                             class="rounded-lg shadow-lg px-2 py-1 bg-white">{{userEmail}}</button>
 

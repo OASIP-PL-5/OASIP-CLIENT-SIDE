@@ -152,6 +152,11 @@ const isLoginNull = () => {
               <textarea class="border py-2 px-3 text-grey-800 rounded-lg" placeholder="maximum at 500 characters"
                 maxlength="500" v-model="newEvent.newNotes"></textarea>
             </div>
+            <div class="flex flex-col mb-4">
+              <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> | file is optional</span></label>
+              <input class="border py-2 px-3 text-grey-800 rounded-lg" 
+                type="file" >
+            </div>
             <div class="flex justify-end">
               <button class="text-gray-400 
                         hover:text-white border
