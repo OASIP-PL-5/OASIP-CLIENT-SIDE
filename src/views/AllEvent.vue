@@ -1,155 +1,283 @@
 <script setup>
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import jwt_decode from 'jwt-decode'
+
 import EventList from '../components/EventList.vue'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
 import IconFilter from '../components/icons/IconFilter.vue'
+// import VueCookies from 'vue-cookies'
+const token = localStorage.getItem('jwtToken');
+const isLogin = localStorage.getItem('email') ? true : false
+const isLec = ref(false)
+
+if (isLogin == true) {
+    var decoded = jwt_decode(token);
+    if (decoded.role === 'lecturer') {
+        isLec.value = true
+    }
+}
+
+const newToken = localStorage.getItem('refreshToken')
+
 console.clear()
 // binding-CSS
 const btnTailWind =
     'inline-block px-6 py-2.5 mt-1.5 bg-blue-400 text-white font-bold text-xs leading-tight uppercase rounded shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600 active:shadow-lg transition duration-150 ease-in-out'
-
 const myRouter = useRouter()
 const { params } = useRoute()
 const goToDetail = () => myRouter.push({ name: 'EventDetailBase' })
 const goToCreate = () => myRouter.push({ name: 'CreateEvent' })
 // goHome จาก component create
 const goToHome = () => myRouter.push({ path: '/' })
+const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 const goToAboutProject = () => myRouter.push({ name: 'AboutProject' })
-
 // object -- แสดงรายการ event เป็น card ต่างๆ
 const eventCard = ref([])
 // object -- จัดการการ searching
 const searchingInfo = ref([])
-
+const eventCat = ref([])
 // GET:: Card
 const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`
     : '/api'
-// const checkURL = `${import.meta.env.PROD}`
-// console.log(checkURL);
+
+// ตัวแปรไว้เก็บ email
+const userEmail = ref()
+
 const getEventCard = async () => {
-    console.log(`${baseUrl}/events`)
+
+    // console.log(`${baseUrl}/events`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const res = await fetch(`${baseUrl}/events`)
+    const resEvent = await fetch(`${baseUrl}/events`, {
+        headers: {
+            'content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
     // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-    eventCard.value = await res.json()
+    if (resEvent.status === 200) {
+        eventCard.value = await resEvent.json()
+        userEmail.value = localStorage.getItem('email')
+        console.log("userEmail : ", userEmail.value);
+    }
+    if (resEvent.status === 401 && checkIsLogin.value === true) {
+        const resRefresh = await fetch(`${baseUrl}/refresh`, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${newToken}`
+            },
+            body: JSON.stringify({
+                token: newToken
+            })
+        })
+        if (resRefresh.status === 401) {
+            localStorage.clear()
+            alert('Please login again')
+            await myRouter.push({ path: '/sign-in' })
+        }
+        if (resRefresh.status === 200) {
+            const data = await resRefresh.json()
+            localStorage.setItem('jwtToken', data.refreshToken)
+            const resEvent = await fetch(`${baseUrl}/events`, {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${newToken}`
+                }
+            })
+            if (resEvent.status === 200) {
+                eventCard.value = await resEvent.json()
+            }
+        }
+    }
 
-    console.log('data from api: ', eventCard.value)
 }
-
 onBeforeMount(async () => {
     await getEventCard()
     console.log('length of eventCard: ', eventCard.value)
+    // console.log('student email :', eventCard.value[0].bookingEmail);
 })
-
 const noScheduleImg =
     'https://img.freepik.com/free-vector/man-reading-concept-illustration_114360-8705.jpg?t=st=1651136740~exp=1651137340~hmac=d17fed796546aa370aea3c826f9743b6eb558fd34399d6cf89663051933ab10f&w=826'
-
 // console.log(toggleModal.value);
-
 const toggleModal = ref(false)
 const closeToggle = () => window.location.reload()
+
+
+const loggingIn = ref(false)
+
+const checkIsLogin = computed(() => {
+    if (localStorage.getItem('email')) {
+        console.log('email value  : ', localStorage.getItem('email'))
+        return loggingIn.value = true
+    }
+    else {
+        return loggingIn.value = false
+    }
+
+})
+
+console.log("IsLogIn", checkIsLogin.value);
 // method: POST -- add event
 const addEvent = async (
     newBookingName,
-    newBookingEmail,
+    newBookingEmail,newBookingEmailGuest,
     newStartTime,
     newNotes,
     categorySelection
 ) => {
     console.log(`${baseUrl}/events`)
-    const res = await fetch(`${baseUrl}/events`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-            // มีผลต่อ payload ต้องใส่
-            bookingName: newBookingName,
-            bookingEmail: newBookingEmail,
-            eventStartTime: newStartTime,
-            eventDuration: categorySelection.eventDuration,
-            eventNotes: newNotes,
-            eventCategoryId: categorySelection.eventCategoryId,
-            eventCategoryName: categorySelection.eventCategoryName
-        })
-    })
-    if (newBookingName.trim().length == 0) {
-        newBookingName = null
-        alert('Booking Name must be filled out!')
-        res.status = 400
-    } if (res.status == 400) {
-        console.log(currentDateTime);
-        alert('Appointment start time must be present or future.')
-        // return res.status = 400
+    console.log(newBookingEmail)
+    console.log(localStorage.getItem('email')) //เดี๋ยวไปสร้างตัวแปรไว้เก็บเฉพาะ....
+    // ถ้าเท่ากันจะได้ 0 ถ้าไม่เท่ากันจะได้ -1
+    // console.log(newBookingEmail.localeCompare(userEmail.value));
+    // if (newBookingEmail.localeCompare(userEmail.value) == 0) {  // ไว้ check สำหรับ login แล้ว email ตรงกับตอนจะ new event มั้ย
+    // ยังมีปัญหาอยู่ คาดว่าเกิดจากการเมาปีกกา
+    // ไว้ check 2 กรณีคือ สำหรับ login ถ้า login อย่ localeCompare จะเป็น 0 หรือ ถ้าเป็น guest checkIsLogin จะเป็น false
+    if (checkIsLogin.value == true) {
+        const res = await fetch(`${baseUrl}/events`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({
+                // มีผลต่อ payload ต้องใส่
+                bookingName: newBookingName,
+                bookingEmail: newBookingEmail,
+                eventStartTime: newStartTime,
+                eventDuration: categorySelection.eventDuration,
+                eventNotes: newNotes,
+                eventCategoryId: categorySelection.eventCategoryId,
+                eventCategoryName: categorySelection.eventCategoryName
+            })
+        }
+        )
+        if (res.status === 201) {
+            const addedEvent = await res.json()
+            eventCard.value.push(addedEvent)
+            console.log("after submit", newBookingEmail);
+            console.log('added sucessfully')
+            alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
+            window.location.reload()
+        } if (newBookingName.trim().length == 0) {
+            newBookingName = null
+            alert('Booking Name must be filled out!')
+            res.status = 400
+        } if (res.status == 400) {
+            console.log(currentDateTime);
+            alert('Appointment start time must be present or future.')
+            // return res.status = 400
+        }
+    }
+    else {
+        const res = await fetch(`${baseUrl}/events`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                // มีผลต่อ payload ต้องใส่
+                bookingName: newBookingName,
+                bookingEmail: newBookingEmailGuest,
+                eventStartTime: newStartTime,
+                eventDuration: categorySelection.eventDuration,
+                eventNotes: newNotes,
+                eventCategoryId: categorySelection.eventCategoryId,
+                eventCategoryName: categorySelection.eventCategoryName
+            })
+        }
+        )
+        if (res.status === 201) {
+            const addedEvent = await res.json()
+            eventCard.value.push(addedEvent)
+            console.log("after submit", newBookingEmail);
+            console.log('added sucessfully')
+            alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmailGuest}`)
+            window.location.reload()
+        } if (newBookingName.trim().length == 0) {
+            newBookingName = null
+            alert('Booking Name must be filled out!')
+            res.status = 400
+        } if (res.status == 400) {
+            console.log(currentDateTime);
+            alert('Appointment start time must be present or future.')
+            // return res.status = 400
+        }
     }
 
-    if (res.status === 201) {
-        const addedEvent = await res.json()
-        eventCard.value.push(addedEvent)
-        console.log('added sucessfully')
-        alert(`Booking Name: ${newBookingName} is created successfully`)
-        window.location.reload()
-    }
+
+    // }
+    // ไม่ได้ใช้เพราะว่าให้ email ตรงกันกับที่ login แล้ว ซึ่งเป็น ReadOnlyFans
+    // else {
+    //     alert("Please check your email")
+    // }
+
+
+
 
 }
-
 // SEARCHING METHOD
 // search-catName-option
 const eventCategory = ref([])
 const getEventCategory = async () => {
     console.log(`${baseUrl}/event-categories`)
-    const res = await fetch(`${baseUrl}/event-categories`)
+    const res = await fetch(`${baseUrl}/event-categories`, {
+        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+    })
     eventCategory.value = await res.json()
     console.log('data from api: ' + eventCategory.value)
 }
 onBeforeMount(async () => {
     await getEventCategory()
 })
-
 // ลองกำหนด model สำหรับรับ id 
 const modelId = ref(null)
 // model for filter: time/chrono
 const filterByCategory = async () => {
     // fetch for filter catName
-    const test = modelId.value
+    // const test = modelId.value
     if (modelId.value == 'all') {
-        const res = await fetch(`${baseUrl}/events`)
+        const res = await fetch(`${baseUrl}/events`, {
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
         eventCard.value = await res.json()
     }
-
     else {
         var id = modelId.value.eventCategoryId
-        const res = await fetch(`${baseUrl}/events/getByEventCategories/${id}`)
-        eventCard.value = await res.json()
-        console.log("res", res.url);
+        const res = await fetch(`${baseUrl}/events/getByEventCategories/${id}`, {
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        })
+        if (res.status == 204) {
+            eventCard.value = 0;
+        } else {
+            eventCard.value = await res.json()
+            console.log("res", res.url);
+        }
     }
 }
 // let isShow = ref(true);
-
 // const isShowListAll = ref(true)
-
 // const eventCardFilterUp = ref([])
 // const eventCardFilterPast = ref([])
-
 const modelTime = ref()
 // obj สำหรับ จัดการ div show scheldule by period
 const haveUpcoming = ref(false)
 const havePast = ref(false)
 const haveAll = ref(false)
-
 // สำหรับแสดง text-header ของแต่ละ filter
 const isFilterAll = ref(true)
 const isFilterUp = ref(false)
 const isFilterPast = ref(false)
 const filterByPeriod = async () => {
-
     // // fetch for filter period/chrono
     if (modelTime.value == 'all') {
         isFilterAll.value = true
         isFilterUp.value = false
         isFilterPast.value = false
-        const res = await fetch(`${baseUrl}/events`)
+        const res = await fetch(`${baseUrl}/events`, {
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        })
         eventCard.value = await res.json()
         haveAll.value = true
         // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming & past
@@ -158,7 +286,9 @@ const filterByPeriod = async () => {
     }
     else if (modelTime.value == 'upcoming') {
         // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no past 
-        const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`)
+        const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`, {
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        })
         havePast.value = false
         haveAll.value = false
         isFilterUp.value = true
@@ -172,7 +302,9 @@ const filterByPeriod = async () => {
             eventCard.value = await resUp.json()
         }
     } else if (modelTime.value == 'past') {
-        const resPast = await fetch(`${baseUrl}/events/getEventByPast`)
+        const resPast = await fetch(`${baseUrl}/events/getEventByPast`, {
+            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        })
         isFilterPast.value = true
         isFilterAll.value = false
         isFilterUp.value = false
@@ -186,12 +318,23 @@ const filterByPeriod = async () => {
         }
     }
 }
-
-
+const modelDate = ref()
+const filterByDate = async () => {
+    var date = modelDate.value
+    const res = await fetch(`${baseUrl}/events/getEventsByEventStartTime/${date}`, {
+        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+    })
+    if (res.status == 204) {
+        eventCard.value = 0
+    }
+    else {
+        eventCard.value = await res.json()
+        console.log("modelDate: ", modelDate.value);
+    }
+}
 const showFilterMenu = ref(false)
 const picked = ref(false)
 const refresh = () => window.location.reload()
-
 // เพื่อ disable เวลาที่เป็นอดีต
 var currentDateTime = new Date();
 console.log(currentDateTime.toJSON());
@@ -200,20 +343,18 @@ var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0
 var yyyy = currentDateTime.getFullYear();
 var hr = String(currentDateTime.getHours())
 var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
-
 currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
 </script>
-
 <template>
     <div>
         <!-- show filter component button -->
-        <button class="border rounded-xl bg-blue-400 text-white bg-blue-400 
-                            font-medium text-lg leading-tight uppercase rounded 
-                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
-                            active:shadow-lg transition duration-150 ease-in-out
-                        font-bold mx-10 mt-4 px-2 rounded inline-flex items-center
-                        absolute top-56 lg:top-36 right-6" @click="showFilterMenu = !showFilterMenu">
+        <button v-if="checkIsLogin == true" class="border rounded-xl bg-blue-400 text-white bg-blue-400 
+                                font-medium text-lg leading-tight uppercase rounded 
+                                shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                                active:shadow-lg transition duration-150 ease-in-out
+                            font-bold mx-10 mt-4 px-2 rounded inline-flex items-center
+                            absolute top-56 lg:top-36 right-6" @click="showFilterMenu = !showFilterMenu">
             <span class="mx-2">Filter Menu</span>
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true"
                 role="img" class="iconify iconify--mdi" width="32" height="32" preserveAspectRatio="xMidYMid meet"
@@ -223,11 +364,10 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                 </path>
             </svg>
         </button>
-
         <!-- filter component -->
         <div class="relative">
             <div class="border rounded-xl shadow-2xl justify-center bg-white text-gray-900 sm:w-3/12
-                    sm:absolute -top-16 right-0 z-50 lg:h-screen" v-show="showFilterMenu">
+                        sm:absolute -top-16 right-0 z-50 lg:h-screen" v-show="showFilterMenu">
                 <div>
                     <form class="grid sm:grid-col gap-4 my-4 mx-auto w-10/12 ">
                         <div>
@@ -235,16 +375,14 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                             <hr class="mb-3">
                             <div class="form-check mb-2">
                                 <input class="form-check-input appearance-none rounded-full h-4 w-4 border 
-                                    border-gray-300 bg-white checked:bg-blue-600 
-                                    checked:border-blue-600 focus:outline-none transition
-                                    duration-200 mt-1 align-top bg-no-repeat bg-center
-                                    bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
+                                        border-gray-300 bg-white checked:bg-blue-600 
+                                        checked:border-blue-600 focus:outline-none transition
+                                        duration-200 mt-1 align-top bg-no-repeat bg-center
+                                        bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
                                     id="flexRadioDefault1" v-model="picked" value="1">
-
                                 <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
                                     Filter by event-category
                                 </label>
-
                             </div>
                             <select v-if="picked == 1" class="border py-2 px-3 text-grey-800 rounded-lg mb-2 w-full"
                                 required v-model="modelId" @change="filterByCategory">
@@ -258,15 +396,14 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                             </select>
                             <div class="form-check mb-2">
                                 <input class="form-check-input appearance-none rounded-full h-4 w-4 border 
-                                    border-gray-300 bg-white checked:bg-blue-600 
-                                    checked:border-blue-600 focus:outline-none transition
-                                    duration-200 mt-1 align-top bg-no-repeat bg-center
-                                    bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
+                                        border-gray-300 bg-white checked:bg-blue-600 
+                                        checked:border-blue-600 focus:outline-none transition
+                                        duration-200 mt-1 align-top bg-no-repeat bg-center
+                                        bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
                                     id="flexRadioDefault1" v-model="picked" value="2">
                                 <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
                                     Filter by date
                                 </label>
-
                             </div>
                             <select v-if="picked == 2" v-model="modelTime" @change="filterByPeriod"
                                 class="border py-2 px-3 text-grey-800 rounded-lg mb-2 w-full">
@@ -276,39 +413,33 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                             </select>
                             <div class="form-check mb-2">
                                 <input class="form-check-input appearance-none rounded-full h-4 w-4 border 
-                                    border-gray-300 bg-white checked:bg-blue-600 
-                                    checked:border-blue-600 focus:outline-none transition
-                                    duration-200 mt-1 align-top bg-no-repeat bg-center
-                                    bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
-                                    id="flexRadioDefault1" v-model="picked" value="3" disabled>
-
-                                <label class="form-check-label inline-block text-gray-400" for="flexRadioDefault1">
-                                    Filter by specific date (coming soon)
+                                        border-gray-300 bg-white checked:bg-blue-600 
+                                        checked:border-blue-600 focus:outline-none transition
+                                        duration-200 mt-1 align-top bg-no-repeat bg-center
+                                        bg-contain float-left mr-2 cursor-pointer" type="radio" name="flexRadioDefault"
+                                    id="flexRadioDefault1" v-model="picked" value="3">
+                                <label class="form-check-label inline-block text-gray-800" for="flexRadioDefault1">
+                                    Filter by specific date
                                 </label>
-
                             </div>
-
                         </div>
-
-                        <input v-if="picked == 3" class="border py-2 px-3 text-grey-800 rounded-lg"
-                            type="datetime-local" v-model="modelDate" @change="filterByDate" />
-
-
-
+                        <input v-if="picked == 3" class="border py-2 px-3 text-grey-800 rounded-lg" type="date"
+                            v-model="modelDate" @change="filterByDate" />
                         <button @click="refresh"
                             class="bg-gray-400 
-                            font-medium text-lg leading-tight uppercase rounded text-white
-                            shadow-sm hover:bg-gray-500 hover:shadow-lg focus:bg-gray-500
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-600
-                            active:shadow-lg transition duration-150 ease-in-out border py-2 px-3 text-grey-800 rounded-lg" type="reset">
+                                font-medium text-lg leading-tight uppercase rounded text-white
+                                shadow-sm hover:bg-gray-500 hover:shadow-lg focus:bg-gray-500
+                                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-600
+                                active:shadow-lg transition duration-150 ease-in-out border py-2 px-3 text-grey-800 rounded-lg"
+                            type="reset">
                             RESET
                         </button>
                         <button class="bg-blue-400 
-                            font-medium text-lg leading-tight uppercase rounded 
-                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
-                            active:shadow-lg transition duration-150 ease-in-out text-white border 
-                            py-2 px-3 text-grey-800 rounded-lg" type="button"
+                                font-medium text-lg leading-tight uppercase rounded 
+                                shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                                active:shadow-lg transition duration-150 ease-in-out text-white border 
+                                py-2 px-3 text-grey-800 rounded-lg" type="button"
                             @click="showFilterMenu = !showFilterMenu">
                             CLOSE
                         </button>
@@ -316,10 +447,8 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                 </div>
             </div>
         </div>
-
         <!-- modal for POST-event from CreateEditEvent.vue(component)-->
         <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" />
-
         <!-- No Schedule -->
         <div v-show="eventCard == 0" class="grid place-items-center h-screen">
             <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>
@@ -333,11 +462,6 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
             <h1 class="font-bold text-5xl text-blue-500">No Past Events</h1>
             <!-- <img :src="noScheduleImg" alt="noScheduleImg" /> -->
         </div>
-
-
-
-
-
         <!-- GET ALL -->
         <div>
             <div v-show="eventCard != 0 && haveUpcoming != true && havePast != true">
@@ -348,7 +472,6 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     <span class="text-3xl text-blue-400 mb-4">{{ eventCard.length }} events
                     </span>
                 </h2>
-
                 <div class="w-full m-auto mt-12 grid md:grid-cols-4 items-center justify-center bg-white text-gray-900">
                     <div class="mx-10 my-6 max-w-sm rounded-lg overflow-hinden shadow-lg hover:scale-110 transition-transform"
                         v-for="(event, index) in eventCard" :key="index">
@@ -362,7 +485,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     <span
                                         class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
                                         {{
-                                                new Date(event.eventStartTime).toLocaleDateString('th')
+                                        new Date(event.eventStartTime).toLocaleDateString('en')
                                         }}
                                     </span>
                                 </div>
@@ -371,10 +494,10 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     <li>
                                         Start Time:
                                         {{
-                                                new Date(event.eventStartTime).toLocaleTimeString('en', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })
+                                        new Date(event.eventStartTime).toLocaleTimeString('en', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                        })
                                         }}
                                     </li>
                                     <li>Duration: {{ event.eventDuration }} minutes</li>
@@ -395,19 +518,17 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     </div>
                 </div>
             </div>
-
         </div>
-        <div class="relative">
+        <div v-if="isLec !== true"
+        class="relative">
             <button @click="toggleModal = !toggleModal" type="button"
                 class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500 hover:scale-150 transition-transform active:shadow-lg mouse shadow ease-in duration-200 focus:outline-none">
                 <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" class="w-16 h-16 inline-block">
                     <path fill="#FFFFFF" d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
-                                    C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399
-                                    C15.952,9,16,9.447,16,10z" />
+                                        C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399
+                                        C15.952,9,16,9.447,16,10z" />
                 </svg>
             </button>
-
-
         </div>
     </div>
 </template>

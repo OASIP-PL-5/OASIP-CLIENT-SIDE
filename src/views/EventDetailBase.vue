@@ -1,13 +1,23 @@
 <script setup>
+import jwtDecode from 'jwt-decode';
 import { ref, onBeforeMount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BtnEditEvent from '../components/BtnEditEvent.vue'
+// import VueCookies from 'vue-cookies'
 const myRouter = useRouter()
 const goToNotFound = () => myRouter.push({ name: 'NotFound' })
 
 console.clear()
 const { params } = useRoute()
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
+const goToAllUser = () => myRouter.push({ name: 'AllUser' })
+const token = localStorage.getItem('jwtToken');
+const role = jwtDecode(token).role;
+console.log("role",role);
+const IsAuthorized = ref(true)
+
+const userRole = localStorage
+
 
 // model สำหรับเก็บค่า edit จาก user
 const editStartTimeModel = ref('')
@@ -20,23 +30,45 @@ const baseUrl = import.meta.env.PROD
 
 const getThisEventCard = async () => {
   const id = params.id
-  const res = await fetch(`${baseUrl}/events/${id}`)
+  const res = await fetch(`${baseUrl}/events/${id}/`, {
+    headers:
+    {
+      'content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  }
+  )
+  // ต้องการให้ เมื่อ token หมดอายุแล้วไปเรียก refreshToken ที่หน้า list-all-user แล้วกลับมาหน้าเดิมก่อนไปเรียก refreshToken
+  if (res.status === 401) {
+    alert("Please login again")
+    await myRouter.push({ path: '/list-all-user' }) // เพื่อไปขอ refreshToken มาใหม่
+    myRouter.go(-1) // กลับมาหน้าเดิมหลังไปเรียก refreshToken
+  }
   // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
   // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
-  thisEventDetail.value = await res.json()
-  console.log(`model startTime:: ${thisEventDetail.value[0].eventStartTime}`);
-  console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
-  editStartTimeModel.value = thisEventDetail.value[0].eventStartTime
-  editNotesModel.value = thisEventDetail.value[0].eventNotes
+  if (res.status === 200) {
+    thisEventDetail.value = await res.json()
+    console.log(`model startTime:: ${thisEventDetail.value[0].eventStartTime}`);
+    console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
+    editStartTimeModel.value = thisEventDetail.value[0].eventStartTime
+    editNotesModel.value = thisEventDetail.value[0].eventNotes
 
+    console.log(`res.status = 200? --> ${res.status == 200 ? true : false}`)
+    console.log(thisEventDetail.value)
 
-  console.log(`res.status = 200? --> ${res.status == 200 ? true : false}`)
-  console.log(thisEventDetail.value)
-
-  if (res.status !== 200) {
-    await goToNotFound()
-    console.log(`event: ${id} is not exist!`)
+  } else if (res.status === 403) {
+    alert("You are not authorized to view this page")
+    goToAllEvent()
+  } else if (res.status === 400) {
+    goToNotFound()
   }
+
+
+  // else {
+  //   await goToNotFound()
+  //   console.log(`event: ${id} is not exist!`)
+  // }
+
 }
 onBeforeMount(async () => {
   await getThisEventCard()
@@ -49,12 +81,20 @@ const cancelEvent = async () => {
   let confirmation = 'Are you sure?'
   if (confirm(confirmation) == true) {
     const res = await fetch(`${baseUrl}/events/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
     })
+
     if (res.status === 200) {
       console.log('cancel bookingId: [' + id + '] success')
       await goToAllEvent()
-    } else {
+    } else if (res.status === 403) {
+      alert("You are not authorized to this action")
+    }
+    else {
       console.log(
         'ERROR, cannot delete this note \n"please check your response status code"'
       )
@@ -87,7 +127,12 @@ const cancelEdit = () => {
 
 const updateEvent = async () => {
   const id = params.id
-  const resGet = await fetch(`${baseUrl}/events/${id}`)
+  const resGet = await fetch(`${baseUrl}/events/${id}`, {
+    headers: {
+      'content-type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  })
   // const bookingName = params.bookingName
   // method: GET
   console.clear()
@@ -96,7 +141,7 @@ const updateEvent = async () => {
   // method: PUT
   const resPut = await fetch(`${baseUrl}/events/${id}`, {
     method: 'PUT',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
     body: JSON.stringify({
       id: thisEventDetail.value[0].id,
       eventStartTime: editStartTimeModel.value, // รับค่าจาก model
@@ -105,6 +150,12 @@ const updateEvent = async () => {
   })
   if (resPut.status == 400) {
     alert("Appointment date can not be time in the past.")
+  }
+  if (resPut.status === 403) {
+    alert("You are not authorized to this action")
+    myRouter.go(0)
+
+
   }
   // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
   if (resPut.status == 200) {
@@ -123,7 +174,7 @@ var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
 
 currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
 </script>
-
+  
 <template>
   <div>
     <div>
@@ -154,25 +205,25 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     </div>
 
                     <div class="text-blue-400 hover:text-white border
-                     border-blue-700 hover:bg-blue-800
-                     focus:ring-4 focus:outline-none
-                     transition duration-500 ease-in-out
-                     focus:ring-blue-300 font-bold rounded-xl
-                     text-3xl px-2 py-1 text-center mb-2 dark:border-blue-500
-                     dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600
-                     dark:focus:ring-blue-800" v-if="isClickEdit == false">
+                       border-blue-700 hover:bg-blue-800
+                       focus:ring-4 focus:outline-none
+                       transition duration-500 ease-in-out
+                       focus:ring-blue-300 font-bold rounded-xl
+                       text-3xl px-2 py-1 text-center mb-2 dark:border-blue-500
+                       dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600
+                       dark:focus:ring-blue-800" v-if="isClickEdit == false">
                       {{ eventDetail.eventCategoryName }}
                       <span v-show="isClickEdit" class="font-light text-lg">({{ eventDetail.eventDuration }}
                         minutes)</span>
                     </div>
                     <div class="text-gray-400 hover:text-white border
-                     border-gray-200 hover:bg-gray-200
-                     focus:ring-4 focus:outline-none
-                     transition duration-200 ease-in-out
-                     focus:ring-gray-300 font-bold rounded-xl
-                     text-3xl px-2 py-1 text-center mb-2 dark:border-gray-200
-                     dark:text-gray-200 dark:hover:text-white dark:hover:bg-gray-200
-                     dark:focus:ring-gray-200" v-if="isClickEdit == true">
+                       border-gray-200 hover:bg-gray-200
+                       focus:ring-4 focus:outline-none
+                       transition duration-200 ease-in-out
+                       focus:ring-gray-300 font-bold rounded-xl
+                       text-3xl px-2 py-1 text-center mb-2 dark:border-gray-200
+                       dark:text-gray-200 dark:hover:text-white dark:hover:bg-gray-200
+                       dark:focus:ring-gray-200" v-if="isClickEdit == true">
                       {{ eventDetail.eventCategoryName }}
                       <span v-show="isClickEdit" class="font-light text-lg">({{ eventDetail.eventDuration }}
                         minutes)</span>
@@ -180,17 +231,17 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     <!-- เมื่อกดปุ่ม save จะซ่อน บรรทัด startTime-duration เดิมทั้งหมด... -->
                     <div v-show="isClickEdit == false" class="text-gray-800 text-2xl">
                       {{
-                          new Date(
-                            eventDetail.eventStartTime
-                          ).toLocaleDateString('en')
+                      new Date(
+                      eventDetail.eventStartTime
+                      ).toLocaleDateString('en')
                       }}
                       {{
-                          new Date(
-                            eventDetail.eventStartTime
-                          ).toLocaleTimeString('en', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
+                      new Date(
+                      eventDetail.eventStartTime
+                      ).toLocaleTimeString('en', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                      })
                       }}
                       <span class="font-light text-lg">({{ eventDetail.eventDuration }} minutes)</span>
                     </div>
@@ -211,8 +262,8 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       </div>
 
                       <div class="border rounded-lg bg-gray-100
-                       max-w-md mt-2 text-gray-600 px-3 py-3 
-                       text-2sm " v-else>
+                         max-w-md mt-2 text-gray-600 px-3 py-3 
+                         text-2sm " v-else>
                         {{ eventDetail.eventNotes }}
                       </div>
                     </div>
@@ -221,73 +272,75 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
 
 
                     <!-- <textarea v-show="isClickEdit" class="" type="text" v-model="editNotesModel"
-                      placeholder="maximum at 500 characters" maxlength="500" /> -->
+                        placeholder="maximum at 500 characters" maxlength="500" /> -->
 
 
                     <textarea id="message" rows="3" v-model="editNotesModel" v-show="isClickEdit" class="block p-2.5 w-full text-lg text-gray-900 bg-white py-2 px-3 text-grey-800 
-                      rounded-lg border border-white focus:ring-blue-500 
-                      focus:border-blue-500 dark:bg-white dark:border-white
-                      dark:placeholder-gray-400 dark:text-gray-900 dark:focus:ring-blue-500
-                      dark:focus:border-blue-500 shadow-lg mb-3" placeholder="maximum at 500 characters" />
+                        rounded-lg border border-white focus:ring-blue-500 
+                        focus:border-blue-500 dark:bg-white dark:border-white
+                        dark:placeholder-gray-400 dark:text-gray-900 dark:focus:ring-blue-500
+                        dark:focus:border-blue-500 shadow-lg mb-3" placeholder="maximum at 500 characters" />
 
                     <div class="grid md:grid-cols-4 w-full" v-if="isClickEdit == false">
                       <button class="text-blue-400 hover:text-white border 
-                        border-blue-700 hover:bg-blue-800 focus:ring-4 
-                        focus:outline-none transition duration-500 
-                        ease-in-out focus:ring-blue-300 font-light 
-                        rounded-xl text-lg text-center sm:mr-12 mt-2 
-                        dark:border-blue-500 dark:text-blue-500 
-                        dark:hover:text-white dark:hover:bg-blue-600 
-                        dark:focus:ring-blue-800" @click="goToAllEvent">
+                          border-blue-700 hover:bg-blue-800 focus:ring-4 
+                          focus:outline-none transition duration-500 
+                          ease-in-out focus:ring-blue-300 font-light 
+                          rounded-xl text-lg text-center sm:mr-12 mt-2 
+                          dark:border-blue-500 dark:text-blue-500 
+                          dark:hover:text-white dark:hover:bg-blue-600 
+                          dark:focus:ring-blue-800" @click="goToAllEvent">
                         BACK
                       </button>
                       <span class="mx-14" v-if="isClickEdit == false"></span>
                       <!-- click เพื่อเริ่มต้นการ edit -->
-                      <button @click="onClickEdit" class="text-orange-400 hover:text-white border 
-                        border-orange-700 hover:bg-orange-800 focus:ring-4
-                        focus:outline-none transition duration-500 ease-in-out
-                        focus:ring-orange-300 font-light rounded-xl text-lg
-                        px-3 py.5 text-center sm:mr-2 mt-2 dark:border-orange-500
-                        dark:text-orange-500 dark:hover:text-white dark:hover:bg-orange-600
-                        dark:focus:ring-orange-800">
+                      <button 
+                      v-if="role === 'admin' || role === 'student'" @click="onClickEdit" class="text-orange-400 hover:text-white border 
+                          border-orange-700 hover:bg-orange-800 focus:ring-4
+                          focus:outline-none transition duration-500 ease-in-out
+                          focus:ring-orange-300 font-light rounded-xl text-lg
+                          px-3 py.5 text-center sm:mr-2 mt-2 dark:border-orange-500
+                          dark:text-orange-500 dark:hover:text-white dark:hover:bg-orange-600
+                          dark:focus:ring-orange-800">
                         EDIT
                       </button>
 
                       <!-- <span class="mx-14" v-show="isClickEdit"></span> -->
 
                       <!-- ยกเลิกการจองนัด -->
-                      <button @click="cancelEvent" class="text-red-400 hover:text-white 
-                        border border-red-700 hover:bg-red-800
-                        focus:ring-4 focus:outline-none transition
-                        duration-500 ease-in-out focus:ring-red-300
-                        font-light rounded-xl text-lg px-3 py.5 text-center
-                        mt-2 dark:border-red-500 dark:text-red-500
-                        dark:hover:text-white dark:hover:bg-red-600
-                        dark:focus:ring-red-800">
+                      <button 
+                      v-if="role === 'admin' || role === 'student'" @click="cancelEvent" class="text-red-400 hover:text-white 
+                          border border-red-700 hover:bg-red-800
+                          focus:ring-4 focus:outline-none transition
+                          duration-500 ease-in-out focus:ring-red-300
+                          font-light rounded-xl text-lg px-3 py.5 text-center
+                          mt-2 dark:border-red-500 dark:text-red-500
+                          dark:hover:text-white dark:hover:bg-red-600
+                          dark:focus:ring-red-800">
                         CANCEL
                       </button>
                     </div>
                     <div class="grid md:grid-cols-2 w-full">
                       <!--  CANCEL EDIT เพื่อยกเลิกการ edit -->
                       <button v-show="isClickEdit" @click="cancelEdit" class="text-red-400 hover:text-white border
-                        border-red-700 hover:bg-red-800 focus:ring-4 
-                        focus:outline-none transition duration-500 ease-in-out 
-                        focus:ring-red-300 font-light rounded-xl text-lg px-3
-                        py.5 text-center mt-2 dark:border-red-500 dark:text-red-500
-                        dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-800">
+                          border-red-700 hover:bg-red-800 focus:ring-4 
+                          focus:outline-none transition duration-500 ease-in-out 
+                          focus:ring-red-300 font-light rounded-xl text-lg px-3
+                          py.5 text-center mt-2 dark:border-red-500 dark:text-red-500
+                          dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-800">
                         CANCEL EDIT
                       </button>
                       <!-- save เพื่อบันทึกการ edit -->
                       <BtnEditEvent @editEvent="updateEvent" v-show="isClickEdit" class="text-orange-400 
-                    hover:text-white border
-                    border-green-700 hover:bg-green-800
-                    focus:ring-4 focus:outline-none
-                    transition duration-500 ease-in-out
-                    focus:ring-green-300 font-light
-                    rounded-xl text-lg px-3 py.5 
-                    text-center sm:ml-2 mt-2 dark:border--500
-                    dark:text-green-500 dark:hover:text-white
-                    dark:hover:bg-green-600 dark:focus:ring-green-800" />
+                      hover:text-white border
+                      border-green-700 hover:bg-green-800
+                      focus:ring-4 focus:outline-none
+                      transition duration-500 ease-in-out
+                      focus:ring-green-300 font-light
+                      rounded-xl text-lg px-3 py.5 
+                      text-center sm:ml-2 mt-2 dark:border--500
+                      dark:text-green-500 dark:hover:text-white
+                      dark:hover:bg-green-600 dark:focus:ring-green-800" />
                     </div>
 
                   </div>

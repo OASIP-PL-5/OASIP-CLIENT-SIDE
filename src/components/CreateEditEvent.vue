@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, onBeforeMount } from 'vue'
+const token = localStorage.getItem('jwtToken')
 defineEmits(['closeToggle', 'addEventComp', 'updateEventComp'])
 const props = defineProps({
   currentEvent: {
@@ -10,18 +11,24 @@ const props = defineProps({
 
 const newEvent = computed(() => {
   return {
-    id: props.currentEvent.id,
-    bookingName: props.currentEvent.bookingName,
-    bookingEmail: props.currentEvent.bookingEmail,
-    eventCategoryName: props.currentEvent.eventCategoryName,
-    eventDuration: props.currentEvent.eventDuration,
-    eventNotes: props.currentEvent.eventNotes,
-    eventStartTime: props.currentEvent.eventStartTime,
-    eventCategoryId: props.currentEvent.eventCategoryId
+    id: props,
+    bookingName: props,
+    bookingEmail: props,
+    eventCategoryName: props,
+    eventDuration: props,
+    eventNotes: props,
+    eventStartTime: props,
+    eventCategoryId: props
   }
 })
 console.log("test", newEvent.eventStartTime);
+console.log("เมื่อกด toggle จะขึ้นใน console");
 // const togxgleModal = ref(false)
+
+// ตัวแปร ดึง email จาก storage เพื่อใส่ input: bookingEmail
+const newBookingEmail = localStorage.getItem("email")
+const newBookingEmailGuest = ref()
+console.log("email >> ", newBookingEmail);
 
 // GET เพื่อจะ map [id และ duration : จะทำให้สามารถ POST ได้]
 const eventCategory = ref([])
@@ -30,7 +37,12 @@ const baseUrl = import.meta.env.PROD
   : '/api'
 const getEventCategory = async () => {
   console.log(`${baseUrl}/event-categories`)
-  const res = await fetch(`${baseUrl}/event-categories`)
+  const res = await fetch(`${baseUrl}/event-categories`, {
+    headers: {
+      'content-type': 'application/json',
+
+    }
+  })
   eventCategory.value = await res.json()
   console.log('data from api: ' + eventCategory.value)
 }
@@ -60,6 +72,20 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
 console.log('currentDateTime ', currentDateTime);
 
 const showWarning = ref()
+
+// สำหรับ จัดการ input: Email เทียบว่า login มีอีเมลอยู่หรือไม่
+// แต่ logic function นี้ คือ "เริ่มด้วย ถ้า email == null จะ return true"
+const isLoginNull = () => {
+  if (localStorage.getItem('email') == null) {
+    console.log("islogin = true ");
+    return true
+  } else {
+    console.log("islogin = false ");
+    return false
+  }
+
+}
+// const isLogin = newBookingEmail.localeCompare(localStorage.getItem('email'))
 </script>
  
 <template>
@@ -81,19 +107,28 @@ const showWarning = ref()
             </div>
 
 
-            <div class="flex flex-col mb-4">
+            <!-- input Email if has-login -->
+            <div class="flex flex-col mb-4" v-if="isLoginNull() == false"> 
               <label class="mb-2 font-bold text-lg text-gray-900">Email<span class="text-sm font-thin"> | maximum 50
                   characters</span></label>
-              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model="newEvent.newBookingEmail"
-                type="email" placeholder="Somchai.jairuk@gmail.com" maxlength="50" />
+              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model="newBookingEmail" type="email"
+                placeholder="Somchai.jairuk@gmail.com" maxlength="50" readonly />
             </div>
+            <!-- input Email if not login-->
+            <div class="flex flex-col mb-4" v-else-if="isLoginNull() == true">
+              <label class="mb-2 font-bold text-lg text-gray-900">Email<span class="text-sm font-thin"> | maximum 50
+                  characters</span></label>
+              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model="newBookingEmailGuest" type="email"
+                placeholder="Somchai.jairuk@gmail.com" maxlength="50" />
+            </div>
+            <!-- EventCategory -->
             <div class="grid grid-cols-2 mb-2 gap-x-2">
               <h1 class="font-bold text-lg text-gray-900">Category</h1>
               <!-- <h1 class="font-bold text-lg text-gray-900">Duration</h1> -->
             </div>
             <div class="grid grid-cols-1 mb-4 gap-x-2">
               <select v-model="newEvent.categorySelection" class="border py-2 px-3 text-grey-800 rounded-lg" required>
-                <option selected="selected">Please select one</option>
+                <option disabled>Please select one</option>
                 <option v-for="(eventCat, index) in eventCategory" :key="index" :value="{
                   eventCategoryId: eventCat.id, eventDuration: eventCat.eventDuration, eventCategoryName: eventCat.eventCategoryName
                 }">
@@ -117,6 +152,11 @@ const showWarning = ref()
               <label class="mb-2 font-bold text-lg text-gray-900">Notes</label>
               <textarea class="border py-2 px-3 text-grey-800 rounded-lg" placeholder="maximum at 500 characters"
                 maxlength="500" v-model="newEvent.newNotes"></textarea>
+            </div>
+            <div class="flex flex-col mb-4">
+              <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> | file is optional </span></label>
+              <input class="border py-2 px-3 text-grey-800 rounded-lg" 
+                type="file" >
             </div>
             <div class="flex justify-end">
               <button class="text-gray-400 
@@ -144,7 +184,7 @@ const showWarning = ref()
               </button>
 
               <button @click="$emit('addEventComp',
-                newEvent.newBookingName, newEvent.newBookingEmail, newEvent.newStartTime,
+                newEvent.newBookingName, newBookingEmail,newBookingEmailGuest, newEvent.newStartTime,
                 newEvent.newNotes, newEvent.categorySelection
               );" class="inline-block px-6 py-2.5 mt-1.5 bg-blue-400
                         text-white font-bold text-xl leading-tight
@@ -165,4 +205,5 @@ const showWarning = ref()
 </template>
  
 <style>
+
 </style>

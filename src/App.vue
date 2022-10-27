@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from '@vue/reactivity';
 import { ref, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router';
 import IconHamburger from './components/icons/IconHamburger.vue';
@@ -7,42 +8,36 @@ const myRouter = useRouter()
 const goToHome = () => myRouter.push({ name: 'Home' })
 const goToContact = () => myRouter.push({ name: 'ContactUs' })
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
+const goToSignUp = () => myRouter.push({ name: 'SignUp' })
+const goToSignIn = () => myRouter.push({ name: 'SignIn' })
+const userEmail = localStorage.getItem('email')
 
+
+const loggingIn = ref(false)
+const checkIsLogin = computed(() => {
+    if (localStorage.getItem('jwtToken')) {
+        console.log('token: ', localStorage.getItem('jwtToken'))
+        return loggingIn.value = true
+    }
+    else {
+        return loggingIn.value = false
+    }
+
+})
+// console.log('login? : ', checkIsLogin.value);
 const showMenu = ref(true)
-// import EventList from './components/EventList.vue';
-// console.clear()
-// const eventList = ref([])
-// // all done bro ? arikato
-// // ayo wheres the other member
-// // lmao we got 2 here
-// // susu bro
-// // ty good luck u 2 by :D
-// // /api in DEV and <host>/api in PROD
 
-// const check = import.meta.env.VITE_BASE_URL ? 'มีข้อมูล' : 'ไม่มีข้อมูล'
-// console.log('import.meta.env.VITE_BASE_URL : ', check);
+const logOut = () => {
+    // localStorage.removeItem('jwtToken')
+    // localStorage.removeItem('refreshToken')
+    // localStorage.removeItem('email')
+    localStorage.clear()
+    loggingIn.value = false
+    console.log('logout');
+    location.reload();
+    goToHome()
+}
 
-// const checkPROD = import.meta.env.PROD
-// console.log('import.meta.env.PROD: ', checkPROD);
-// // GET
-// // important !
-// // ใช้เช็คว่า baseUrl จะเป็น null รึป่าว ก็คือถ้า import.meta.env.PROD แล้วได้ null ก็คือ baseUrl = '/api'
-// // ถ้า import.meta.env.PROD มีแล้วมีข้อมูล ก็จะเอา `${import.meta.env.VITE_BASE_URL}/api` มาใส่ใน baseUrl
-// // สามารถลดรูปเหลือเป็น const baseUrl = '/api'; ได้
-// const baseUrl = import.meta.env.PROD ? `${import.meta.env.VITE_BASE_URL}/api` : '/api';
-// const checkURL = `${import.meta.env.PROD}`
-// console.log(checkURL);
-// const getEvent = async () => {
-//     console.log(`${baseUrl}/event`);
-//     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
-//     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-//     const res = await fetch(`${baseUrl}/event`)
-//     eventList.value = await res.json()
-//     console.log(eventList.value);
-// }
-// onBeforeMount(async () => {
-//     await getEvent()
-// })
 
 
 </script>
@@ -50,15 +45,14 @@ const showMenu = ref(true)
 <template>
     <div>
 
-        <nav class="bg-white drop-shadow-md rounded-lg ">
-            <div class="max-w-screen-xl mx-auto">
+        <nav class="bg-white drop-shadow-md rounded-lg sticky top-0 z-50 ">
+            <div class="max-w-full mx-16">
                 <div class="flex justify-between">
                     <div class="flex space-x-4">
-
                         <div>
                             <a href="#" class="flex items-center py-2 text-gray-700" @click="goToHome">
                                 <!-- <img src="./assets/FUNBOOK-LOGO.png" alt="LOGO" :style="logoSize" /> -->
-                                <span class="font-bold text-5xl px-2 text-transparent 
+                                <span class="font-bold text-5xl px-1 text-transparent 
                                 bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">OASIP I PL-5</span>
                                 <!-- <span class="font-light">Online Appointment <br>
                                     Scheduling System <br>
@@ -67,29 +61,41 @@ const showMenu = ref(true)
                         </div>
                     </div>
 
-                    <div class="hidden md:grid grid-cols-3 items-center space-x-1">
-                        <button type="button" class="inline-block px-6 py-2.5 bg-blue-400 text-white 
-                            font-medium text-xs leading-tight uppercase rounded 
-                            shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
-                            active:shadow-lg transition duration-150 ease-in-out" @click="goToHome">HOME</button>
+                    <div class="hidden md:flex flex-cols-5 items-center gap-x-14 text-xl">
+                        <button type="button" class="text-blue-400" @click="goToHome">HOME</button>
 
-                        <button type="button" class="inline-block px-6 py-2.5 bg-gray-200 text-gray-700
-                            font-medium text-xs leading-tight uppercase rounded 
-                            shadow-sm hover:bg-gray-300 hover:shadow-lg focus:bg-gray-300 
-                            focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-400
-                            active:shadow-lg transition duration-150 ease-in-out" @click="goToAllEvent">ALL
+                        <button type="button" class="link link-underline link-underline-black" @click="goToAllEvent">ALL
                             EVENTS</button>
 
-                        <button type="button" class="inline-block px-6 py-2.5 bg-gray-800 text-white 
-                            font-medium text-xs leading-tight uppercase rounded shadow-sm 
-                            hover:bg-gray-900 hover:shadow-lg focus:bg-gray-900 focus:shadow-lg 
-                            focus:outline-none focus:ring-0 active:bg-gray-900 active:shadow-lg 
-                            transition duration-150 ease-in-out" @click="goToContact">ABOUT US</button>
+                        <button type="button" class="link link-underline link-underline-black"
+                            @click="goToContact">ABOUT US</button>
+
+
+                        <button v-if="loggingIn==false" type="button" class=" rounded-lg px-4  bg-blue-400 text-white 
+                                font-bold rounded-lg text-center
+                                shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
+                                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
+                                active:shadow-lg transition duration-150 ease-in-out" @click="goToSignIn">SIGN
+                            IN</button>
+
+                        <button v-if="loggingIn==true" type="button" class="rounded-lg px-4  bg-gray-500 text-white 
+                                font-bold rounded-lg text-center
+                                shadow-sm hover:bg-gray-600 hover:shadow-lg focus:bg-gray-600
+                                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-700
+                                active:shadow-lg transition duration-150 ease-in-out" @click="logOut">SIGN
+                            OUT</button>
+
+                        <button v-show="checkIsLogin"
+                            class="rounded-lg shadow-lg px-2 py-1 bg-white">{{userEmail}}</button>
+
+                            
+
+
                     </div>
+                    
 
                     <div class="md:hidden flex items-center">
-                        <button class="py-2 px-2">
+                        <button class="py-2 px-2 mt-1">
                             <icon-hamburger @click="showMenu = !showMenu" class="text-gray-700" />
                         </button>
                     </div>
@@ -101,6 +107,10 @@ const showMenu = ref(true)
                 <button type="button" class="font-semibold text-gray-400" @click="goToAllEvent">ALL
                     EVENTS</button>
                 <button type="button" class="font-semibold text-gray-800" @click="goToContact">ABOUT US</button>
+                <button v-if="loggingIn==false" type="button" class="font-semibold text-gray-800"
+                    @click="goToSignIn">SIGN IN</button>
+                <button v-if="loggingIn==true" type="button" class="font-semibold text-gray-800" @click="logOut">SIGN
+                    OUT</button>
             </div>
         </nav>
         <!-- <h2 class="font-bold text-5xl mx-10 my-10">LIST-ALL</h2>
@@ -129,6 +139,24 @@ const showMenu = ref(true)
 .fade-enter-active,
 .fade-leave.active {
     transition: opacity 1.2s ease-out;
+}
+
+.link-underline {
+    border-bottom-width: 0;
+    background-image: linear-gradient(transparent, transparent), linear-gradient(#fff, #fff);
+    background-size: 0 3px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size .5s ease-in-out;
+}
+
+.link-underline-black {
+    background-image: linear-gradient(transparent, transparent), linear-gradient(#7299f1, #7299f1)
+}
+
+.link-underline:hover {
+    background-size: 100% 3px;
+    background-position: 0 100%
 }
 </style>
 

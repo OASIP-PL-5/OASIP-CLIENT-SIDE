@@ -2,6 +2,9 @@
 import { ref, onBeforeMount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BtnEditEventCategory from '../components/BtnEditEventCategory.vue'
+// import VueCookies from 'vue-cookies'
+const token = localStorage.getItem('jwtToken');
+
 const myRouter = useRouter()
 const goToNotFound = () => myRouter.push({ name: 'NotFound' })
 const goToHome = () => myRouter.push({ name: 'Home' })
@@ -24,7 +27,12 @@ const baseUrl = import.meta.env.PROD
 
 const getThisEventCatCard = async () => {
     const id = params.id
-    const res = await fetch(`${baseUrl}/event-categories/${id}`)
+    const res = await fetch(`${baseUrl}/event-categories/${id}`, {
+        headers: {
+            'content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
 
     thisEventCategoryDetail.value = await res.json()
     // ควรไว้ทีหลัง res.json()
@@ -48,14 +56,16 @@ const CateNameValidate = ref(false)
 const DurationValidate = ref(false)
 const updateEventCategory = async () => {
     const id = params.id
-    const resGet = await fetch(`${baseUrl}/event-categories/${id}`)
+    const resGet = await fetch(`${baseUrl}/event-categories/${id}`, {
+        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+    })
     // const bookingName = params.bookingName
     // method: GET
     console.clear()
     // method: PUT
     const resPut = await fetch(`${baseUrl}/event-categories/${id}`, {
         method: 'PUT',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
             id: thisEventCategoryDetail.value.id,
             eventCategoryName: editCategoryNameModel.value,
@@ -103,7 +113,7 @@ const cancelEdit = () => {
     isClickEdit.value = false
 }
 </script>
-
+    
 <template>
     <div>
         <div>
@@ -211,6 +221,7 @@ const cancelEdit = () => {
         </div>
     </div>
 </template>
-
+    
 <style>
+
 </style>

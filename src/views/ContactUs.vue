@@ -1,12 +1,6 @@
 <script setup>
 // รายการสมาชิกในทีม
 const teamMembers = [
-    {
-        name: '404',
-        title: 'NOT FOUND',
-        avatar: "https://images.unsplash.com/photo-1634926878768-2a5b3c42f139?fit=clamp&w=400&h=400&q=80",
-        contactLink: 'http://localhost:3000/notfound'
-    },
 
     {
         name: 'Pattarapon Makhirun',
@@ -19,6 +13,12 @@ const teamMembers = [
         title: '63130500103',
         avatar: "https://www.techhub.in.th/wp-content/uploads/2021/05/DhYGYs6WkAAScEU.jpg",
         contactLink: 'https://github.com/willvaritchai'
+    },
+    {
+        name: 'Apiwat Atittieng',
+        title: '63130500130',
+        avatar: "https://yt3.ggpht.com/ytc/AMLnZu84y2D_AqpcxJP4mXTwX5LZbxVPRQ4NQQyg1mCXpA=s900-c-k-c0x00ffffff-no-rj",
+        contactLink: 'https://github.com/ApiwatPhai'
     }
 ]
 
