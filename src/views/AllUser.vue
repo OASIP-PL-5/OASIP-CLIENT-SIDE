@@ -167,6 +167,14 @@ const addUser = async (
               alert(`User: ${newName} is created successfully`)
               location.reload()
             }
+            else if(res.status === 409){
+              alert("This name is already used.")
+              console.log("This name is already used.")
+            }
+            else if(res.status === 400){
+              alert("This email is already used.")
+              console.log("This email is already used.")
+            }
           }
           if (newPassword.length < 7) {
             alert("password must 8-14")
