@@ -114,8 +114,10 @@ const addEvent = async (
     newBookingEmail,
     newStartTime,
     newNotes,
-    categorySelection
+    categorySelection,
+    modelFile
 ) => {
+    console.log("***modelFile*** : ",modelFile);
     console.log(`${baseUrl}/events`)
     console.log(newBookingEmail)
     console.log(localStorage.getItem('email')) //เดี๋ยวไปสร้างตัวแปรไว้เก็บเฉพาะ....
@@ -156,7 +158,15 @@ const addEvent = async (
             alert('Appointment start time must be present or future.')
             // return res.status = 400
         }
+        if(res.status === 409){
+            alert('Appointment start time unable to schedule overlapping')
+        }
+        // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
+        if (modelFile != null) {
+           alert('hello file') 
+        }
     }
+    // กรณีเป็น "Guest / No-Authorized"
     else {
         const res = await fetch(`${baseUrl}/events`, {
             method: 'POST',
@@ -179,7 +189,7 @@ const addEvent = async (
             console.log("after submit", newBookingEmail);
             console.log('added sucessfully')
             alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
-            window.location.reload()
+            // window.location.reload()
         } if (newBookingName.trim().length == 0) {
             newBookingName = null
             alert('Booking Name must be filled out!')
@@ -189,15 +199,33 @@ const addEvent = async (
             alert('Appointment start time must be present or future.')
             // return res.status = 400
         }
+        if(res.status === 409){
+            alert('Appointment start time unable to schedule overlapping')
+        }
+
+        // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
+        if (modelFile != null) {
+            const formData = new FormData()
+            formData.append('file',modelFile)
+            const resFile = await fetch(`${baseUrl}/files`, {
+            method: 'POST',
+            body: formData
+        }
+        )
+        if (resFile.status === 200) {
+            alert('upload file success !!!')
+            window.location.reload()
+        }
+        }
     }
-
-
+    
+    
     // }
     // ไม่ได้ใช้เพราะว่าให้ email ตรงกันกับที่ login แล้ว ซึ่งเป็น ReadOnlyFans
     // else {
-    //     alert("Please check your email")
-    // }
-
+        //     alert("Please check your email")
+        // }
+        
 
 
 
@@ -332,6 +360,14 @@ var yyyy = currentDateTime.getFullYear();
 var hr = String(currentDateTime.getHours())
 var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
 currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
+
+
+// file management 
+// const testFile = (e)=>{
+//   const file = e.target.files[0]
+//   console.log(file)
+// }
+
 </script>
 <template>
     <div>
@@ -436,7 +472,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
             </div>
         </div>
         <!-- modal for POST-event from CreateEditEvent.vue(component)-->
-        <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" />
+        <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" @file="testFile"/>
         <!-- No Schedule -->
         <div v-show="eventCard == 0" class="grid place-items-center h-screen">
             <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>

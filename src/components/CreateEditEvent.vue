@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, onBeforeMount } from 'vue'
 const token = localStorage.getItem('jwtToken')
-defineEmits(['closeToggle', 'addEventComp', 'updateEventComp'])
+defineEmits(['file','closeToggle', 'addEventComp', 'updateEventComp'])
 const props = defineProps({
   currentEvent: {
     type: Object,
@@ -85,6 +85,14 @@ const isLoginNull = () => {
 
 }
 // const isLogin = newBookingEmail.localeCompare(localStorage.getItem('email'))
+
+// file management 
+const testFile = (e)=>{
+  const file = e.target.files[0]
+  console.log(file)
+  modelFile.value = file
+}
+const modelFile = ref(null)
 </script>
  
 <template>
@@ -155,7 +163,7 @@ const isLoginNull = () => {
             <div class="flex flex-col mb-4">
               <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> | file is optional</span></label>
               <input class="border py-2 px-3 text-grey-800 rounded-lg" 
-                type="file" >
+                type="file" @change="testFile">
             </div>
             <div class="flex justify-end">
               <button class="text-gray-400 
@@ -184,7 +192,7 @@ const isLoginNull = () => {
 
               <button @click="$emit('addEventComp',
                 newEvent.newBookingName, newBookingEmail, newEvent.newStartTime,
-                newEvent.newNotes, newEvent.categorySelection
+                newEvent.newNotes, newEvent.categorySelection,modelFile
               );" class="inline-block px-6 py-2.5 mt-1.5 bg-blue-400
                         text-white font-bold text-xl leading-tight
                         uppercase rounded shadow-sm hover:bg-blue-500 
