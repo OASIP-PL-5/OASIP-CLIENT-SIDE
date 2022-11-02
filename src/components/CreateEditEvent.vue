@@ -87,12 +87,12 @@ const isLoginNull = () => {
 // const isLogin = newBookingEmail.localeCompare(localStorage.getItem('email'))
 
 // file management 
-const testFile = (e)=>{
+const modelFile = ref(null)
+const fileAction = (e)=>{
   const file = e.target.files[0]
-  console.log(file)
+  // console.log(file)
   modelFile.value = file
 }
-const modelFile = ref(null)
 </script>
  
 <template>
@@ -163,7 +163,7 @@ const modelFile = ref(null)
             <div class="flex flex-col mb-4">
               <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> | file is optional</span></label>
               <input class="border py-2 px-3 text-grey-800 rounded-lg" 
-                type="file" @change="testFile">
+                type="file" @change="fileAction">
             </div>
             <div class="flex justify-end">
               <button class="text-gray-400 
