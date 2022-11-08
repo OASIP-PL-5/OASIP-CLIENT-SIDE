@@ -67,8 +67,71 @@ const getThisEventCard = async () => {
   // }
 
 }
+
+const fileId = ref('')
+const fileType = ref('')
+
+
+const thisEventFile = ref([])
+const getFile = async () => {
+  const id = params.id
+  const res = await fetch(`${baseUrl}/files/${id}/`, {
+    headers:
+    {
+      'content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      // 'responseType': 'blob'
+
+    }
+  }
+  )
+  if (res.status === 200) {
+    thisEventFile.value = await res.json()
+    console.log("thisEventFile = ", thisEventFile)
+    console.log(thisEventFile.value.fileName);
+    console.log(thisEventFile.value.fileType);
+    console.log(thisEventFile.value.eventBooking);
+    console.log(thisEventFile.value.id);
+    fileId.value = thisEventFile.value.id
+    console.log(`fileId = ${fileId.value}`);
+    fileType.value = thisEventFile.value.fileType
+    console.log(`fileType = ${fileType.value}`);
+
+  }
+
+}
+
+// const downloadFile =  () => {
+//   const id = fileId.value
+//   const res = fetch(`${baseUrl}/files/download/${id}`, {
+//     headers:
+//     {
+//       'content-Type': `${fileType.value}`,
+//       'Authorization': `Bearer ${token}`,
+//       // 'responseType': 'blob'
+
+//     }
+//   }
+//   )
+//   if (res.status === 200) {
+//     thisEventFile.value =  res.json()
+//     console.log("thisEventFile = ", thisEventFile)
+//     console.log(thisEventFile.value.fileName);
+//     console.log(thisEventFile.value.fileType);
+//     console.log(thisEventFile.value.eventBooking);
+//     console.log(thisEventFile.value.id);
+//     fileId.value = thisEventFile.value.id
+//     console.log(`fileId = ${fileId.value}`);
+
+//   }
+
+// }
+
+
 onBeforeMount(async () => {
   await getThisEventCard()
+  await getFile()
+  // await downloadFile()
 
 })
 
@@ -179,7 +242,9 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">
           EVENT-DETAIL-BASE::
         </h2>
+
         <div>
+
           <div class="w-11/12 m-auto grid items-center justify-center bg-white text-gray-900">
             <div class="mx-10 my-3 max-w-none rounded-lg overflow-hinden shadow-lg">
               <div class="px-6 py-4 text-left">
@@ -228,17 +293,17 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     <!-- เมื่อกดปุ่ม save จะซ่อน บรรทัด startTime-duration เดิมทั้งหมด... -->
                     <div v-show="isClickEdit == false" class="text-gray-800 text-2xl">
                       {{
-                      new Date(
-                      eventDetail.eventStartTime
-                      ).toLocaleDateString('en')
+                          new Date(
+                            eventDetail.eventStartTime
+                          ).toLocaleDateString('en')
                       }}
                       {{
-                      new Date(
-                      eventDetail.eventStartTime
-                      ).toLocaleTimeString('en', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                      })
+                          new Date(
+                            eventDetail.eventStartTime
+                          ).toLocaleTimeString('en', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
                       }}
                       <span class="font-light text-lg">({{ eventDetail.eventDuration }} minutes)</span>
                     </div>
@@ -263,6 +328,8 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                          text-2sm " v-else>
                         {{ eventDetail.eventNotes }}
                       </div>
+
+                      <button @click="downloadFile(id)"> {{ thisEventFile.fileName }}</button>
                     </div>
 
 

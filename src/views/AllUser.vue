@@ -20,7 +20,7 @@ const users = ref([])
 // console.log(VueCookies.get('jwtToken'))
 console.log('localStorage token : ', localStorage.getItem('jwtToken'));
 console.log('localStorage refreshToken : ', localStorage.getItem('refreshToken'));
-
+console.log('is login : ', localStorage.getItem('email') ? true : false);
 const IsAuthorized = ref(true)
 
 
@@ -30,6 +30,14 @@ const baseUrl = import.meta.env.PROD
 
 //GET
 const getUser = async () => {
+  const isLogin = localStorage.getItem('email') ? true : false
+  if(isLogin == false){
+    alert('Please login again')
+    await myRouter.push({ path: '/sign-in' })
+    myRouter.go(0)
+  }
+
+
   const resUser = await fetch(`${baseUrl}/users`, {
     headers: {
       'content-type': 'application/json',
@@ -143,7 +151,7 @@ const addUser = async (
           if (newPassword.length > 7) {
             const res = await fetch(`${baseUrl}/users`, {
               method: 'POST',
-              headers: { 'content-type': 'application/json', },
+              headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
               body: JSON.stringify({
                 //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
                 name: newName,
@@ -158,6 +166,14 @@ const addUser = async (
               // users.value.push(addedUser) <- what is this
               alert(`User: ${newName} is created successfully`)
               location.reload()
+            }
+            else if(res.status === 409){
+              alert("This name is already used.")
+              console.log("This name is already used.")
+            }
+            else if(res.status === 400){
+              alert("This email is already used.")
+              console.log("This email is already used.")
             }
           }
           if (newPassword.length < 7) {
