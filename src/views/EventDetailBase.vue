@@ -70,6 +70,7 @@ const getThisEventCard = async () => {
 
 const fileId = ref('')
 const fileType = ref('')
+const hasFile = ref(false)
 
 
 const thisEventFile = ref([])
@@ -87,6 +88,7 @@ const getFile = async () => {
   )
   if (res.status === 200) {
     thisEventFile.value = await res.json()
+    hasFile.value = true
     console.log("thisEventFile = ", thisEventFile)
     console.log(thisEventFile.value.fileName);
     console.log(thisEventFile.value.fileType);
@@ -101,31 +103,43 @@ const getFile = async () => {
 
 }
 
-// const downloadFile =  () => {
-//   const id = fileId.value
-//   const res = fetch(`${baseUrl}/files/download/${id}`, {
-//     headers:
-//     {
-//       'content-Type': `${fileType.value}`,
-//       'Authorization': `Bearer ${token}`,
-//       // 'responseType': 'blob'
 
-//     }
-//   }
-//   )
-//   if (res.status === 200) {
-//     thisEventFile.value =  res.json()
-//     console.log("thisEventFile = ", thisEventFile)
-//     console.log(thisEventFile.value.fileName);
-//     console.log(thisEventFile.value.fileType);
-//     console.log(thisEventFile.value.eventBooking);
-//     console.log(thisEventFile.value.id);
-//     fileId.value = thisEventFile.value.id
-//     console.log(`fileId = ${fileId.value}`);
+const fileUrl = ref('')
+const clicked = ref(false)
 
-//   }
+const downloadFile = async () => {
+  const id = fileId.value
+  const res = await fetch(`${baseUrl}/files/download/${id}`, {
+    headers:
+    {
+      'content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      // 'responseType': 'blob'
 
-// }
+    }
+  }
+  )
+  if (res.status === 200) {
+    clicked.value = true
+    // thisEventFile.value = await res.json()
+    console.log("res", res);
+    // console.log(res.url);
+    fileUrl.value = res.url
+    console.log("fileUrl", fileUrl.value);
+    console.log("thisEventFile = ", thisEventFile)
+    console.log(thisEventFile.value.fileName);
+    console.log(thisEventFile.value.fileType);
+    console.log(thisEventFile.value.eventBooking);
+    console.log(thisEventFile.value.id);
+    fileId.value = thisEventFile.value.id
+    console.log(`fileId = ${fileId.value}`);
+    fileType.value = thisEventFile.value.fileType
+    console.log(`fileType = ${fileType.value}`);
+
+  }
+
+}
+
 
 
 onBeforeMount(async () => {
@@ -329,7 +343,11 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                         {{ eventDetail.eventNotes }}
                       </div>
 
-                      <button @click="downloadFile(id)"> {{ thisEventFile.fileName }}</button>
+                      <button @click="downloadFile" v-show="hasFile">1 File attached.</button> <br>
+                      <!-- <a href="${fileUrl}">download file</a> -->
+                      <a :href="fileUrl" v-show="clicked"
+                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                       {{ thisEventFile.fileName }}</a>
                     </div>
 
 
