@@ -12,8 +12,8 @@ const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 const token = localStorage.getItem('jwtToken');
 const IsAuthorized = ref(true)
+const alert404 = "Sorry... Something went wrong with this event.\nWe'll take you back to the EVENT-LIST-PAGE"
 
-const userRole = localStorage
 
 
 // model สำหรับเก็บค่า edit จาก user
@@ -25,7 +25,7 @@ const baseUrl = import.meta.env.PROD
   ? `${import.meta.env.VITE_BASE_URL}/api`
   : '/api'
 
-const getThisEventCard = async () => {
+  const getThisEventCard = async () => {
   const id = params.id
   const res = await fetch(`${baseUrl}/events/${id}/`, {
     headers:
@@ -35,6 +35,10 @@ const getThisEventCard = async () => {
     }
   }
   )
+  if(res.status === 404){
+    alert(alert404)
+    goToAllEvent()
+  }
   // ต้องการให้ เมื่อ token หมดอายุแล้วไปเรียก refreshToken ที่หน้า list-all-user แล้วกลับมาหน้าเดิมก่อนไปเรียก refreshToken
   if (res.status === 401) {
     alert("Please login again")
@@ -49,30 +53,23 @@ const getThisEventCard = async () => {
     console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
     editStartTimeModel.value = thisEventDetail.value[0].eventStartTime
     editNotesModel.value = thisEventDetail.value[0].eventNotes
-
     console.log(`res.status = 200? --> ${res.status == 200 ? true : false}`)
     console.log(thisEventDetail.value)
-
   } else if (res.status === 403) {
     alert("You are not authorized to view this page")
     goToAllEvent()
   } else if (res.status === 400) {
     goToNotFound()
   }
-
-
   // else {
   //   await goToNotFound()
   //   console.log(`event: ${id} is not exist!`)
   // }
-
 }
 
 const fileId = ref('')
 const fileType = ref('')
 const hasFile = ref(false)
-
-
 const thisEventFile = ref([])
 const getFile = async () => {
   const id = params.id
@@ -82,7 +79,6 @@ const getFile = async () => {
       'content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
       // 'responseType': 'blob'
-
     }
   }
   )
@@ -98,9 +94,7 @@ const getFile = async () => {
     console.log(`fileId = ${fileId.value}`);
     fileType.value = thisEventFile.value.fileType
     console.log(`fileType = ${fileType.value}`);
-
   }
-
 }
 
 
@@ -153,9 +147,16 @@ onBeforeMount(async () => {
 
 // DELETE: event
 const cancelEvent = async () => {
+  console.clear()
+  console.log(thisEventFile.value.id);
+  const fileId = thisEventFile.value.id
   const id = params.id
   let confirmation = 'Are you sure?'
   if (confirm(confirmation) == true) {
+    //warning:: delete-file-before-event !!!
+    const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
+      method: 'DELETE'})
+
     const res = await fetch(`${baseUrl}/events/${id}`, {
       method: 'DELETE',
       headers: {
@@ -163,6 +164,10 @@ const cancelEvent = async () => {
         'Authorization': `Bearer ${token}`
       }
     })
+    if (resDelFile.status === 404 && res.status === 404) {
+    alert(alert404)
+    goToAllEvent()
+  }
 
     if (res.status === 200) {
       console.log('cancel bookingId: [' + id + '] success')
@@ -179,7 +184,6 @@ const cancelEvent = async () => {
     console.log('confirmation false')
   }
   console.log(`${baseUrl}/event/${id}`)
-
   // if (res.status === 200) {
   //     console.log('cancel bookingId: [' + id + '] success');
   //     await goToHome()
@@ -196,11 +200,9 @@ const onClickEdit = () => {
 const cancelEdit = () => {
   isClickEdit.value = false
 }
-
 // model สำหรับเก็บค่า edit จาก user
 // const editStartTimeModel = ref(`${thisEventDetail.value.eventStartTime}`)
 // const editNotesModel = ref(`${thisEventDetail.value.eventNotes}`)
-
 const updateEvent = async () => {
   const id = params.id
   const resGet = await fetch(`${baseUrl}/events/${id}`, {
@@ -209,6 +211,10 @@ const updateEvent = async () => {
       'Authorization': `Bearer ${token}`
     }
   })
+  if(resGet.status === 404){
+    alert(alert404)
+    goToAllEvent()
+  }
   // const bookingName = params.bookingName
   // method: GET
   console.clear()
@@ -230,15 +236,34 @@ const updateEvent = async () => {
   if (resPut.status === 403) {
     alert("You are not authorized to this action")
     myRouter.go(0)
-
-
   }
   // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
-  if (resPut.status == 200) {
+  if (fileEditModel.value != null) {
+      const fileEditedData = new FormData() 
+    console.log(fileEditModel.value);
+    fileEditedData.append('file',fileEditModel.value)
+    const resPutFile = await fetch(`${baseUrl}/files/update/${id}`, {
+    method: 'PATCH',
+    body: fileEditedData
+  })
+  if (resPutFile.status === 200) {
     window.location.reload()
+  }  
   }
-
+  window.location.reload()
+  
 }
+
+// สำหรับจัดการ edit-file
+const fileEditModel = ref(null)
+const fileAction = (e)=>{
+  const file = e.target.files[0]
+  // console.log(file)
+  fileEditModel.value = file
+  console.clear()
+  console.log(fileEditModel.value);
+}
+
 // เพื่อ disable เวลาที่เป็นอดีต
 var currentDateTime = new Date();
 console.log(currentDateTime.toJSON());
@@ -327,9 +352,9 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     </div>
 
                     <!-- แล้วจะแสดง div ตัวนี้แทน (modelStartTime) -->
-                    <div v-show="isClickEdit" class="text-gray-800 text-2xl mt-2 mb-3">
+                    <div v-show="isClickEdit" class="text-gray-800 text-2xl mt-2 mb-3 relative">
                       <div class="grid">
-                        <input class="border py-2 px-5 text-grey-800 rounded-lg shadow-lg	" required
+                        <input class="py-2 px-16 rounded-lg shadow-lg border-gray-200" required
                           v-model="editStartTimeModel" type="datetime-local" :min="currentDateTime" />
                       </div>
                     </div>
@@ -354,17 +379,20 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       </div>
 
 
-                      <div class="mt-2"> <button @click="downloadFile" v-if="hasFile == true" v-show="toggle"
+                      <div class="mt-2">
+                        <button @click="downloadFile" v-if="hasFile == true" v-show="toggle"
                           class="font-bold text-blue-600 dark:text-orange-500 hover:underline">
                           1 File attached.</button>
-                        </div>
+
+
+                      </div>
 
                       <!-- <a href="${fileUrl}">download file</a> -->
-                      <div class="mt-2">
+                      <div>
                         <a :href="fileUrl" v-show="clicked"
                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
                           {{ thisEventFile.fileName }}</a>
-                        </div>
+                      </div>
 
 
 
@@ -384,10 +412,12 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                         dark:focus:border-blue-500 shadow-lg mb-3" placeholder="maximum at 500 characters" />
 
                     <!-- input สำหรับ Edit File -->
-                    <div class="flex flex-col mb-4" v-if="isClickEdit == true">
+                    <div class="flex flex-col mb-2" v-if="isClickEdit == true">
                       <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> |
                           Optional</span></label>
-                      <input class="border py-2 px-6 text-grey-800 rounded-lg shadow-lg" type="file">
+                      <input class="text-sm px-16 pl-2
+               text-gray-900 rounded-lg border
+                cursor-pointer" type="file" @change="fileAction">
                     </div>
 
                     <div class="grid md:grid-cols-4 w-full" v-if="isClickEdit == false">

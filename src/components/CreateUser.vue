@@ -45,19 +45,19 @@ const newUser = computed(() => {
               <label class="mb-2 font-bold text-lg text-gray-900">Email address<span class="text-sm font-thin"> |
                   maximum 50
                   characters</span></label>
-              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model.trim="newUser.newEmail" type="email"
+              <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" required v-model.trim="newUser.newEmail" type="email"
                 placeholder="Somchai.jairuk@gmail.com" maxlength="50" />
             </div>
             <!-- input password -->
             <div class="flex flex-col mb-4"> 
                 <h1 class="mb-2 font-bold text-lg text-gray-900">Password <span class="text-sm font-thin"> | minimum 8 
                    maximum 14 characters</span></h1>
-                   <input class="border py-2 px-3 text-grey-800 rounded-lg" placeholder="••••••••••••••"
+                   <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" placeholder="••••••••••••••"
                     required v-model="newUser.newPassword" type="password" minlength="8" maxlength="14">
             </div>
           <div class="flex flex-col mb-4"> 
                 <h1 class="mb-2 font-bold text-lg text-gray-900">Confirm Password <span class="text-sm font-thin"> | type same password</span></h1>
-                   <input class="border py-2 px-3 text-grey-800 rounded-lg" placeholder="••••••••••••••"
+                   <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" placeholder="••••••••••••••"
                    required v-model="newUser.confirm" type="password" minlength="8" maxlength="14">
             </div>
 
@@ -68,7 +68,7 @@ const newUser = computed(() => {
               <!-- <h1 class="font-bold text-lg text-gray-900">Duration</h1> -->
             </div>
             <div class="grid grid-cols-1 mb-4 gap-x-2">
-              <select v-model="newUser.newRole" class="border py-2 px-3 text-grey-800 rounded-lg" required>
+              <select v-model="newUser.newRole" class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" required>
                 <option selected="selected" disabled>Please select one</option>
                 <option value="student">
                   Student
