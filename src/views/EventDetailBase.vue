@@ -106,6 +106,7 @@ const getFile = async () => {
 
 const fileUrl = ref('')
 const clicked = ref(false)
+const toggle = ref(true)
 
 const downloadFile = async () => {
   const id = fileId.value
@@ -121,6 +122,7 @@ const downloadFile = async () => {
   )
   if (res.status === 200) {
     clicked.value = true
+    toggle.value = false
     // thisEventFile.value = await res.json()
     console.log("res", res);
     // console.log(res.url);
@@ -292,6 +294,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       <span v-show="isClickEdit" class="font-light text-lg">({{ eventDetail.eventDuration }}
                         minutes)</span>
                     </div>
+
                     <div class="text-gray-400 hover:text-white border
                        border-gray-200 hover:bg-gray-200
                        focus:ring-4 focus:outline-none
@@ -304,6 +307,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       <span v-show="isClickEdit" class="font-light text-lg">({{ eventDetail.eventDuration }}
                         minutes)</span>
                     </div>
+
                     <!-- เมื่อกดปุ่ม save จะซ่อน บรรทัด startTime-duration เดิมทั้งหมด... -->
                     <div v-show="isClickEdit == false" class="text-gray-800 text-2xl">
                       {{
@@ -321,15 +325,20 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       }}
                       <span class="font-light text-lg">({{ eventDetail.eventDuration }} minutes)</span>
                     </div>
+
                     <!-- แล้วจะแสดง div ตัวนี้แทน (modelStartTime) -->
                     <div v-show="isClickEdit" class="text-gray-800 text-2xl mt-2 mb-3">
                       <div class="grid">
-                        <input class="border py-2 px-3 text-grey-800 rounded-lg shadow-lg	" required
+                        <input class="border py-2 px-5 text-grey-800 rounded-lg shadow-lg	" required
                           v-model="editStartTimeModel" type="datetime-local" :min="currentDateTime" />
                       </div>
                     </div>
+
+
+
                     <!-- detail: event-notes || เมื่อ click edit จะ ซ่อน div ของ notes นี้แล้วจะกลายเป็น input-->
                     <div class="w-full mb-3" v-show="isClickEdit == false">
+
                       <div class="border rounded-lg bg-gray-100 max-w-md mt-2 text-gray-600 px-3 py-3 text-2sm" v-if="
                         eventDetail.eventNotes === null ||
                         eventDetail.eventNotes.trim().length === 0
@@ -341,13 +350,24 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                          max-w-md mt-2 text-gray-600 px-3 py-3 
                          text-2sm " v-else>
                         {{ eventDetail.eventNotes }}
+
                       </div>
 
-                      <button @click="downloadFile" v-show="hasFile">1 File attached.</button> <br>
+
+                      <div class="mt-2"> <button @click="downloadFile" v-if="hasFile == true" v-show="toggle"
+                          class="font-bold text-blue-600 dark:text-orange-500 hover:underline">
+                          1 File attached.</button>
+                        </div>
+
                       <!-- <a href="${fileUrl}">download file</a> -->
-                      <a :href="fileUrl" v-show="clicked"
-                      class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                       {{ thisEventFile.fileName }}</a>
+                      <div class="mt-2">
+                        <a :href="fileUrl" v-show="clicked"
+                          class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                          {{ thisEventFile.fileName }}</a>
+                        </div>
+
+
+
                     </div>
 
 
@@ -362,6 +382,13 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                         focus:border-blue-500 dark:bg-white dark:border-white
                         dark:placeholder-gray-400 dark:text-gray-900 dark:focus:ring-blue-500
                         dark:focus:border-blue-500 shadow-lg mb-3" placeholder="maximum at 500 characters" />
+
+                    <!-- input สำหรับ Edit File -->
+                    <div class="flex flex-col mb-4" v-if="isClickEdit == true">
+                      <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> |
+                          Optional</span></label>
+                      <input class="border py-2 px-6 text-grey-800 rounded-lg shadow-lg" type="file">
+                    </div>
 
                     <div class="grid md:grid-cols-4 w-full" v-if="isClickEdit == false">
                       <button class="text-blue-400 hover:text-white border 
