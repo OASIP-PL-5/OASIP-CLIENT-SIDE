@@ -61,7 +61,6 @@ const newUser = computed(() => {
                    required v-model="newUser.confirm" type="password" minlength="8" maxlength="14">
             </div>
 
-
             <div class="grid grid-cols-2 mb-2 gap-x-2">
               <h1 class="font-bold text-lg text-gray-900">Role<span class="text-sm font-thin"> | select your role</span>
               </h1>

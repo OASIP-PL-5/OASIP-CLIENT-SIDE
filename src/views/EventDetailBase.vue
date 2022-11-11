@@ -25,7 +25,7 @@ const baseUrl = import.meta.env.PROD
   ? `${import.meta.env.VITE_BASE_URL}/api`
   : '/api'
 
-  const getThisEventCard = async () => {
+const getThisEventCard = async () => {
   const id = params.id
   const res = await fetch(`${baseUrl}/events/${id}/`, {
     headers:
@@ -35,7 +35,7 @@ const baseUrl = import.meta.env.PROD
     }
   }
   )
-  if(res.status === 404){
+  if (res.status === 404) {
     alert(alert404)
     goToAllEvent()
   }
@@ -136,6 +136,48 @@ const downloadFile = async () => {
 
 }
 
+// delete file 
+const deleteFile = async () => {
+  const id = fileId.value
+  let confirmation = 'Are you sure?'
+  if(confirm(confirmation) == true){
+    const res = await fetch(`${baseUrl}/files/delete/${id}/`, {
+      method: 'DELETE',
+      headers:
+      {
+        'content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        // 'responseType': 'blob'
+      }
+    }
+    )
+    if (res.status === 200) {
+      alert("File deleted")
+      hasFile.value = false
+      console.log("thisEventFile = ", thisEventFile)
+      console.log(thisEventFile.value.fileName);
+      console.log(thisEventFile.value.fileType);
+      console.log(thisEventFile.value.eventBooking);
+      console.log(thisEventFile.value.id);
+      fileId.value = thisEventFile.value.id
+      console.log(`fileId = ${fileId.value}`);
+      fileType.value = thisEventFile.value.fileType
+      console.log(`fileType = ${fileType.value}`);
+    }
+  }
+  
+  
+  if (res.status === 200) {
+    hasFile.value = false
+    console.log("res", res);
+    // console.log(res.url);
+    fileUrl.value = res.url
+   
+
+  }
+
+}
+
 
 
 onBeforeMount(async () => {
@@ -155,7 +197,8 @@ const cancelEvent = async () => {
   if (confirm(confirmation) == true) {
     //warning:: delete-file-before-event !!!
     const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
-      method: 'DELETE'})
+      method: 'DELETE'
+    })
 
     const res = await fetch(`${baseUrl}/events/${id}`, {
       method: 'DELETE',
@@ -165,9 +208,9 @@ const cancelEvent = async () => {
       }
     })
     if (resDelFile.status === 404 && res.status === 404) {
-    alert(alert404)
-    goToAllEvent()
-  }
+      alert(alert404)
+      goToAllEvent()
+    }
 
     if (res.status === 200) {
       console.log('cancel bookingId: [' + id + '] success')
@@ -211,7 +254,7 @@ const updateEvent = async () => {
       'Authorization': `Bearer ${token}`
     }
   })
-  if(resGet.status === 404){
+  if (resGet.status === 404) {
     alert(alert404)
     goToAllEvent()
   }
@@ -239,24 +282,24 @@ const updateEvent = async () => {
   }
   // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
   if (fileEditModel.value != null) {
-      const fileEditedData = new FormData() 
+    const fileEditedData = new FormData()
     console.log(fileEditModel.value);
-    fileEditedData.append('file',fileEditModel.value)
+    fileEditedData.append('file', fileEditModel.value)
     const resPutFile = await fetch(`${baseUrl}/files/update/${id}`, {
-    method: 'PATCH',
-    body: fileEditedData
-  })
-  if (resPutFile.status === 200) {
-    window.location.reload()
-  }  
+      method: 'PATCH',
+      body: fileEditedData
+    })
+    if (resPutFile.status === 200) {
+      window.location.reload()
+    }
   }
   window.location.reload()
-  
+
 }
 
 // สำหรับจัดการ edit-file
 const fileEditModel = ref(null)
-const fileAction = (e)=>{
+const fileAction = (e) => {
   const file = e.target.files[0]
   // console.log(file)
   fileEditModel.value = file
@@ -415,10 +458,25 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     <div class="flex flex-col mb-2" v-if="isClickEdit == true">
                       <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> |
                           Optional</span></label>
-                      <input class="text-sm px-16 pl-2
-               text-gray-900 rounded-lg border
-                cursor-pointer" type="file" @change="fileAction">
+                      <div class="flex item-center justify-between ">
+                        <input class="text-sm px-16 pl-2
+                        text-gray-900 rounded-lg border w-full
+                        cursor-pointer" type="file" @change="fileAction">
+                        <button v-if="hasFile == true" @click="deleteFile"><svg width="32" height="32"
+                            viewBox="0 0 24 24" class="text-red-500">
+                            <path fill="currentColor" d="M7 4V2h10v2h5v2h-2v15a1 1 0 0 1-1 1H5a1 
+                           1 0 0 1-1-1V6H2V4h5zM6 6v14h12V6H6zm3
+                           3h2v8H9V9zm4 0h2v8h-2V9z" />
+                          </svg></button>
+
+                      </div>
+
+                      <p v-if="hasFile == true" class="text-slate-900 mt-1 m-auto">The old file <span
+                          class="font-medium text-blue-500">({{
+                              thisEventFile.fileName
+                          }}) </span>will be replaced/removed.</p>
                     </div>
+
 
                     <div class="grid md:grid-cols-4 w-full" v-if="isClickEdit == false">
                       <button class="text-blue-400 hover:text-white border 
