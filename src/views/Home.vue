@@ -102,12 +102,22 @@ const toggleModal = ref(false)
                             text-center mb-2 hover:shadow-xl" @click="goToAllEvent">
                         SCHEDULE
                     </button>
-                    <button v-show="isAdmin" class="inline-block rounded-lg text-2xl px-1.5 py-1.5 bg-blue-400 text-white 
-                                font-bold rounded-lg text-center mb-2
-                                shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
-                                focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
-                                active:shadow-lg transition duration-150 ease-in-out" @click="goToAllUser">
+                    <button v-show="isAdmin" class="text-orange-400
+                         hover:text-white border border-orange-700
+                        hover:bg-orange-800 focus:ring-4 inline-flex 
+                        items-center focus:outline-none transition 
+                        duration-500 ease-in-out focus:ring-orange-300 
+                        font-light rounded-lg text-2xl px-1.5 py-1.5 mb-2  text-center 
+                        dark:border-orange-500 dark:text-orange-500 dark:hover:text-white
+                        dark:hover:bg-orange-600 dark:focus:ring-orange-800" @click="goToAllUser">
                         OUR USERS
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            aria-hidden="true" role="img" class="iconify iconify--ph" width="32" height="32"
+                            preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 256">
+                            <path fill="currentColor"
+                                d="m234.8 150.4l-14.9-19.8c.1-1.8 0-3.7 0-5.1l14.9-19.9a7.8 7.8 0 0 0 1.3-6.9a114.8 114.8 0 0 0-10.9-26.4a8.2 8.2 0 0 0-5.8-4l-24.5-3.5l-3.7-3.7l-3.5-24.5a8.2 8.2 0 0 0-4-5.8a114.8 114.8 0 0 0-26.4-10.9a7.8 7.8 0 0 0-6.9 1.3L130.6 36h-5.2l-19.8-14.8a7.8 7.8 0 0 0-6.9-1.3a114.8 114.8 0 0 0-26.4 10.9a8.2 8.2 0 0 0-4 5.8l-3.5 24.5l-3.7 3.7l-24.5 3.5a8.2 8.2 0 0 0-5.8 4a114.8 114.8 0 0 0-10.9 26.4a7.8 7.8 0 0 0 1.3 6.9l14.9 19.8v5.1l-14.9 19.9a7.8 7.8 0 0 0-1.3 6.9a114.8 114.8 0 0 0 10.9 26.4a8.2 8.2 0 0 0 5.8 4l24.5 3.5l3.7 3.7l3.5 24.5a8.2 8.2 0 0 0 4 5.8a114.8 114.8 0 0 0 26.4 10.9a7.6 7.6 0 0 0 2.1.3a7.7 7.7 0 0 0 4.8-1.6l19.8-14.8h5.2l19.8 14.8a7.8 7.8 0 0 0 6.9 1.3a114.8 114.8 0 0 0 26.4-10.9a8.2 8.2 0 0 0 4-5.8l3.5-24.6c1.2-1.2 2.6-2.5 3.6-3.6l24.6-3.5a8.2 8.2 0 0 0 5.8-4a114.8 114.8 0 0 0 10.9-26.4a7.8 7.8 0 0 0-1.3-6.9ZM128 172a44 44 0 1 1 44-44a44 44 0 0 1-44 44Z">
+                            </path>
+                        </svg>
                     </button>
                     <!-- <button class="text-white bg-blue-500 border
                                     border-white hover:bg-blue-800

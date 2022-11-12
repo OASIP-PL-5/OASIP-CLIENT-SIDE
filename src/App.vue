@@ -15,14 +15,20 @@ const goToSignUp = () => myRouter.push({ name: 'SignUp' })
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 const userEmail = localStorage.getItem('email')
 const token = localStorage.getItem('jwtToken');
-const userName = jwt_decode(token).userName
-const userRole = jwt_decode(token).role
+// const userName = jwt_decode(token).userName
+// const userRole = jwt_decode(token).role
+const userName = ref('')
+const userRole = ref('')
 
 
 const loggingIn = ref(false)
 const checkIsLogin = computed(() => {
     if (localStorage.getItem('jwtToken')) {
         console.log('token: ', localStorage.getItem('jwtToken'))
+        userName.value = jwt_decode(token).username
+        userRole.value = jwt_decode(token).role
+        console.log('userName: ', userName)
+        console.log('userRole: ', userRole)
         return loggingIn.value = true
     }
     else {
@@ -114,7 +120,7 @@ const toggle = () => {
                             style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 10px);"
                             data-popper-placement="bottom">
                             <div class="py-3 px-4 text-sm text-black ">
-                                <div>{{userRole}}</div>
+                                <div class="text-xl capitalize font-bold">{{userRole}}</div>
                                 <div class="font-medium truncate">{{ userEmail }}</div>
                             </div>
                             <ul class="py-1 text-sm text-black divide-y" aria-labelledby="dropdownInformationButton">
@@ -124,7 +130,7 @@ const toggle = () => {
                                         dark:hover:bg-gray-100 
                                         ">Change password</a>
                                 </li>
-                                <li @click="logOut" class="block py-2 px-4  
+                                <li @click="logOut()" class="block py-2 px-4  
                                         hover:bg-gray-800 
                                         dark:hover:bg-gray-600 hover:text-white cursor-pointer">Sign
                                     out</li>
