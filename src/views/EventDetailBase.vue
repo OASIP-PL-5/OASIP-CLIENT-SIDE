@@ -140,7 +140,7 @@ const downloadFile = async () => {
 const deleteFile = async () => {
   const id = fileId.value
   let confirmation = 'Are you sure?'
-  if(confirm(confirmation) == true){
+  if (confirm(confirmation) == true) {
     const res = await fetch(`${baseUrl}/files/delete/${id}/`, {
       method: 'DELETE',
       headers:
@@ -165,14 +165,14 @@ const deleteFile = async () => {
       console.log(`fileType = ${fileType.value}`);
     }
   }
-  
-  
+
+
   if (res.status === 200) {
     hasFile.value = false
     console.log("res", res);
     // console.log(res.url);
     fileUrl.value = res.url
-   
+
 
   }
 
@@ -261,6 +261,8 @@ const updateEvent = async () => {
   // const bookingName = params.bookingName
   // method: GET
   console.clear()
+  // let editStartTimeModel = new Date()
+  // editStartTimeModel.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   console.log(editStartTimeModel.value);
   console.log(editNotesModel.value);
   // method: PUT
@@ -292,19 +294,81 @@ const updateEvent = async () => {
     if (resPutFile.status === 200) {
       window.location.reload()
     }
+    else if (resPutFile.status === 404) {
+      // fetch post file
+      // const addNewFile ({modelFile}) => {
+
+      // }
+      console.log(fileEditModel.value.size);
+      var fileSize = 10000000 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+      if (fileEditModel.value.size > fileSize) {
+        alert('Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".')
+      }
+
+      const fileData = new FormData()
+      fileData.append('file', fileEditModel.value)
+      // check file size
+      console.log(fileEditModel)
+
+      console.log("test file size ::");
+      // if(fileEditModel.value.siz>)
+
+      // editStartTimeModel.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      console.log("format", editStartTimeModel.value);
+      // fileData.append('eventStartTime', editStartTimeModel.value.substring(0,16))
+      console.log(editStartTimeModel.value);
+      console.log(fileEditModel.value)
+      console.log(fileData)
+      console.log("sub string : ", editStartTimeModel.value.substring(0, 16));
+      const completedStartTime = editStartTimeModel.value.substring(0, 16)
+      fileData.append('eventStartTime', completedStartTime)
+      console.log("completed starttime: ", completedStartTime);
+
+      const resFile = await fetch(`${baseUrl}/files/upload`, {
+        method: 'POST',
+        // body: `${resGet.eventStartTime}`
+        body: fileData
+      })
+      if (resFile.status == 200) {
+        window.location.reload()
+      }
+      // else{
+      //   alert("File size is too large")
+      // }
+    }
   }
-  window.location.reload()
+  // window.location.reload()
 
 }
 
 // สำหรับจัดการ edit-file
 const fileEditModel = ref(null)
+const isTooLarge = ref(false)
 const fileAction = (e) => {
   const file = e.target.files[0]
   // console.log(file)
   fileEditModel.value = file
   console.clear()
   console.log(fileEditModel.value);
+  // byte -> MB
+  console.log("size :: ", fileEditModel.value.size * 0.000001);
+  const mbfile = fileEditModel.value.size * 0.000001
+  const tenMb = 10485760
+  // if(mbfile>1048576){
+  //   alert("File too large")
+  // }
+  console.log(fileEditModel.value.size);
+  if (fileEditModel.value.size > tenMb) {
+    console.log("file size", fileEditModel.value.size);
+    alert("File is too large, Please choose again.")
+    fileEditModel.value = null
+    isTooLarge.value = true
+    // เพื่อ reset file เมื่อขนาดเกินกำหนด
+    e.target.value = ''
+  }
+  else{
+    isTooLarge.value = false
+  }
 }
 
 // เพื่อ disable เวลาที่เป็นอดีต
@@ -457,7 +521,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     <!-- input สำหรับ Edit File -->
                     <div class="flex flex-col mb-2" v-if="isClickEdit == true">
                       <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> |
-                          Optional</span></label>
+                          Optional<span v-if="isTooLarge == true" class="block text-red-400 font-bold"> Please Choose again.</span></span></label>
                       <div class="flex item-center justify-between ">
                         <input class="text-sm px-16 pl-2
                         text-gray-900 rounded-lg border w-full
