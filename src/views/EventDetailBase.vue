@@ -139,7 +139,7 @@ const downloadFile = async () => {
 // delete file 
 const deleteFile = async () => {
   const id = fileId.value
-  let confirmation = 'Are you sure?'
+  let confirmation = `Are you sure to delete ${thisEventFile.value.fileName} ?`
   if (confirm(confirmation) == true) {
     const res = await fetch(`${baseUrl}/files/delete/${id}/`, {
       method: 'DELETE',
@@ -152,7 +152,7 @@ const deleteFile = async () => {
     }
     )
     if (res.status === 200) {
-      alert("File deleted")
+      alert(`${thisEventFile.value.fileName} is deleted.`)
       hasFile.value = false
       console.log("thisEventFile = ", thisEventFile)
       console.log(thisEventFile.value.fileName);
@@ -366,7 +366,7 @@ const fileAction = (e) => {
     // เพื่อ reset file เมื่อขนาดเกินกำหนด
     e.target.value = ''
   }
-  else{
+  else {
     isTooLarge.value = false
   }
 }
@@ -390,9 +390,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">
           EVENT-DETAIL-BASE::
         </h2>
-
         <div>
-
           <div class="w-11/12 m-auto grid items-center justify-center bg-white text-gray-900">
             <div class="mx-10 my-3 max-w-none rounded-lg overflow-hinden shadow-lg">
               <div class="px-6 py-4 text-left">
@@ -400,11 +398,9 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                   class="md:flex flex-col justify-center items-center">
                   <div class="font-bold text-center text-5xl mb-2 text-gray-700 max-w-xl" v-if="isClickEdit == false">
                     {{ eventDetail.bookingName }}
-
                   </div>
                   <div class="font-bold text-center text-5xl mb-2 text-gray-200 max-w-xl" v-if="isClickEdit == true">
                     {{ eventDetail.bookingName }}
-
                   </div>
                   <div class="flex flex-col justify-center items-center">
                     <div class="text-gray-500 text-xl mb-4" v-if="isClickEdit == false">
@@ -495,7 +491,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       </div>
 
                       <!-- <a href="${fileUrl}">download file</a> -->
-                      <div>
+                      <div v-if="hasFile == true">
                         <a :href="fileUrl" v-show="clicked"
                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
                           {{ thisEventFile.fileName }}</a>
@@ -521,7 +517,8 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                     <!-- input สำหรับ Edit File -->
                     <div class="flex flex-col mb-2" v-if="isClickEdit == true">
                       <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> |
-                          Optional<span v-if="isTooLarge == true" class="block text-red-400 font-bold"> Please Choose again.</span></span></label>
+                          Optional<span v-if="isTooLarge == true" class="block text-red-400 font-bold"> Please Choose
+                            again.</span></span></label>
                       <div class="flex item-center justify-between ">
                         <input class="text-sm px-16 pl-2
                         text-gray-900 rounded-lg border w-full
