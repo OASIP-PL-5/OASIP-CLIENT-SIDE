@@ -12,8 +12,8 @@ const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 const token = localStorage.getItem('jwtToken');
 const IsAuthorized = ref(true)
+const alert404 = "Sorry... Something went wrong with this event.\nWe'll take you back to the EVENT-LIST-PAGE"
 
-const userRole = localStorage
 
 
 // model สำหรับเก็บค่า edit จาก user
@@ -35,6 +35,10 @@ const getThisEventCard = async () => {
     }
   }
   )
+  if (res.status === 404) {
+    alert(alert404)
+    goToAllEvent()
+  }
   // ต้องการให้ เมื่อ token หมดอายุแล้วไปเรียก refreshToken ที่หน้า list-all-user แล้วกลับมาหน้าเดิมก่อนไปเรียก refreshToken
   if (res.status === 401) {
     alert("Please login again")
@@ -49,34 +53,149 @@ const getThisEventCard = async () => {
     console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
     editStartTimeModel.value = thisEventDetail.value[0].eventStartTime
     editNotesModel.value = thisEventDetail.value[0].eventNotes
-
     console.log(`res.status = 200? --> ${res.status == 200 ? true : false}`)
     console.log(thisEventDetail.value)
-
   } else if (res.status === 403) {
     alert("You are not authorized to view this page")
     goToAllEvent()
   } else if (res.status === 400) {
     goToNotFound()
   }
-
-
   // else {
   //   await goToNotFound()
   //   console.log(`event: ${id} is not exist!`)
   // }
+}
 
+const fileId = ref('')
+const fileType = ref('')
+const hasFile = ref(false)
+const thisEventFile = ref([])
+const getFile = async () => {
+  const id = params.id
+  const res = await fetch(`${baseUrl}/files/${id}/`, {
+    headers:
+    {
+      'content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      // 'responseType': 'blob'
+    }
+  }
+  )
+  if (res.status === 200) {
+    thisEventFile.value = await res.json()
+    hasFile.value = true
+    console.log("thisEventFile = ", thisEventFile)
+    console.log(thisEventFile.value.fileName);
+    console.log(thisEventFile.value.fileType);
+    console.log(thisEventFile.value.eventBooking);
+    console.log(thisEventFile.value.id);
+    fileId.value = thisEventFile.value.id
+    console.log(`fileId = ${fileId.value}`);
+    fileType.value = thisEventFile.value.fileType
+    console.log(`fileType = ${fileType.value}`);
+  }
 }
 onBeforeMount(async () => {
   await getThisEventCard()
+  await getFile()
+  // await downloadFile()
 
 })
 
+const fileUrl = ref('')
+const clicked = ref(false)
+const toggle = ref(true)
+
+const downloadFile = async () => {
+  const id = fileId.value
+  const res = await fetch(`${baseUrl}/files/download/${id}`, {
+    headers:
+    {
+      'content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      // 'responseType': 'blob'
+
+    }
+  }
+  )
+  if (res.status === 200) {
+    clicked.value = true
+    toggle.value = false
+    // thisEventFile.value = await res.json()
+    console.log("res", res);
+    // console.log(res.url);
+    fileUrl.value = res.url
+    console.log("fileUrl", fileUrl.value);
+    console.log("thisEventFile = ", thisEventFile)
+    console.log(thisEventFile.value.fileName);
+    console.log(thisEventFile.value.fileType);
+    console.log(thisEventFile.value.eventBooking);
+    console.log(thisEventFile.value.id);
+    fileId.value = thisEventFile.value.id
+    console.log(`fileId = ${fileId.value}`);
+    fileType.value = thisEventFile.value.fileType
+    console.log(`fileType = ${fileType.value}`);
+
+  }
+
+}
+
+// delete "only" file 
+const deleteFile = async () => {
+  console.clear()
+  const id = fileId.value
+  console.log(thisEventFile.value.fileName);
+  const fileName = thisEventFile.value.fileName
+  let confirmation = `We will delete file : [${fileName}] \nAre you sure ?`
+  if (confirm(confirmation) == true) {
+    const res = await fetch(`${baseUrl}/files/delete/${id}/`, {
+      method: 'DELETE',
+      headers:
+      {
+        'content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        // 'responseType': 'blob'
+      }
+    }
+    )
+    if (res.status === 200) {
+      alert(`[${fileName}] deleted`)
+      hasFile.value = false
+      console.log("thisEventFile = ", thisEventFile)
+      console.log(thisEventFile.value.fileName);
+      console.log(thisEventFile.value.fileType);
+      console.log(thisEventFile.value.eventBooking);
+      console.log(thisEventFile.value.id);
+      fileId.value = thisEventFile.value.id
+      console.log(`fileId = ${fileId.value}`);
+      fileType.value = thisEventFile.value.fileType
+      console.log(`fileType = ${fileType.value}`);
+      hasFile.value = false
+      console.log("res", res);
+      // console.log(res.url);
+      fileUrl.value = res.url
+    }
+  }
+}
+
+
+
+
+
 // DELETE: event
 const cancelEvent = async () => {
+  console.clear()
+  console.log(thisEventFile.value.id);
+  const fileId = thisEventFile.value.id
   const id = params.id
   let confirmation = 'Are you sure?'
   if (confirm(confirmation) == true) {
+    //warning:: delete-file-before-event !!!
+    const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
+      method: 'DELETE'
+    })
+
     const res = await fetch(`${baseUrl}/events/${id}`, {
       method: 'DELETE',
       headers: {
@@ -84,6 +203,10 @@ const cancelEvent = async () => {
         'Authorization': `Bearer ${token}`
       }
     })
+    if (resDelFile.status === 404 && res.status === 404) {
+      alert(alert404)
+      goToAllEvent()
+    }
 
     if (res.status === 200) {
       console.log('cancel bookingId: [' + id + '] success')
@@ -100,7 +223,6 @@ const cancelEvent = async () => {
     console.log('confirmation false')
   }
   console.log(`${baseUrl}/event/${id}`)
-
   // if (res.status === 200) {
   //     console.log('cancel bookingId: [' + id + '] success');
   //     await goToHome()
@@ -117,11 +239,9 @@ const onClickEdit = () => {
 const cancelEdit = () => {
   isClickEdit.value = false
 }
-
 // model สำหรับเก็บค่า edit จาก user
 // const editStartTimeModel = ref(`${thisEventDetail.value.eventStartTime}`)
 // const editNotesModel = ref(`${thisEventDetail.value.eventNotes}`)
-
 const updateEvent = async () => {
   const id = params.id
   const resGet = await fetch(`${baseUrl}/events/${id}`, {
@@ -130,9 +250,15 @@ const updateEvent = async () => {
       'Authorization': `Bearer ${token}`
     }
   })
+  if (resGet.status === 404) {
+    alert(alert404)
+    goToAllEvent()
+  }
   // const bookingName = params.bookingName
   // method: GET
   console.clear()
+  // let editStartTimeModel = new Date()
+  // editStartTimeModel.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   console.log(editStartTimeModel.value);
   console.log(editNotesModel.value);
   // method: PUT
@@ -151,15 +277,90 @@ const updateEvent = async () => {
   if (resPut.status === 403) {
     alert("You are not authorized to this action")
     myRouter.go(0)
-
-
   }
   // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
-  if (resPut.status == 200) {
-    window.location.reload()
+  if (fileEditModel.value != null) {
+    const fileEditedData = new FormData()
+    console.log(fileEditModel.value);
+    fileEditedData.append('file', fileEditModel.value)
+    const resPutFile = await fetch(`${baseUrl}/files/update/${id}`, {
+      method: 'PATCH',
+      body: fileEditedData
+    })
+    if (resPutFile.status === 200) {
+      window.location.reload()
+    }
+    else if (resPutFile.status === 404) {
+      // fetch post file
+      // const addNewFile ({modelFile}) => {
+
+      // }
+      console.clear()
+      console.log(fileEditModel.value.size);
+
+      const fileData = new FormData()
+      fileData.append('file', fileEditModel.value)
+      // check file size
+      console.log(fileEditModel)
+
+      console.log("test file size ::");
+      // if(fileEditModel.value.siz>)
+
+      // editStartTimeModel.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      console.log("format", editStartTimeModel.value);
+      // fileData.append('eventStartTime', editStartTimeModel.value.substring(0,16))
+      console.log(editStartTimeModel.value);
+      console.log(fileEditModel.value)
+      console.log(fileData)
+      console.log("sub string : ", editStartTimeModel.value.substring(0, 16));
+      const completedStartTime = editStartTimeModel.value.substring(0, 16)
+      fileData.append('eventStartTime', completedStartTime)
+      console.log("completed starttime: ", completedStartTime);
+
+      const resFile = await fetch(`${baseUrl}/files/upload`, {
+        method: 'POST',
+        // body: `${resGet.eventStartTime}`
+        body: fileData
+      })
+      if (resFile.status == 201) {
+        window.location.reload()
+      }
+    }
   }
+  window.location.reload()
 
 }
+
+// สำหรับจัดการ edit-file
+const fileEditModel = ref(null)
+const isTooLarge = ref(false)
+const fileAction = (e) => {
+  const file = e.target.files[0]
+  // console.log(file)
+  fileEditModel.value = file
+  console.clear()
+  console.log(fileEditModel.value);
+  // byte -> MB
+  console.log("size :: ", fileEditModel.value.size * 0.000001);
+  const mbfile = fileEditModel.value.size * 0.000001
+  const tenMb = 10485760
+  // if(mbfile>1048576){
+  //   alert("File too large")
+  // }
+  console.log(fileEditModel.value.size);
+  if (fileEditModel.value.size > tenMb) {
+    console.log("file size", fileEditModel.value.size);
+    alert("File is too large, Please choose again.")
+    fileEditModel.value = null
+    isTooLarge.value = true
+    // เพื่อ reset file เมื่อขนาดเกินกำหนด
+    e.target.value = ''
+  }
+  else{
+    isTooLarge.value = false
+  }
+}
+
 // เพื่อ disable เวลาที่เป็นอดีต
 var currentDateTime = new Date();
 console.log(currentDateTime.toJSON());
@@ -179,7 +380,9 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         <h2 class="font-bold text-4xl mx-10 my-10 text-slate-700">
           EVENT-DETAIL-BASE::
         </h2>
+
         <div>
+
           <div class="w-11/12 m-auto grid items-center justify-center bg-white text-gray-900">
             <div class="mx-10 my-3 max-w-none rounded-lg overflow-hinden shadow-lg">
               <div class="px-6 py-4 text-left">
@@ -213,6 +416,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       <span v-show="isClickEdit" class="font-light text-lg">({{ eventDetail.eventDuration }}
                         minutes)</span>
                     </div>
+
                     <div class="text-gray-400 hover:text-white border
                        border-gray-200 hover:bg-gray-200
                        focus:ring-4 focus:outline-none
@@ -225,32 +429,38 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       <span v-show="isClickEdit" class="font-light text-lg">({{ eventDetail.eventDuration }}
                         minutes)</span>
                     </div>
+
                     <!-- เมื่อกดปุ่ม save จะซ่อน บรรทัด startTime-duration เดิมทั้งหมด... -->
                     <div v-show="isClickEdit == false" class="text-gray-800 text-2xl">
                       {{
-                      new Date(
-                      eventDetail.eventStartTime
-                      ).toLocaleDateString('en')
+                          new Date(
+                            eventDetail.eventStartTime
+                          ).toLocaleDateString('en')
                       }}
                       {{
-                      new Date(
-                      eventDetail.eventStartTime
-                      ).toLocaleTimeString('en', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                      })
+                          new Date(
+                            eventDetail.eventStartTime
+                          ).toLocaleTimeString('en', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
                       }}
                       <span class="font-light text-lg">({{ eventDetail.eventDuration }} minutes)</span>
                     </div>
+
                     <!-- แล้วจะแสดง div ตัวนี้แทน (modelStartTime) -->
-                    <div v-show="isClickEdit" class="text-gray-800 text-2xl mt-2 mb-3">
+                    <div v-show="isClickEdit" class="text-gray-800 text-2xl mt-2 mb-3 relative">
                       <div class="grid">
-                        <input class="border py-2 px-3 text-grey-800 rounded-lg shadow-lg	" required
+                        <input class="py-2 px-16 rounded-lg shadow-lg border-gray-200" required
                           v-model="editStartTimeModel" type="datetime-local" :min="currentDateTime" />
                       </div>
                     </div>
+
+
+
                     <!-- detail: event-notes || เมื่อ click edit จะ ซ่อน div ของ notes นี้แล้วจะกลายเป็น input-->
                     <div class="w-full mb-3" v-show="isClickEdit == false">
+
                       <div class="border rounded-lg bg-gray-100 max-w-md mt-2 text-gray-600 px-3 py-3 text-2sm" v-if="
                         eventDetail.eventNotes === null ||
                         eventDetail.eventNotes.trim().length === 0
@@ -262,7 +472,27 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                          max-w-md mt-2 text-gray-600 px-3 py-3 
                          text-2sm " v-else>
                         {{ eventDetail.eventNotes }}
+
                       </div>
+
+
+                      <div class="mt-2">
+                        <button @click="downloadFile" v-if="hasFile == true" v-show="toggle"
+                          class="font-bold text-blue-600 dark:text-orange-500 hover:underline">
+                          1 File attached.</button>
+
+
+                      </div>
+
+                      <!-- <a href="${fileUrl}">download file</a> -->
+                      <div v-if="hasFile == true">
+                        <a :href="fileUrl" v-show="clicked"
+                          class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                          {{ thisEventFile.fileName }}</a>
+                      </div>
+
+
+
                     </div>
 
 
@@ -277,6 +507,30 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                         focus:border-blue-500 dark:bg-white dark:border-white
                         dark:placeholder-gray-400 dark:text-gray-900 dark:focus:ring-blue-500
                         dark:focus:border-blue-500 shadow-lg mb-3" placeholder="maximum at 500 characters" />
+
+                    <!-- input สำหรับ Edit File -->
+                    <div class="flex flex-col mb-2" v-if="isClickEdit == true">
+                      <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> |
+                          Optional<span v-if="isTooLarge == true" class="block text-red-400 font-bold"> Please Choose again.</span></span></label>
+                      <div class="flex item-center justify-between ">
+                        <input class="text-sm px-16 pl-2
+                        text-gray-900 rounded-lg border w-full
+                        cursor-pointer" type="file" @change="fileAction">
+                        <button v-if="hasFile == true" @click="deleteFile"><svg width="32" height="32"
+                            viewBox="0 0 24 24" class="text-red-500">
+                            <path fill="currentColor" d="M7 4V2h10v2h5v2h-2v15a1 1 0 0 1-1 1H5a1 
+                           1 0 0 1-1-1V6H2V4h5zM6 6v14h12V6H6zm3
+                           3h2v8H9V9zm4 0h2v8h-2V9z" />
+                          </svg></button>
+
+                      </div>
+
+                      <p v-if="hasFile == true" class="text-slate-900 mt-1 m-auto">The old file <span
+                          class="font-medium text-blue-500">({{
+                              thisEventFile.fileName
+                          }}) </span>will be replaced/removed.</p>
+                    </div>
+
 
                     <div class="grid md:grid-cols-4 w-full" v-if="isClickEdit == false">
                       <button class="text-blue-400 hover:text-white border 

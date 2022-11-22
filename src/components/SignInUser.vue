@@ -94,11 +94,11 @@ const test = ()=>{
 
 
                                 </div>
-                                <div class="flex justify-center mt-2 text-xl">New here?&nbsp;
+                                <!-- <div class="flex justify-center mt-2 text-xl">New here?&nbsp;
                                     <button @click="goToSignUp" class="font-bold text-blue-400 
                                      hover:underline hover:scale-105 
                                      transition-transform">Create an account</button>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
