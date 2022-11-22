@@ -13,6 +13,7 @@ const isAdmin = ref(false)
 
 if (isLogin == true ) {
     var decoded = jwt_decode(token);
+    var msal_decoded = jwt_decode(msal);
     if (decoded.role === 'admin') {
         isAdmin.value = true
     }

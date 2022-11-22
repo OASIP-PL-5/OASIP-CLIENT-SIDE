@@ -44,6 +44,7 @@ const checkIsLogin = computed(() => {
         console.log('msal token: ', localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken'));
         userName.value = jwt_decode(msal).name
         msEmail.value = jwt_decode(msal).preferred_username
+        userRole.value = jwt_decode(msal).roles[0]
         console.log('userName: ', userName);
         return loggingIn.value = true
     }
@@ -149,7 +150,7 @@ const toggle = () => {
                             data-popper-placement="bottom">
                             <div class="py-3 px-4 text-sm text-black ">
                                 <div class="text-xl capitalize font-bold">{{ userRole }}</div>
-                                <div class="font-medium truncate">{{ userEmail }} {{ msEmail}}</div>
+                                <div class="font-medium truncate">{{ userEmail }} {{ msEmail }}</div>
                             </div>
                             <ul class="py-1 text-sm text-black divide-y" aria-labelledby="dropdownInformationButton">
                                 <li>
