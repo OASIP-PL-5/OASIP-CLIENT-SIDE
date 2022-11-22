@@ -82,16 +82,28 @@ const isLoginNull = () => {
     console.log("islogin = false ");
     return false
   }
-
 }
 // const isLogin = newBookingEmail.localeCompare(localStorage.getItem('email'))
 
 // file management 
+
+const tenMb = 10485760
+
 const modelFile = ref(null)
 const fileAction = (e) => {
+  console.clear()
   const file = e.target.files[0]
-  // console.log(file)
   modelFile.value = file
+  console.log("modelFile : ", modelFile.value);
+  if (modelFile.value.size > tenMb) {
+    console.log("The file size cannot be larger than 10 MB");
+    alert("The file size cannot be larger than 10 MB")
+    // fileEditModel.value = null
+    // isTooLarge.value = true
+    // เพื่อ reset file เมื่อขนาดเกินกำหนด
+    e.target.value = ''
+  }
+
 }
 </script>
  
@@ -163,7 +175,8 @@ const fileAction = (e) => {
                 placeholder="maximum at 500 characters" maxlength="500" v-model="newEvent.newNotes"></textarea>
             </div>
             <div class="flex flex-col mb-4">
-              <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> | Optional, Max file size 10MB </span></label>
+              <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> | Optional, Max
+                  file size 10MB </span></label>
               <input class="block w-full text-sm
                text-gray-900 rounded-lg border
                 cursor-pointer" type="file" @change="fileAction">

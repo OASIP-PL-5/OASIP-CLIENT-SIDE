@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import EventList from '../components/EventList.vue'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
 import IconFilter from '../components/icons/IconFilter.vue'
+
 // import VueCookies from 'vue-cookies'
 const token = localStorage.getItem('jwtToken');
 const newToken = localStorage.getItem('refreshToken')
@@ -95,7 +96,6 @@ const closeToggle = () => window.location.reload()
 
 
 const loggingIn = ref(false)
-
 const checkIsLogin = computed(() => {
     if (localStorage.getItem('email')) {
         console.log('email value  : ', localStorage.getItem('email'))
@@ -109,6 +109,7 @@ const checkIsLogin = computed(() => {
 
 console.log("IsThisBitchLogIn", checkIsLogin.value);
 // method: POST -- add event
+const loading = ref(false)
 const addEvent = async (
     newBookingName,
     newBookingEmail,
@@ -117,6 +118,8 @@ const addEvent = async (
     categorySelection,
     modelFile
 ) => {
+    loading.value = true
+    console.log("loading 1 ", loading.value);
     console.log("***modelFile*** : ", modelFile);
     console.log(`${baseUrl}/events`)
     console.log("booking email", newBookingEmail)
@@ -131,7 +134,7 @@ const addEvent = async (
     if (newBookingEmail.localeCompare(localStorage.getItem('email')) == 0) {
         // กรณีมี file-upload ด้วย
         if (modelFile != null) {
-            var fileSize = 10000000 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+            var fileSize = 10485760 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
             if (modelFile.size <= fileSize) {
                 const res = await fetch(`${baseUrl}/events`, {
                     method: 'POST',
@@ -148,6 +151,8 @@ const addEvent = async (
                     })
                 }
                 )
+                loading.value = true
+                console.log("loading 1 ", loading.value);
                 if (res.status === 201) {
                     const addedEvent = await res.json()
                     eventCard.value.push(addedEvent)
@@ -201,6 +206,8 @@ const addEvent = async (
                 })
             }
             )
+            loading.value = true
+            console.log("loading 1 ", loading.value);
             if (res.status === 201) {
                 const addedEvent = await res.json()
                 eventCard.value.push(addedEvent)
@@ -226,8 +233,9 @@ const addEvent = async (
     else {
         // กรณีมี file-upload ด้วย
         if (modelFile != null) {
-            var fileSize = 10000000 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+            const fileSize = 10485760 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
             if (modelFile.size <= fileSize) {
+                console.log("file size", modelFile.size);
                 const res = await fetch(`${baseUrl}/events`, {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
@@ -449,13 +457,6 @@ var hr = String(currentDateTime.getHours())
 var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
 currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
 
-
-// file management 
-// const testFile = (e)=>{
-//   const file = e.target.files[0]
-//   console.log(file)
-// }
-
 </script>
 <template>
     <div>
@@ -561,6 +562,11 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         </div>
         <!-- modal for POST-event from CreateEditEvent.vue(component)-->
         <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" @file="testFile" />
+        <div v-if="loading">
+            <div class="relative w-full rounded">
+                <div style="width: 100%" class="absolute top-0 h-4 rounded shim-red"></div>
+            </div>
+        </div>
         <!-- No Schedule -->
         <div v-show="eventCard == 0" class="grid place-items-center h-screen">
             <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>
@@ -643,3 +649,32 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         </div>
     </div>
 </template>
+<style scoped>
+.shim-red {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(63, 140, 241, 0.7);
+}
+
+.shim-red::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg,
+            rgba(233, 233, 233, 1) 0,
+            rgba(233, 233, 233, 0.9) 50%,
+            rgba(233, 233, 233, 0.8) 100%);
+    animation: shimmer 3s ease-out infinite;
+    content: "";
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(0%);
+        opacity: 0;
+    }
+}
+</style>

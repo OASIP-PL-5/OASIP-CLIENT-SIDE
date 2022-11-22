@@ -4,6 +4,7 @@ import { ref, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router';
 import IconHamburger from './components/icons/IconHamburger.vue';
 import jwt_decode from 'jwt-decode'
+import aad from "./services/aad.js"
 
 
 
@@ -15,13 +16,21 @@ const goToSignUp = () => myRouter.push({ name: 'SignUp' })
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 const userEmail = localStorage.getItem('email')
 const token = localStorage.getItem('jwtToken');
-// const userName = jwt_decode(token).userName
-// const userRole = jwt_decode(token).role
+const msal = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken');
+console.log('msal client info: ', msal);
+
+
+// const msal_username = jwt_decode(msal).name;
+// console.log('msal username: ',msal_username);
+const loggingIn = ref(false)
 const userName = ref('')
 const userRole = ref('')
+const msEmail = ref('')
 
 
-const loggingIn = ref(false)
+
+
+
 const checkIsLogin = computed(() => {
     if (localStorage.getItem('jwtToken')) {
         console.log('token: ', localStorage.getItem('jwtToken'))
@@ -29,20 +38,35 @@ const checkIsLogin = computed(() => {
         userRole.value = jwt_decode(token).role
         console.log('userName: ', userName)
         console.log('userRole: ', userRole)
+        console.log(checkIsLogin);
+        return loggingIn.value = true
+    } else if (localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken')) {
+        console.log('msal token: ', localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken'));
+        userName.value = jwt_decode(msal).name
+        msEmail.value = jwt_decode(msal).preferred_username
+        console.log('userName: ', userName);
         return loggingIn.value = true
     }
     else {
         return loggingIn.value = false
+
     }
+
 
 })
 // console.log('login? : ', checkIsLogin.value);
 const showMenu = ref(true)
 
+const aadLogin = () => {
+    aad.login().then((account) => {
+        account.userName
+    })
+}
+
+
+
+
 const logOut = () => {
-    // localStorage.removeItem('jwtToken')
-    // localStorage.removeItem('refreshToken')
-    // localStorage.removeItem('email')
     localStorage.clear()
     loggingIn.value = false
     console.log('logout');
@@ -54,12 +78,16 @@ const showProfile = ref(false)
 const toggle = () => {
     showProfile.value = true
 }
+
+
 </script>
  
 <template>
     <div>
+        <!-- <button @click="aadLogin">ms</button> -->
 
-        <nav class="bg-white drop-shadow-md rounded-lg sticky top-0 z-50 ">
+
+        <nav class="bg-white drop-shadow-md rounded-lg sticky top-0 z-40 ">
             <div class="max-w-full mx-16">
                 <div class="flex justify-between">
                     <div class="flex space-x-4">
@@ -85,14 +113,14 @@ const toggle = () => {
                             @click="goToContact">ABOUT US</button>
 
 
-                        <button v-if="loggingIn == false" type="button" class=" rounded-lg px-4  bg-blue-400 text-white 
+                        <button v-if="loggingIn == false || checkMsalLogin == false" type="button" class=" rounded-lg px-4  bg-blue-400 text-white 
                                 font-bold rounded-lg text-center
                                 shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500
                                 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600
                                 active:shadow-lg transition duration-150 ease-in-out" @click="goToSignIn">SIGN
                             IN</button>
 
-                            <!-- old_logout button-->
+                        <!-- old_logout button-->
                         <!-- <button v-if="loggingIn == true" type="button" class="rounded-lg px-4  bg-gray-500 text-white 
                                 font-bold rounded-lg text-center
                                 shadow-sm hover:bg-gray-600 hover:shadow-lg focus:bg-gray-600
@@ -120,8 +148,8 @@ const toggle = () => {
                             style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(0px, 10px);"
                             data-popper-placement="bottom">
                             <div class="py-3 px-4 text-sm text-black ">
-                                <div class="text-xl capitalize font-bold">{{userRole}}</div>
-                                <div class="font-medium truncate">{{ userEmail }}</div>
+                                <div class="text-xl capitalize font-bold">{{ userRole }}</div>
+                                <div class="font-medium truncate">{{ userEmail }} {{ msEmail}}</div>
                             </div>
                             <ul class="py-1 text-sm text-black divide-y" aria-labelledby="dropdownInformationButton">
                                 <li>
