@@ -26,8 +26,8 @@ const test = () => {
     alert('hello')
 }
 
-const aadLogin = () =>{
-    aad.login().then((account)=>{
+const aadLogin = () => {
+    aad.login().then((account) => {
         // account.userName
         myRouter.push({ path: '/' })
 
@@ -107,14 +107,15 @@ const aadLogin = () =>{
                                     <p class="text-center font-semibold mx-4 mb-0">OR</p>
                                 </div>
                                 <a @click="aadLogin" class="px-7 py-3 
-                                text-sm leading-snug uppercase rounded border-2
+                                leading-snug uppercase rounded border-2
                                 hover:shadow-lg hover:text-blue-500 focus:shadow-lg focus:outline-none 
                                 focus:ring-0 active:shadow-lg transition 
                                 duration-150 ease-in-out w-full flex justify-center 
-                                items-center mb-3 bg-slate-100">
+                                items-center mb-3 bg-slate-100 cursor-pointer	">
+                                <img src="../assets/microsoft.png" alt="ms-logo" class="w-8 mr-2">
 
-                                    <span class="text-slate-800">Continue with Microsoft</span>
-                            </a>
+                                    <span class="text-slate-500 font-semibold text-xl">Continue with Microsoft</span>
+                                </a>
 
                                 <!-- <div class="flex justify-center mt-2 text-xl">New here?&nbsp;
                                     <button @click="goToSignUp" class="font-bold text-blue-400 
