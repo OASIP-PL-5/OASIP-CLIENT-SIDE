@@ -1,23 +1,12 @@
 <script setup>
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import jwt_decode from 'jwt-decode'
-
 import EventList from '../components/EventList.vue'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
 import IconFilter from '../components/icons/IconFilter.vue'
+
 // import VueCookies from 'vue-cookies'
 const token = localStorage.getItem('jwtToken');
-const isLogin = localStorage.getItem('email') ? true : false
-const isLec = ref(false)
-
-if (isLogin == true) {
-    var decoded = jwt_decode(token);
-    if (decoded.role === 'lecturer') {
-        isLec.value = true
-    }
-}
-
 const newToken = localStorage.getItem('refreshToken')
 
 console.clear()
@@ -107,7 +96,6 @@ const closeToggle = () => window.location.reload()
 
 
 const loggingIn = ref(false)
-
 const checkIsLogin = computed(() => {
     if (localStorage.getItem('email')) {
         console.log('email value  : ', localStorage.getItem('email'))
@@ -119,101 +107,225 @@ const checkIsLogin = computed(() => {
 
 })
 
-console.log("IsLogIn", checkIsLogin.value);
+console.log("IsThisBitchLogIn", checkIsLogin.value);
 // method: POST -- add event
+const loading = ref(false)
 const addEvent = async (
     newBookingName,
-    newBookingEmail,newBookingEmailGuest,
+    newBookingEmail,
     newStartTime,
     newNotes,
-    categorySelection
+    categorySelection,
+    modelFile
 ) => {
+    loading.value = true
+    console.log("loading 1 ", loading.value);
+    console.log("***modelFile*** : ", modelFile);
     console.log(`${baseUrl}/events`)
-    console.log(newBookingEmail)
-    console.log(localStorage.getItem('email')) //เดี๋ยวไปสร้างตัวแปรไว้เก็บเฉพาะ....
+    console.log("booking email", newBookingEmail)
+    console.log("have email in localStorage", localStorage.getItem('email')) //เดี๋ยวไปสร้างตัวแปรไว้เก็บเฉพาะ....
     // ถ้าเท่ากันจะได้ 0 ถ้าไม่เท่ากันจะได้ -1
-    // console.log(newBookingEmail.localeCompare(userEmail.value));
+    console.log(newBookingEmail.localeCompare(userEmail.value));
     // if (newBookingEmail.localeCompare(userEmail.value) == 0) {  // ไว้ check สำหรับ login แล้ว email ตรงกับตอนจะ new event มั้ย
     // ยังมีปัญหาอยู่ คาดว่าเกิดจากการเมาปีกกา
     // ไว้ check 2 กรณีคือ สำหรับ login ถ้า login อย่ localeCompare จะเป็น 0 หรือ ถ้าเป็น guest checkIsLogin จะเป็น false
-    if (checkIsLogin.value == true) {
-        const res = await fetch(`${baseUrl}/events`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({
-                // มีผลต่อ payload ต้องใส่
-                bookingName: newBookingName,
-                bookingEmail: newBookingEmail,
-                eventStartTime: newStartTime,
-                eventDuration: categorySelection.eventDuration,
-                eventNotes: newNotes,
-                eventCategoryId: categorySelection.eventCategoryId,
-                eventCategoryName: categorySelection.eventCategoryName
-            })
+
+    // กรณี postfile-with-login (Authorized)
+    if (newBookingEmail.localeCompare(localStorage.getItem('email')) == 0) {
+        // กรณีมี file-upload ด้วย
+        if (modelFile != null) {
+            var fileSize = 10485760 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+            if (modelFile.size <= fileSize) {
+                const res = await fetch(`${baseUrl}/events`, {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        // มีผลต่อ payload ต้องใส่
+                        bookingName: newBookingName,
+                        bookingEmail: newBookingEmail,
+                        eventStartTime: newStartTime,
+                        eventDuration: categorySelection.eventDuration,
+                        eventNotes: newNotes,
+                        eventCategoryId: categorySelection.eventCategoryId,
+                        eventCategoryName: categorySelection.eventCategoryName
+                    })
+                }
+                )
+                loading.value = true
+                console.log("loading 1 ", loading.value);
+                if (res.status === 201) {
+                    const addedEvent = await res.json()
+                    eventCard.value.push(addedEvent)
+                    console.log("after submit", newBookingEmail);
+                    console.log('added sucessfully')
+
+                    // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
+                    const fileData = new FormData()
+                    fileData.append('file', modelFile)
+                    fileData.append('eventStartTime', newStartTime)
+                    const resFile = await fetch(`${baseUrl}/files/upload`, {
+                        method: 'POST',
+                        body: fileData
+                    })
+
+                    alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
+                    window.location.reload()
+
+                } if (newBookingName.trim().length == 0 && res.status === 417) {
+                    newBookingName = null
+                    alert('Booking Name must be filled out!')
+                }
+                if (newBookingEmail.trim().length == 0 && res.status === 417) {
+                    alert('Booking Email must be filled out!')
+                }
+                if (res.status == 400) {
+                    console.log(currentDateTime);
+                    alert('Appointment start time must be present or future.')
+                }
+                if (res.status === 409) {
+                    alert('Appointment start time unable to schedule overlapping')
+                }
+            }
+            else { alert('Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".') }
         }
-        )
-        if (res.status === 201) {
-            const addedEvent = await res.json()
-            eventCard.value.push(addedEvent)
-            console.log("after submit", newBookingEmail);
-            console.log('added sucessfully')
-            alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
-            window.location.reload()
-        } if (newBookingName.trim().length == 0) {
-            newBookingName = null
-            alert('Booking Name must be filled out!')
-            res.status = 400
-        } if (res.status == 400) {
-            console.log(currentDateTime);
-            alert('Appointment start time must be present or future.')
-            // return res.status = 400
+
+        // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
+        if (modelFile == null || modelFile == undefined) {
+            const res = await fetch(`${baseUrl}/events`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    // มีผลต่อ payload ต้องใส่
+                    bookingName: newBookingName,
+                    bookingEmail: newBookingEmail,
+                    eventStartTime: newStartTime,
+                    eventDuration: categorySelection.eventDuration,
+                    eventNotes: newNotes,
+                    eventCategoryId: categorySelection.eventCategoryId,
+                    eventCategoryName: categorySelection.eventCategoryName
+                })
+            }
+            )
+            loading.value = true
+            console.log("loading 1 ", loading.value);
+            if (res.status === 201) {
+                const addedEvent = await res.json()
+                eventCard.value.push(addedEvent)
+                console.log("after submit", newBookingEmail);
+                console.log('added sucessfully')
+                alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
+                window.location.reload()
+            } if (newBookingName.trim().length == 0) {
+                newBookingName = null
+                alert('Booking Name must be filled out!')
+                res.status = 400
+            } if (res.status == 400) {
+                console.log(currentDateTime);
+                alert('Appointment start time must be present or future.')
+            }
+            if (res.status === 409) {
+                alert('Appointment start time unable to schedule overlapping')
+            }
         }
     }
+
+    // กรณีเป็น "Guest / No-Authorized"
     else {
-        const res = await fetch(`${baseUrl}/events`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-                // มีผลต่อ payload ต้องใส่
-                bookingName: newBookingName,
-                bookingEmail: newBookingEmailGuest,
-                eventStartTime: newStartTime,
-                eventDuration: categorySelection.eventDuration,
-                eventNotes: newNotes,
-                eventCategoryId: categorySelection.eventCategoryId,
-                eventCategoryName: categorySelection.eventCategoryName
-            })
+        // กรณีมี file-upload ด้วย
+        if (modelFile != null) {
+            const fileSize = 10485760 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+            if (modelFile.size <= fileSize) {
+                console.log("file size", modelFile.size);
+                const res = await fetch(`${baseUrl}/events`, {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({
+                        // มีผลต่อ payload ต้องใส่
+                        bookingName: newBookingName,
+                        bookingEmail: newBookingEmail,
+                        eventStartTime: newStartTime,
+                        eventDuration: categorySelection.eventDuration,
+                        eventNotes: newNotes,
+                        eventCategoryId: categorySelection.eventCategoryId,
+                        eventCategoryName: categorySelection.eventCategoryName
+                    })
+                }
+                )
+                if (res.status === 201) {
+                    const addedEvent = await res.json()
+                    eventCard.value.push(addedEvent)
+                    console.log("after submit", newBookingEmail);
+                    console.log('added sucessfully')
+
+                    // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
+                    const fileData = new FormData()
+                    fileData.append('file', modelFile)
+                    fileData.append('eventStartTime', newStartTime)
+                    const resFile = await fetch(`${baseUrl}/files/upload`, {
+                        method: 'POST',
+                        body: fileData
+                    })
+
+                    alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
+                    window.location.reload()
+
+                } if (newBookingName.trim().length == 0 && res.status === 417) {
+                    newBookingName = null
+                    alert('Booking Name must be filled out!')
+                }
+                if (newBookingEmail.trim().length == 0 && res.status === 417) {
+                    alert('Booking Email must be filled out!')
+                }
+                if (res.status == 400) {
+                    console.log(currentDateTime);
+                    alert('Appointment start time must be present or future.')
+                }
+                if (res.status === 409) {
+                    alert('Appointment start time unable to schedule overlapping')
+                }
+            }
+            else { alert('Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".') }
         }
-        )
-        if (res.status === 201) {
-            const addedEvent = await res.json()
-            eventCard.value.push(addedEvent)
-            console.log("after submit", newBookingEmail);
-            console.log('added sucessfully')
-            alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmailGuest}`)
-            window.location.reload()
-        } if (newBookingName.trim().length == 0) {
-            newBookingName = null
-            alert('Booking Name must be filled out!')
-            res.status = 400
-        } if (res.status == 400) {
-            console.log(currentDateTime);
-            alert('Appointment start time must be present or future.')
-            // return res.status = 400
+
+        // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
+        if (modelFile == null || modelFile == undefined) {
+            const res = await fetch(`${baseUrl}/events`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    // มีผลต่อ payload ต้องใส่
+                    bookingName: newBookingName,
+                    bookingEmail: newBookingEmail,
+                    eventStartTime: newStartTime,
+                    eventDuration: categorySelection.eventDuration,
+                    eventNotes: newNotes,
+                    eventCategoryId: categorySelection.eventCategoryId,
+                    eventCategoryName: categorySelection.eventCategoryName
+                })
+            }
+            )
+            if (res.status === 201) {
+                const addedEvent = await res.json()
+                eventCard.value.push(addedEvent)
+                console.log("after submit", newBookingEmail);
+                console.log('added sucessfully')
+                alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
+                window.location.reload()
+            } if (newBookingName.trim().length == 0) {
+                newBookingName = null
+                alert('Booking Name must be filled out!')
+                res.status = 400
+            } if (res.status == 400) {
+                console.log(currentDateTime);
+                alert('Appointment start time must be present or future.')
+            }
+            if (res.status === 409) {
+                alert('Appointment start time unable to schedule overlapping')
+            }
         }
     }
+}//ปีกกาปิดของ function: addEvent()
 
-
-    // }
-    // ไม่ได้ใช้เพราะว่าให้ email ตรงกันกับที่ login แล้ว ซึ่งเป็น ReadOnlyFans
-    // else {
-    //     alert("Please check your email")
-    // }
-
-
-
-
-}
 // SEARCHING METHOD
 // search-catName-option
 const eventCategory = ref([])
@@ -344,6 +456,7 @@ var yyyy = currentDateTime.getFullYear();
 var hr = String(currentDateTime.getHours())
 var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
 currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
+
 </script>
 <template>
     <div>
@@ -448,7 +561,12 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
             </div>
         </div>
         <!-- modal for POST-event from CreateEditEvent.vue(component)-->
-        <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" />
+        <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" @file="testFile" />
+        <div v-if="loading">
+            <div class="relative w-full rounded">
+                <div style="width: 100%" class="absolute top-0 h-4 rounded shim-red"></div>
+            </div>
+        </div>
         <!-- No Schedule -->
         <div v-show="eventCard == 0" class="grid place-items-center h-screen">
             <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>
@@ -485,7 +603,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     <span
                                         class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
                                         {{
-                                        new Date(event.eventStartTime).toLocaleDateString('en')
+                                                new Date(event.eventStartTime).toLocaleDateString('en')
                                         }}
                                     </span>
                                 </div>
@@ -494,10 +612,10 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                                     <li>
                                         Start Time:
                                         {{
-                                        new Date(event.eventStartTime).toLocaleTimeString('en', {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                        })
+                                                new Date(event.eventStartTime).toLocaleTimeString('en', {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })
                                         }}
                                     </li>
                                     <li>Duration: {{ event.eventDuration }} minutes</li>
@@ -519,8 +637,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                 </div>
             </div>
         </div>
-        <div v-if="isLec !== true"
-        class="relative">
+        <div class="relative">
             <button @click="toggleModal = !toggleModal" type="button"
                 class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500 hover:scale-150 transition-transform active:shadow-lg mouse shadow ease-in duration-200 focus:outline-none">
                 <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" class="w-16 h-16 inline-block">
@@ -532,3 +649,32 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         </div>
     </div>
 </template>
+<style scoped>
+.shim-red {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(63, 140, 241, 0.7);
+}
+
+.shim-red::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg,
+            rgba(233, 233, 233, 1) 0,
+            rgba(233, 233, 233, 0.9) 50%,
+            rgba(233, 233, 233, 0.8) 100%);
+    animation: shimmer 3s ease-out infinite;
+    content: "";
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(0%);
+        opacity: 0;
+    }
+}
+</style>

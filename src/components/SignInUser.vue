@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import aad from "../services/aad.js"
 const myRouter = useRouter()
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
+const goToHome = () => myRouter.push({ name: 'Home' })
 
 defineEmits(['matchUser'])
 const props = defineProps({
@@ -20,8 +22,16 @@ const matching = computed(() => {
 })
 
 
-const test = ()=>{
+const test = () => {
     alert('hello')
+}
+
+const aadLogin = () => {
+    aad.login().then((account) => {
+        // account.userName
+        myRouter.push({ path: '/' })
+
+    })
 }
 
 </script>
@@ -81,7 +91,7 @@ const test = ()=>{
                                 <div class="flex justify-center">
                                     <div>
                                         <button
-                                            @click="test,$emit('matchUser', matching.newEmail, matching.newPassword)"
+                                            @click="test, $emit('matchUser', matching.newEmail, matching.newPassword)"
                                             class="inline-block px-8 py-2.5 bg-blue-400
                         text-white font-bold text-2xl leading-tight
                         uppercase rounded-lg shadow-sm hover:bg-blue-500 
@@ -91,9 +101,22 @@ const test = ()=>{
                                             Login</button>
                                     </div>
 
-
-
                                 </div>
+                                <div
+                                    class="flex items-center my-4 before:flex-1 before:border-t before:border-gray-300 before:mt-0.5 after:flex-1 after:border-t after:border-gray-300 after:mt-0.5">
+                                    <p class="text-center font-semibold mx-4 mb-0">OR</p>
+                                </div>
+                                <a @click="aadLogin" class="px-7 py-3 
+                                leading-snug uppercase rounded border-2
+                                hover:shadow-lg hover:text-blue-500 focus:shadow-lg focus:outline-none 
+                                focus:ring-0 active:shadow-lg transition 
+                                duration-150 ease-in-out w-full flex justify-center 
+                                items-center mb-3 bg-slate-100 cursor-pointer	">
+                                <img src="../assets/microsoft.png" alt="ms-logo" class="w-8 mr-2">
+
+                                    <span class="text-slate-500 font-semibold text-xl">Continue with Microsoft</span>
+                                </a>
+
                                 <!-- <div class="flex justify-center mt-2 text-xl">New here?&nbsp;
                                     <button @click="goToSignUp" class="font-bold text-blue-400 
                                      hover:underline hover:scale-105 

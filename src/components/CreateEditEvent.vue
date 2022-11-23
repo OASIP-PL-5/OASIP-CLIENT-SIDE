@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, onBeforeMount } from 'vue'
 const token = localStorage.getItem('jwtToken')
-defineEmits(['closeToggle', 'addEventComp', 'updateEventComp'])
+defineEmits(['file', 'closeToggle', 'addEventComp', 'updateEventComp'])
 const props = defineProps({
   currentEvent: {
     type: Object,
@@ -27,7 +27,6 @@ console.log("เมื่อกด toggle จะขึ้นใน console");
 
 // ตัวแปร ดึง email จาก storage เพื่อใส่ input: bookingEmail
 const newBookingEmail = localStorage.getItem("email")
-const newBookingEmailGuest = ref()
 console.log("email >> ", newBookingEmail);
 
 // GET เพื่อจะ map [id และ duration : จะทำให้สามารถ POST ได้]
@@ -83,9 +82,29 @@ const isLoginNull = () => {
     console.log("islogin = false ");
     return false
   }
-
 }
 // const isLogin = newBookingEmail.localeCompare(localStorage.getItem('email'))
+
+// file management 
+
+const tenMb = 10485760
+
+const modelFile = ref(null)
+const fileAction = (e) => {
+  console.clear()
+  const file = e.target.files[0]
+  modelFile.value = file
+  console.log("modelFile : ", modelFile.value);
+  if (modelFile.value.size > tenMb) {
+    console.log("The file size cannot be larger than 10 MB");
+    alert("The file size cannot be larger than 10 MB")
+    // fileEditModel.value = null
+    // isTooLarge.value = true
+    // เพื่อ reset file เมื่อขนาดเกินกำหนด
+    e.target.value = ''
+  }
+
+}
 </script>
  
 <template>
@@ -108,26 +127,28 @@ const isLoginNull = () => {
 
 
             <!-- input Email if has-login -->
-            <div class="flex flex-col mb-4" v-if="isLoginNull() == false"> 
+            <div class="flex flex-col mb-4" v-if="isLoginNull() == false">
               <label class="mb-2 font-bold text-lg text-gray-900">Email<span class="text-sm font-thin"> | maximum 50
                   characters</span></label>
-              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model="newBookingEmail" type="email"
-                placeholder="Somchai.jairuk@gmail.com" maxlength="50" readonly />
+              <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" required
+                v-model="newBookingEmail" type="email" placeholder="Somchai.jairuk@gmail.com" maxlength="50" readonly />
             </div>
             <!-- input Email if not login-->
             <div class="flex flex-col mb-4" v-else-if="isLoginNull() == true">
-              <label class="mb-2 font-bold text-lg text-gray-900">Email<span class="text-sm font-thin"> | maximum 50
+              <label class="mb-2 font-bold text-lg text-gray-900 border-gray-200">Email<span class="text-sm font-thin">
+                  | maximum 50
                   characters</span></label>
-              <input class="border py-2 px-3 text-grey-800 rounded-lg" required v-model="newBookingEmailGuest" type="email"
-                placeholder="Somchai.jairuk@gmail.com" maxlength="50" />
+              <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" required
+                v-model="newBookingEmail" type="email" placeholder="Somchai.jairuk@gmail.com" maxlength="50" />
             </div>
             <!-- EventCategory -->
             <div class="grid grid-cols-2 mb-2 gap-x-2">
-              <h1 class="font-bold text-lg text-gray-900">Category</h1>
+              <h1 class="font-bold text-lg text-gray-900 ">Category</h1>
               <!-- <h1 class="font-bold text-lg text-gray-900">Duration</h1> -->
             </div>
             <div class="grid grid-cols-1 mb-4 gap-x-2">
-              <select v-model="newEvent.categorySelection" class="border py-2 px-3 text-grey-800 rounded-lg" required>
+              <select v-model="newEvent.categorySelection"
+                class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" required>
                 <option disabled>Please select one</option>
                 <option v-for="(eventCat, index) in eventCategory" :key="index" :value="{
                   eventCategoryId: eventCat.id, eventDuration: eventCat.eventDuration, eventCategoryName: eventCat.eventCategoryName
@@ -143,20 +164,22 @@ const isLoginNull = () => {
               <!-- <h1 class="font-bold text-lg text-gray-900">Start Time</h1> -->
             </div>
             <div class="grid mb-4 ">
-              <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newEvent.newStartTime"
+              <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" v-model="newEvent.newStartTime"
                 type="datetime-local" :min="currentDateTime">
               <!-- <input class="border py-2 px-3 text-grey-800 rounded-lg" v-model="newStartTime" type="time" /> -->
             </div>
             <!-- <span v-if="newStartTime != today">You're choosing past date</span> -->
             <div class="flex flex-col mb-4">
               <label class="mb-2 font-bold text-lg text-gray-900">Notes</label>
-              <textarea class="border py-2 px-3 text-grey-800 rounded-lg" placeholder="maximum at 500 characters"
-                maxlength="500" v-model="newEvent.newNotes"></textarea>
+              <textarea class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200"
+                placeholder="maximum at 500 characters" maxlength="500" v-model="newEvent.newNotes"></textarea>
             </div>
             <div class="flex flex-col mb-4">
-              <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> | file is optional </span></label>
-              <input class="border py-2 px-3 text-grey-800 rounded-lg" 
-                type="file" >
+              <label class="mb-2 font-bold text-lg text-gray-900">File <span class="text-sm font-thin"> | Optional, Max
+                  file size 10MB </span></label>
+              <input class="block w-full text-sm
+               text-gray-900 rounded-lg border
+                cursor-pointer" type="file" @change="fileAction">
             </div>
             <div class="flex justify-end">
               <button class="text-gray-400 
@@ -184,8 +207,8 @@ const isLoginNull = () => {
               </button>
 
               <button @click="$emit('addEventComp',
-                newEvent.newBookingName, newBookingEmail,newBookingEmailGuest, newEvent.newStartTime,
-                newEvent.newNotes, newEvent.categorySelection
+                newEvent.newBookingName, newBookingEmail, newEvent.newStartTime,
+                newEvent.newNotes, newEvent.categorySelection, modelFile
               );" class="inline-block px-6 py-2.5 mt-1.5 bg-blue-400
                         text-white font-bold text-xl leading-tight
                         uppercase rounded shadow-sm hover:bg-blue-500 

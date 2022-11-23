@@ -6,11 +6,14 @@ import jwt_decode from 'jwt-decode'
 
 
 const token = localStorage.getItem('jwtToken');
+const msal = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken');
 const isLogin = localStorage.getItem('email') ? true : false
+const isMsalLogin = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken') ? true : false
 const isAdmin = ref(false)
 
-if (isLogin == true) {
+if (isLogin == true ) {
     var decoded = jwt_decode(token);
+    // var msal_decoded = jwt_decode(msal);
     if (decoded.role === 'admin') {
         isAdmin.value = true
     }
@@ -102,15 +105,14 @@ const toggleModal = ref(false)
                             text-center mb-2 hover:shadow-xl" @click="goToAllEvent">
                         SCHEDULE
                     </button>
-                    <button v-show="isAdmin"
-                        class="text-orange-400
+                    <button v-show="isAdmin" class="text-orange-400
                          hover:text-white border border-orange-700
                         hover:bg-orange-800 focus:ring-4 inline-flex 
                         items-center focus:outline-none transition 
                         duration-500 ease-in-out focus:ring-orange-300 
                         font-light rounded-lg text-2xl px-1.5 py-1.5 mb-2  text-center 
-                        dark:border-orange-500 dark:text-orange-500 dark:hover:text-white dark:hover:bg-orange-600 dark:focus:ring-orange-800"
-                        @click="goToAllUser">
+                        dark:border-orange-500 dark:text-orange-500 dark:hover:text-white
+                        dark:hover:bg-orange-600 dark:focus:ring-orange-800" @click="goToAllUser">
                         OUR USERS
                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                             aria-hidden="true" role="img" class="iconify iconify--ph" width="32" height="32"
