@@ -11,7 +11,14 @@ const isLogin = localStorage.getItem('email') ? true : false
 const isMsalLogin = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken') ? true : false
 const isAdmin = ref(false)
 
-if (isLogin == true ) {
+if (isMsalLogin == true) {
+    var msal_decoded = jwt_decode(msal).roles[0];
+    if (msal_decoded == 'admin') {
+        isAdmin.value = true
+    }
+}
+
+if (isLogin == true) {
     var decoded = jwt_decode(token);
     // var msal_decoded = jwt_decode(msal);
     if (decoded.role === 'admin') {

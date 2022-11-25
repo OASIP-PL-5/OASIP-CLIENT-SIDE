@@ -34,6 +34,21 @@ const baseUrl = import.meta.env.PROD
 // ตัวแปรไว้เก็บ email
 const userEmail = ref()
 
+// get current datetime
+// เพื่อ disable เวลาที่เป็นอดีต
+var currentDateTime = new Date();
+console.log(currentDateTime.toJSON());
+var dd = String(currentDateTime.getDate()).padStart(2, '0');
+var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0!
+var yyyy = currentDateTime.getFullYear();
+var hr = String(currentDateTime.getHours())
+var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
+currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
+console.log("currentDateTime: ", currentDateTime);
+
+const isUpcoming = ref(false)
+const isPast = ref(false)
+
 const getEventCard = async () => {
 
     // console.log(`${baseUrl}/events`)
@@ -50,6 +65,10 @@ const getEventCard = async () => {
         eventCard.value = await resEvent.json()
         userEmail.value = localStorage.getItem('email')
         console.log("userEmail : ", userEmail.value);
+        console.log("eventCard : ", eventCard.value);
+
+
+
     }
     if (resEvent.status === 401 && checkIsLogin.value === true) {
         const resRefresh = await fetch(`${baseUrl}/refresh`, {
@@ -447,15 +466,7 @@ const filterByDate = async () => {
 const showFilterMenu = ref(false)
 const picked = ref(false)
 const refresh = () => window.location.reload()
-// เพื่อ disable เวลาที่เป็นอดีต
-var currentDateTime = new Date();
-console.log(currentDateTime.toJSON());
-var dd = String(currentDateTime.getDate()).padStart(2, '0');
-var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0!
-var yyyy = currentDateTime.getFullYear();
-var hr = String(currentDateTime.getHours())
-var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
-currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
+
 
 </script>
 <template>
@@ -595,6 +606,16 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                         v-for="(event, index) in eventCard" :key="index">
                         <div class="px-6 py-2 text-left">
                             <div>
+                                <div class="flex justify-start">
+                                    <div v-if="event.eventStartTime > currentDateTime"
+                                        class="bg-blue-100 font-semibold rounded-lg w-fit px-2 text-blue-500 ">
+                                        Upcoming</div>
+
+                                    <div v-if="event.eventStartTime < currentDateTime"
+                                        class="border bg-slate-200 font-semibold rounded-lg w-fit px-2 text-slate-600 ">
+                                        Past</div>
+                                </div>
+
                                 <div class="font-bold text-2xl mb-2 text-gray-700">
                                     {{ event.eventCategoryName }}
                                     <span>

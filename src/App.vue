@@ -14,6 +14,7 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
+const goToPasswordConfig = () => myRouter.push({ name: 'PasswordConfig' })
 const userEmail = localStorage.getItem('email')
 const token = localStorage.getItem('jwtToken');
 const msal = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken');
@@ -154,10 +155,10 @@ const toggle = () => {
                             </div>
                             <ul class="py-1 text-sm text-black divide-y" aria-labelledby="dropdownInformationButton">
                                 <li>
-                                    <a href="#" class="block py-2 px-4 
+                                    <a @click="goToPasswordConfig" href="#" class="block py-2 px-4 
                                         hover:bg-gray-400 
                                         dark:hover:bg-gray-100 
-                                        ">Change password</a>
+                                        ">Setting</a>
                                 </li>
                                 <li @click="logOut()" class="block py-2 px-4  
                                         hover:bg-gray-800 
