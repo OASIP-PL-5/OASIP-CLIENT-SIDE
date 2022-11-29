@@ -11,6 +11,7 @@ import SignUp from '../views/SignUp.vue'
 import SignIn from '../views/SignIn.vue'
 import ForgotPassword from '../views/ForgotPassword.vue'
 import ResetPassword from '../views/ResetPassword.vue'
+import ChangePassword from '../views/ChangePassword.vue'
 
 
 const history = createWebHistory()
@@ -78,6 +79,11 @@ const routes = [
         path: '/reset-password',
         name: 'ResetPassword',
         component: ResetPassword
+    },
+    {
+        path: '/setting-password',
+        name: 'ChangePassword',
+        component: ChangePassword
     }
 
 

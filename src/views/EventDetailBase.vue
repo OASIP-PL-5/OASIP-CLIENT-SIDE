@@ -274,7 +274,12 @@ const updateEvent = async () => {
   )
   editLoading.value = true
   console.log("edit loading", editLoading.value);
-  if (resGet.status === 404) {
+
+  if (resGet.status == 200) {
+    window.location.reload()
+    editLoading.value = false
+  }
+  else if (resGet.status === 404) {
     alert(alert404)
     goToAllEvent()
   }

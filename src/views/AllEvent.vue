@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import EventList from '../components/EventList.vue'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
 import IconFilter from '../components/icons/IconFilter.vue'
 
@@ -33,6 +32,8 @@ const baseUrl = import.meta.env.PROD
 
 // ตัวแปรไว้เก็บ email
 const userEmail = ref()
+
+const ownEvent = ref(false)
 
 // get current datetime
 // เพื่อ disable เวลาที่เป็นอดีต
@@ -66,9 +67,7 @@ const getEventCard = async () => {
         userEmail.value = localStorage.getItem('email')
         console.log("userEmail : ", userEmail.value);
         console.log("eventCard : ", eventCard.value);
-
-
-
+        console.log(eventCard.value[0].email);
     }
     if (resEvent.status === 401 && checkIsLogin.value === true) {
         const resRefresh = await fetch(`${baseUrl}/refresh`, {
@@ -609,24 +608,61 @@ const refresh = () => window.location.reload()
                                 <div class="flex justify-start">
                                     <div v-if="event.eventStartTime > currentDateTime"
                                         class="bg-blue-100 font-semibold rounded-lg w-fit px-2 text-blue-500 ">
-                                        Upcoming</div>
+                                        <span class="inline-block">
+                                            <svg width="22" height="22" viewBox="0 -2 24 24">
+                                                <path fill="currentColor" d="M15 22v-2h4V10H5v4H3V6q0-.825.587-1.412Q4.175 4 
+                                                 5 4h1V2h2v2h8V2h2v2h1q.825 0 1.413.588Q21 5.175 21 
+                                                 6v14q0 .825-.587 1.413Q19.825 22 19 22Zm-7 2l-1.4-1.4L9.175 
+                                                 20H1v-2h8.175L6.6 15.4L8 14l5 5Z" />
+                                            </svg>
+                                        </span>
+                                        Upcoming
+                                    </div>
 
                                     <div v-if="event.eventStartTime < currentDateTime"
                                         class="border bg-slate-200 font-semibold rounded-lg w-fit px-2 text-slate-600 ">
-                                        Past</div>
+                                        <span class="inline-block"><svg width="22" height="22" viewBox="0 -3 24 24">
+                                                <path fill="currentColor" d="M16.53 11.06L15.47 10l-4.88 
+                                                    4.88l-2.12-2.12l-1.06 1.06L10.59 
+                                                    17l5.94-5.94zM19 3h-1V1h-2v2H8V1H6v2H5c-1.11 
+                                                    0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 
+                                                    2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
+                                            </svg>
+                                        </span>
+                                        Past
+                                    </div>
+                                    <div v-if="userEmail == event.bookingEmail"
+                                        class="rounded-lg bg-yellow-200 bg-opacity-50 text-yellow-600 font-semibold ml-1 px-2">
+                                        <span class="inline-block">
+                                            <svg width="24" height="24" viewBox="0 -2 24 24">
+                                                <path fill="currentColor"
+                                                    d="m9.981 14.811l-.467 2.726l2.449-1.287l2.449 1.287l-.468-2.726l1.982-1.932l-2.738-.398L11.963 10l-1.225 2.481L8 12.879z" />
+                                                <path fill="currentColor"
+                                                    d="M19 4h-2V2h-2v2H9V2H7v2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zm.002 16H5V8h14l.002 12z" />
+                                            </svg>
+                                        </span>
+                                        My event
+                                    </div>
+
+                                    <div class="ml-auto">
+                                        <span class="ml-1 text-blue-400 
+                                        border border-blue-400 
+                                        font-bold rounded-lg text-sm px-1.5 py-1 
+                                        text-center">
+                                            {{
+                                                    new Date(event.eventStartTime).toLocaleDateString('en')
+                                            }}
+                                        </span>
+                                    </div>
                                 </div>
+
 
                                 <div class="font-bold text-2xl mb-2 text-gray-700">
                                     {{ event.eventCategoryName }}
                                     <span>
                                         <!--Space between eventCategory and date-->
                                     </span>
-                                    <span
-                                        class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
-                                        {{
-                                                new Date(event.eventStartTime).toLocaleDateString('en')
-                                        }}
-                                    </span>
+
                                 </div>
                                 <ul class="mb-2">
                                     <li>Name: {{ event.bookingName }}</li>

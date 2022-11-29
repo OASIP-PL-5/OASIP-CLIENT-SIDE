@@ -15,6 +15,8 @@ const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 const goToPasswordConfig = () => myRouter.push({ name: 'PasswordConfig' })
+const goToChangePassword = () => myRouter.push({ name: 'ChangePassword' })
+
 const userEmail = localStorage.getItem('email')
 const token = localStorage.getItem('jwtToken');
 const msal = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken');
@@ -108,7 +110,7 @@ const toggle = () => {
                     <div class="hidden md:flex flex-cols-5 items-center gap-x-14 text-xl">
                         <button type="button" class="text-blue-400" @click="goToHome">HOME</button>
 
-                        <button type="button" class="link link-underline link-underline-black" @click="goToAllEvent">ALL
+                        <button type="button" class="link link-underline link-underline-black " @click="goToAllEvent">ALL
                             EVENTS</button>
 
                         <button type="button" class="link link-underline link-underline-black"
@@ -155,7 +157,7 @@ const toggle = () => {
                             </div>
                             <ul class="py-1 text-sm text-black divide-y" aria-labelledby="dropdownInformationButton">
                                 <li>
-                                    <a @click="goToPasswordConfig" href="#" class="block py-2 px-4 
+                                    <a @click="goToChangePassword" href="#" class="block py-2 px-4 
                                         hover:bg-gray-400 
                                         dark:hover:bg-gray-100 
                                         ">Setting</a>
