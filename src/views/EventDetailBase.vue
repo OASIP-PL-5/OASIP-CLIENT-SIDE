@@ -54,7 +54,7 @@ const getThisEventCard = async () => {
   // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
   if (res.status === 200) {
     thisEventDetail.value = await res.json()
-    if(thisEventDetail.value[0].bookingEmail == null){
+    if (thisEventDetail.value[0].bookingEmail == null) {
       isOwner.value = false
       console.log("isOwner", isOwner.value);
     }
@@ -216,7 +216,7 @@ const cancelEvent = async () => {
   if (confirm(confirmation) == true) {
     //warning:: delete-file-before-event !!!
     const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
-      method: 'DELETE'
+      method: 'DELETE', headers:{'Authorization': `Bearer ${token}`}
     })
 
     const res = await fetch(`${baseUrl}/events/${id}`, {

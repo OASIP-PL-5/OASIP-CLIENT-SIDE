@@ -3,7 +3,12 @@ import { useRoute, useRouter } from 'vue-router'
 const myRouter = useRouter()
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 const goToReset = () => myRouter.push({ name: 'ResetPassword' })
-
+const route = useRoute()
+let url = route.query
+console.log("url")
+console.log(url.token)//pattern https://url.com?token=บลาๆ
+const getToken = url.token
+console.log(getToken)
 </script>
  
 <template>

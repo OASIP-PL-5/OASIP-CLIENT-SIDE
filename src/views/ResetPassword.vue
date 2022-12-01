@@ -1,5 +1,11 @@
 <script setup>
-
+import { useRoute, useRouter } from 'vue-router'
+const route = useRoute()
+let url = route.query
+console.log("url")
+console.log(url.token)//pattern https://url.com?token=บลาๆ
+const getToken = url.token
+console.log(getToken)
 </script>
  
 <template>

@@ -5,6 +5,8 @@ import CreateEditEvent from '../components/CreateEditEvent.vue'
 import IconFilter from '../components/icons/IconFilter.vue'
 import jwt_decode from 'jwt-decode'
 
+// ref-message-กรณี จะนำ errormessage ไปใช้งาน
+const refMes = ref("")
 
 
 // import VueCookies from 'vue-cookies'
@@ -255,7 +257,13 @@ const addEvent = async (
                 alert('Appointment start time must be present or future.')
             }
             if (res.status === 409) {
-                alert('Appointment start time unable to schedule overlapping')
+
+                // alert('Appointment start time unable to schedule overlapping')
+                return res.json().then(text => {
+                    refMes.value = text.message;
+                    console.log(refMes.value);
+                    alert(refMes.value)
+                })
             }
         }
     }
