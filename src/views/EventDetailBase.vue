@@ -14,6 +14,7 @@ const token = localStorage.getItem('jwtToken');
 const IsAuthorized = ref(true)
 const alert404 = "Sorry... Something went wrong with this event.\nWe'll take you back to the EVENT-LIST-PAGE"
 
+const isOwner = ref(true)
 
 
 // model สำหรับเก็บค่า edit จาก user
@@ -53,6 +54,10 @@ const getThisEventCard = async () => {
   // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
   if (res.status === 200) {
     thisEventDetail.value = await res.json()
+    if(thisEventDetail.value[0].bookingEmail == null){
+      isOwner.value = false
+      console.log("isOwner", isOwner.value);
+    }
     console.log(`model startTime:: ${thisEventDetail.value[0].eventStartTime}`);
     console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
     editStartTimeModel.value = thisEventDetail.value[0].eventStartTime
@@ -228,6 +233,7 @@ const cancelEvent = async () => {
 
     if (res.status === 200) {
       console.log('cancel bookingId: [' + id + '] success')
+      alert('cancel bookingId: [' + id + '] success')
       await goToAllEvent()
     } else if (res.status === 403) {
       alert("You are not authorized to this action")
@@ -319,7 +325,7 @@ const updateEvent = async () => {
       body: fileEditedData
     })
     if (resPutFile.status === 200) {
-      window.location.reload()
+      // window.location.reload()
     }
     else if (resPutFile.status === 404) {
       // fetch post file
@@ -616,7 +622,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       </button>
                       <span class="mx-14" v-if="isClickEdit == false"></span>
                       <!-- click เพื่อเริ่มต้นการ edit -->
-                      <button @click="onClickEdit" class="text-orange-400 hover:text-white border 
+                      <button v-if="isOwner" @click="onClickEdit" class="text-orange-400 hover:text-white border 
                           border-orange-700 hover:bg-orange-800 focus:ring-4
                           focus:outline-none transition duration-500 ease-in-out
                           focus:ring-orange-300 font-light rounded-xl text-lg
@@ -630,7 +636,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       <!-- <span class="mx-14" v-show="isClickEdit"></span> -->
 
                       <!-- ยกเลิกการจองนัด -->
-                      <button @click="cancelEvent" class="text-red-400 hover:text-white 
+                      <button v-if="isOwner" @click="cancelEvent" class="text-red-400 hover:text-white 
                           border border-red-700 hover:bg-red-800
                           focus:ring-4 focus:outline-none transition
                           duration-500 ease-in-out focus:ring-red-300

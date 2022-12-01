@@ -3,6 +3,9 @@ import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
 import IconFilter from '../components/icons/IconFilter.vue'
+import jwt_decode from 'jwt-decode'
+
+
 
 // import VueCookies from 'vue-cookies'
 const token = localStorage.getItem('jwtToken');
@@ -114,18 +117,28 @@ const closeToggle = () => window.location.reload()
 
 
 const loggingIn = ref(false)
+const allowModal = ref(true)
+
+
+
 const checkIsLogin = computed(() => {
     if (localStorage.getItem('email')) {
         console.log('email value  : ', localStorage.getItem('email'))
+        const decoded = jwt_decode(localStorage.getItem('jwtToken'))
+        if (decoded.role === "lecturer" || decoded.role === null) {
+            allowModal.value = false
+            console.log('allowModal : ', allowModal.value);
+        }
         return loggingIn.value = true
     }
     else {
-        return loggingIn.value = false
+        loggingIn.value = false
+        allowModal.value = false
     }
 
 })
 
-console.log("IsThisBitchLogIn", checkIsLogin.value);
+console.log("isLogin", checkIsLogin.value);
 // method: POST -- add event
 const loading = ref(false)
 const addEvent = async (
@@ -695,7 +708,7 @@ const refresh = () => window.location.reload()
             </div>
         </div>
         <div class="relative">
-            <button @click="toggleModal = !toggleModal" type="button"
+            <button v-if="allowModal == true" @click="toggleModal = !toggleModal" type="button"
                 class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500 hover:scale-150 transition-transform active:shadow-lg mouse shadow ease-in duration-200 focus:outline-none">
                 <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" class="w-16 h-16 inline-block">
                     <path fill="#FFFFFF" d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
