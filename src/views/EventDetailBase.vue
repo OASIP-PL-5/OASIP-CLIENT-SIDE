@@ -34,7 +34,7 @@ const getThisEventCard = async () => {
     headers:
     {
       'content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     }
   }
   )
@@ -96,7 +96,6 @@ const getFile = async () => {
   if (res.status === 200) {
     thisEventFile.value = await res.json()
     hasFile.value = true
-
     loadFile.value = false
     console.log("thisEventFile = ", thisEventFile)
     console.log(thisEventFile.value.fileName);
@@ -142,10 +141,10 @@ const downloadFile = async () => {
     fileUrl.value = res.url
     console.log("fileUrl", fileUrl.value);
     console.log("thisEventFile = ", thisEventFile)
-    console.log(thisEventFile.value.fileName);
-    console.log(thisEventFile.value.fileType);
-    console.log(thisEventFile.value.eventBooking);
-    console.log(thisEventFile.value.id);
+    // console.log(thisEventFile.value.fileName);
+    // console.log(thisEventFile.value.fileType);
+    // console.log(thisEventFile.value.eventBooking);
+    // console.log(thisEventFile.value.id);
     fileId.value = thisEventFile.value.id
     console.log(`fileId = ${fileId.value}`);
     fileType.value = thisEventFile.value.fileType
@@ -202,7 +201,7 @@ const deleteFile = async () => {
 onBeforeMount(async () => {
   await getThisEventCard()
   await getFile()
-  // await downloadFile()
+  await downloadFile()
 
 })
 
@@ -282,7 +281,7 @@ const updateEvent = async () => {
   console.log("edit loading", editLoading.value);
 
   if (resGet.status == 200) {
-    window.location.reload()
+    // window.location.reload()
     editLoading.value = false
   }
   else if (resGet.status === 404) {
@@ -322,10 +321,12 @@ const updateEvent = async () => {
     fileEditedData.append('file', fileEditModel.value)
     const resPutFile = await fetch(`${baseUrl}/files/update/${id}`, {
       method: 'PATCH',
-      body: fileEditedData
+      body: fileEditedData,
+      // ถ้าไม่ใส่ header จะ 401
+      headers: { 'Authorization': `Bearer ${token}` }
     })
     if (resPutFile.status === 200) {
-      // window.location.reload()
+      window.location.reload()
     }
     else if (resPutFile.status === 404) {
       // fetch post file
@@ -360,7 +361,9 @@ const updateEvent = async () => {
       const resFile = await fetch(`${baseUrl}/files/upload`, {
         method: 'POST',
         // body: `${resGet.eventStartTime}`
-        body: fileData
+        body: fileData,
+        headers: { 'Authorization': `Bearer ${token}` }
+
       })
       editLoading.value = true
       if (resFile.status == 200) {
@@ -378,7 +381,7 @@ const updateEvent = async () => {
       // }
     }
   }
-  // window.location.reload()
+  window.location.reload()
 
 }
 
