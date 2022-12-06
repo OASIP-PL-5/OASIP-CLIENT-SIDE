@@ -27,10 +27,11 @@ const test = () => {
     alert('hello')
 }
 
-const aadLogin = () => {
-    aad.login().then((account) => {
+const aadLogin =  () => {
+    aad.login().then(async (account) => {
         // account.userName
-        myRouter.push({ path: '/' })
+        await myRouter.push({ path: '/' })
+        myRouter.go(0)
 
     })
 }

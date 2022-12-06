@@ -13,6 +13,11 @@ const refMes = ref("")
 const token = localStorage.getItem('jwtToken');
 const newToken = localStorage.getItem('refreshToken')
 
+const msalToken = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken');
+const isMsalLogin = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken') ? true : false
+
+
+
 console.clear()
 // binding-CSS
 const btnTailWind =
@@ -60,50 +65,144 @@ const getEventCard = async () => {
     // console.log(`${baseUrl}/events`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const resEvent = await fetch(`${baseUrl}/events`, {
-        headers: {
-            'content-type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-    if (resEvent.status === 200) {
-        eventCard.value = await resEvent.json()
-        userEmail.value = localStorage.getItem('email')
-        console.log("userEmail : ", userEmail.value);
-        console.log("eventCard : ", eventCard.value);
-        console.log(eventCard.value[0].email);
-    }
-    if (resEvent.status === 401 && checkIsLogin.value === true) {
-        const resRefresh = await fetch(`${baseUrl}/refresh`, {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-                'Authorization': `Bearer ${newToken}`
-            },
-            body: JSON.stringify({
-                token: newToken
-            })
-        })
-        if (resRefresh.status === 401) {
-            localStorage.clear()
-            alert('Please login again')
-            await myRouter.push({ path: '/sign-in' })
-        }
-        if (resRefresh.status === 200) {
-            const data = await resRefresh.json()
-            localStorage.setItem('jwtToken', data.refreshToken)
+    if (isMsalLogin == false) {
+        if (checkIsLogin.value == undefined || checkIsLogin.value == null) {
             const resEvent = await fetch(`${baseUrl}/events`, {
                 headers: {
                     'content-type': 'application/json',
-                    'Authorization': `Bearer ${newToken}`
+                    // 'Authorization': `Bearer ${token}`
                 }
-            })
+            }) // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
             if (resEvent.status === 200) {
                 eventCard.value = await resEvent.json()
+                userEmail.value = localStorage.getItem('email')
+                console.log("userEmail : ", userEmail.value);
+                console.log("eventCard : ", eventCard.value);
+                console.log(eventCard.value[0].email);
+            }
+            if (resEvent.status === 401 && checkIsLogin.value === true) {
+                const resRefresh = await fetch(`${baseUrl}/refresh`, {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json',
+                        'Authorization': `Bearer ${newToken}`
+                    },
+                    body: JSON.stringify({
+                        token: newToken
+                    })
+                })
+                if (resRefresh.status === 401) {
+                    localStorage.clear()
+                    alert('Please login again')
+                    await myRouter.push({ path: '/sign-in' })
+                }
+                if (resRefresh.status === 200) {
+                    const data = await resRefresh.json()
+                    localStorage.setItem('jwtToken', data.refreshToken)
+                    const resEvent = await fetch(`${baseUrl}/events`, {
+                        headers: {
+                            'content-type': 'application/json',
+                            'Authorization': `Bearer ${newToken}`
+                        }
+                    })
+                    if (resEvent.status === 200) {
+                        eventCard.value = await resEvent.json()
+                    }
+                }
+            }
+        }
+        else{
+            const resEvent = await fetch(`${baseUrl}/events`, {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            }) // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+            if (resEvent.status === 200) {
+                eventCard.value = await resEvent.json()
+                userEmail.value = localStorage.getItem('email')
+                console.log("userEmail : ", userEmail.value);
+                console.log("eventCard : ", eventCard.value);
+                console.log(eventCard.value[0].email);
+            }
+            if (resEvent.status === 401 && checkIsLogin.value === true) {
+                const resRefresh = await fetch(`${baseUrl}/refresh`, {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json',
+                        'Authorization': `Bearer ${newToken}`
+                    },
+                    body: JSON.stringify({
+                        token: newToken
+                    })
+                })
+                if (resRefresh.status === 401) {
+                    localStorage.clear()
+                    alert('Please login again')
+                    await myRouter.push({ path: '/sign-in' })
+                }
+                if (resRefresh.status === 200) {
+                    const data = await resRefresh.json()
+                    localStorage.setItem('jwtToken', data.refreshToken)
+                    const resEvent = await fetch(`${baseUrl}/events`, {
+                        headers: {
+                            'content-type': 'application/json',
+                            'Authorization': `Bearer ${newToken}`
+                        }
+                    })
+                    if (resEvent.status === 200) {
+                        eventCard.value = await resEvent.json()
+                    }
+                }
             }
         }
     }
+    if (isMsalLogin == true) {
+        const resEvent = await fetch(`${baseUrl}/events`, {
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${msalToken}`
+            }
+        }) // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+        if (resEvent.status === 200) {
+            eventCard.value = await resEvent.json()
+            userEmail.value = localStorage.getItem('email')
+            console.log("userEmail : ", userEmail.value);
+            console.log("eventCard : ", eventCard.value);
+            console.log(eventCard.value[0].email);
+        }
+        if (resEvent.status === 401 && checkIsLogin.value === true) {
+            const resRefresh = await fetch(`${baseUrl}/refresh`, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${newToken}`
+                },
+                body: JSON.stringify({
+                    token: newToken
+                })
+            })
+            if (resRefresh.status === 401) {
+                localStorage.clear()
+                alert('Please login again')
+                await myRouter.push({ path: '/sign-in' })
+            }
+            if (resRefresh.status === 200) {
+                const data = await resRefresh.json()
+                localStorage.setItem('jwtToken', data.refreshToken)
+                const resEvent = await fetch(`${baseUrl}/events`, {
+                    headers: {
+                        'content-type': 'application/json',
+                        'Authorization': `Bearer ${newToken}`
+                    }
+                })
+                if (resEvent.status === 200) {
+                    eventCard.value = await resEvent.json()
+                }
+            }
+        }
+    }
+
 
 }
 onBeforeMount(async () => {
@@ -371,7 +470,9 @@ const eventCategory = ref([])
 const getEventCategory = async () => {
     console.log(`${baseUrl}/event-categories`)
     const res = await fetch(`${baseUrl}/event-categories`, {
-        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        headers: { 'content-type': 'application/json',
+        //  'Authorization': `Bearer ${token}`
+         }
     })
     eventCategory.value = await res.json()
     console.log('data from api: ' + eventCategory.value)

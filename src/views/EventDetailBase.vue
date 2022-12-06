@@ -7,15 +7,36 @@ const myRouter = useRouter()
 const goToNotFound = () => myRouter.push({ name: 'NotFound' })
 
 console.clear()
+
+const checkIsLogin = computed(() => {
+    if (localStorage.getItem('email')) {
+        console.log('email value  : ', localStorage.getItem('email'))
+        const decoded = jwt_decode(localStorage.getItem('jwtToken'))
+        if (decoded.role === "lecturer" || decoded.role === null) {
+            allowModal.value = false
+            console.log('allowModal : ', allowModal.value);
+        }
+        return loggingIn.value = true
+    }
+    else {
+        loggingIn.value = false
+        allowModal.value = false
+    }
+
+})
+
 const { params } = useRoute()
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToAllUser = () => myRouter.push({ name: 'AllUser' })
 const token = localStorage.getItem('jwtToken');
+const newToken = localStorage.getItem('refreshToken')
+const msalToken = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken');
+const isMsalLogin = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken') ? true : false
+
 const IsAuthorized = ref(true)
 const alert404 = "Sorry... Something went wrong with this event.\nWe'll take you back to the EVENT-LIST-PAGE"
 
 const isOwner = ref(true)
-
 
 // model สำหรับเก็บค่า edit จาก user
 const editStartTimeModel = ref('')
@@ -366,7 +387,7 @@ const updateEvent = async () => {
 
       })
       editLoading.value = true
-      if (resFile.status == 200) {
+      if (resFile.status == 201) {
         editLoading.value = false
         doneEdit.value = true
         // wait 2 seconds then reload page

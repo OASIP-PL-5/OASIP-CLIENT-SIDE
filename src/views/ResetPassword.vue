@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 let url = route.query
@@ -6,6 +7,37 @@ console.log("url")
 console.log(url.token)//pattern https://url.com?token=บลาๆ
 const getToken = url.token
 console.log(getToken)
+
+const password = computed(()=>{
+    newPassword =''
+    confirmPassword = ''
+})
+
+const reset = async (password)=>{
+    console.log(password.newPassword)
+    console.log(password.confirmPassword)
+    if(password.newPassword.length>=8 && password.newPassword.length<=15){
+        if(password.newPassword.localeCompare(password.confirmPassword) == 0){
+            const res = await fetch(`${baseUrl}/forgot`,{
+                method: 'PUT',
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${url.token}`
+                },
+                body:JSON.stringify({
+                    password: password.newPassword
+                })
+            })
+            if(res.status===200){
+                alert("Change password complete")
+            }
+        }else{
+            alert("password and confirm password not match")
+        }
+    }else{
+        alert("Password must have between 8-15 charecters")
+    }
+}
 </script>
  
 <template>
@@ -25,18 +57,18 @@ console.log(getToken)
                                 New password <span class="text-slate-400 font-thin">| minimum 8 maximum 14
                                     characters</span>
                             </label>
-                            <input
+                            <input v-model="newPassword"
                                 class="w-full px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
                                 type="password" placeholder="Enter new password" />
                             <label class="block mt-2 mb-2 text-lg font-bold text-blue-400">
                                 Confirm password
                             </label>
-                            <input
+                            <input v-model="confirmPassword"
                                 class="w-full mb-2 px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
                                 type="password" placeholder="Enter new password again" />
                         </div>
                         <div class="mb-3 text-center">
-                            <button @click="goToReset"
+                            <button @click="reset()"
                                 class="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:shadow-outline"
                                 type="button">
                                 Reset Password
