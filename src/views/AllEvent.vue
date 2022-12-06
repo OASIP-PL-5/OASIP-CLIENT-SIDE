@@ -1,12 +1,22 @@
 <script setup>
 import { ref, onBeforeMount, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import EventList from '../components/EventList.vue'
 import CreateEditEvent from '../components/CreateEditEvent.vue'
 import IconFilter from '../components/icons/IconFilter.vue'
+import jwt_decode from 'jwt-decode'
+
+// ref-message-กรณี จะนำ errormessage ไปใช้งาน
+const refMes = ref("")
+
+
 // import VueCookies from 'vue-cookies'
 const token = localStorage.getItem('jwtToken');
 const newToken = localStorage.getItem('refreshToken')
+
+const msalToken = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken');
+const isMsalLogin = localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken') ? true : false
+
+
 
 console.clear()
 // binding-CSS
@@ -33,53 +43,167 @@ const baseUrl = import.meta.env.PROD
 // ตัวแปรไว้เก็บ email
 const userEmail = ref()
 
+const ownEvent = ref(false)
+
+// get current datetime
+// เพื่อ disable เวลาที่เป็นอดีต
+var currentDateTime = new Date();
+console.log(currentDateTime.toJSON());
+var dd = String(currentDateTime.getDate()).padStart(2, '0');
+var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0!
+var yyyy = currentDateTime.getFullYear();
+var hr = String(currentDateTime.getHours())
+var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
+currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
+console.log("currentDateTime: ", currentDateTime);
+
+const isUpcoming = ref(false)
+const isPast = ref(false)
+
 const getEventCard = async () => {
 
     // console.log(`${baseUrl}/events`)
     // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
     // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    const resEvent = await fetch(`${baseUrl}/events`, {
-        headers: {
-            'content-type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-    if (resEvent.status === 200) {
-        eventCard.value = await resEvent.json()
-        userEmail.value = localStorage.getItem('email')
-        console.log("userEmail : ", userEmail.value);
-    }
-    if (resEvent.status === 401 && checkIsLogin.value === true) {
-        const resRefresh = await fetch(`${baseUrl}/refresh`, {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-                'Authorization': `Bearer ${newToken}`
-            },
-            body: JSON.stringify({
-                token: newToken
-            })
-        })
-        if (resRefresh.status === 401) {
-            localStorage.clear()
-            alert('Please login again')
-            await myRouter.push({ path: '/sign-in' })
-        }
-        if (resRefresh.status === 200) {
-            const data = await resRefresh.json()
-            localStorage.setItem('jwtToken', data.refreshToken)
+    if (isMsalLogin == false) {
+        // guest
+        if (checkIsLogin.value == undefined || checkIsLogin.value == null) {
             const resEvent = await fetch(`${baseUrl}/events`, {
                 headers: {
                     'content-type': 'application/json',
-                    'Authorization': `Bearer ${newToken}`
+                    // 'Authorization': `Bearer ${token}`
                 }
-            })
+            }) // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
             if (resEvent.status === 200) {
                 eventCard.value = await resEvent.json()
+                userEmail.value = localStorage.getItem('email')
+                console.log("userEmail : ", userEmail.value);
+                console.log("eventCard : ", eventCard.value);
+                console.log(eventCard.value[0].email);
+            }
+            if (resEvent.status === 401 && checkIsLogin.value === true) {
+                const resRefresh = await fetch(`${baseUrl}/refresh`, {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json',
+                        'Authorization': `Bearer ${newToken}`
+                    },
+                    body: JSON.stringify({
+                        token: newToken
+                    })
+                })
+                if (resRefresh.status === 401) {
+                    localStorage.clear()
+                    alert('Please login again')
+                    await myRouter.push({ path: '/sign-in' })
+                }
+                if (resRefresh.status === 200) {
+                    const data = await resRefresh.json()
+                    localStorage.setItem('jwtToken', data.refreshToken)
+                    const resEvent = await fetch(`${baseUrl}/events`, {
+                        headers: {
+                            'content-type': 'application/json',
+                            'Authorization': `Bearer ${newToken}`
+                        }
+                    })
+                    if (resEvent.status === 200) {
+                        eventCard.value = await resEvent.json()
+                    }
+                }
+            }
+        }
+        else{
+            const resEvent = await fetch(`${baseUrl}/events`, {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            }) // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+            if (resEvent.status === 200) {
+                eventCard.value = await resEvent.json()
+                userEmail.value = localStorage.getItem('email')
+                console.log("userEmail : ", userEmail.value);
+                console.log("eventCard : ", eventCard.value);
+                console.log(eventCard.value[0].email);
+            }
+            if (resEvent.status === 401 && checkIsLogin.value === true) {
+                const resRefresh = await fetch(`${baseUrl}/refresh`, {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json',
+                        'Authorization': `Bearer ${newToken}`
+                    },
+                    body: JSON.stringify({
+                        token: newToken
+                    })
+                })
+                if (resRefresh.status === 401) {
+                    localStorage.clear()
+                    alert('Please login again')
+                    await myRouter.push({ path: '/sign-in' })
+                }
+                if (resRefresh.status === 200) {
+                    const data = await resRefresh.json()
+                    localStorage.setItem('jwtToken', data.refreshToken)
+                    const resEvent = await fetch(`${baseUrl}/events`, {
+                        headers: {
+                            'content-type': 'application/json',
+                            'Authorization': `Bearer ${newToken}`
+                        }
+                    })
+                    if (resEvent.status === 200) {
+                        eventCard.value = await resEvent.json()
+                    }
+                }
             }
         }
     }
+    if (isMsalLogin == true) {
+        const resEvent = await fetch(`${baseUrl}/events`, {
+            headers: {
+                'content-type': 'application/json',
+                'Authorization': `Bearer ${msalToken}`
+            }
+        }) // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+        if (resEvent.status === 200) {
+            eventCard.value = await resEvent.json()
+            userEmail.value = localStorage.getItem('email')
+            console.log("userEmail : ", userEmail.value);
+            console.log("eventCard : ", eventCard.value);
+            console.log(eventCard.value[0].email);
+        }
+        if (resEvent.status === 401 && checkIsLogin.value === true) {
+            const resRefresh = await fetch(`${baseUrl}/refresh`, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${newToken}`
+                },
+                body: JSON.stringify({
+                    token: newToken
+                })
+            })
+            if (resRefresh.status === 401) {
+                localStorage.clear()
+                alert('Please login again')
+                await myRouter.push({ path: '/sign-in' })
+            }
+            if (resRefresh.status === 200) {
+                const data = await resRefresh.json()
+                localStorage.setItem('jwtToken', data.refreshToken)
+                const resEvent = await fetch(`${baseUrl}/events`, {
+                    headers: {
+                        'content-type': 'application/json',
+                        'Authorization': `Bearer ${newToken}`
+                    }
+                })
+                if (resEvent.status === 200) {
+                    eventCard.value = await resEvent.json()
+                }
+            }
+        }
+    }
+
 
 }
 onBeforeMount(async () => {
@@ -95,20 +219,30 @@ const closeToggle = () => window.location.reload()
 
 
 const loggingIn = ref(false)
+const allowModal = ref(true)
+
+
 
 const checkIsLogin = computed(() => {
     if (localStorage.getItem('email')) {
         console.log('email value  : ', localStorage.getItem('email'))
+        const decoded = jwt_decode(localStorage.getItem('jwtToken'))
+        if (decoded.role === "lecturer" || decoded.role === null) {
+            allowModal.value = false
+            console.log('allowModal : ', allowModal.value);
+        }
         return loggingIn.value = true
     }
     else {
-        return loggingIn.value = false
+        loggingIn.value = false
+        allowModal.value = false
     }
 
 })
 
-console.log("IsThisBitchLogIn", checkIsLogin.value);
+console.log("isLogin", checkIsLogin.value);
 // method: POST -- add event
+const loading = ref(false)
 const addEvent = async (
     newBookingName,
     newBookingEmail,
@@ -117,6 +251,8 @@ const addEvent = async (
     categorySelection,
     modelFile
 ) => {
+    loading.value = true
+    console.log("loading 1 ", loading.value);
     console.log("***modelFile*** : ", modelFile);
     console.log(`${baseUrl}/events`)
     console.log("booking email", newBookingEmail)
@@ -131,7 +267,7 @@ const addEvent = async (
     if (newBookingEmail.localeCompare(localStorage.getItem('email')) == 0) {
         // กรณีมี file-upload ด้วย
         if (modelFile != null) {
-            var fileSize = 10000000 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+            var fileSize = 10485760 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
             if (modelFile.size <= fileSize) {
                 const res = await fetch(`${baseUrl}/events`, {
                     method: 'POST',
@@ -148,6 +284,8 @@ const addEvent = async (
                     })
                 }
                 )
+                loading.value = true
+                console.log("loading 1 ", loading.value);
                 if (res.status === 201) {
                     const addedEvent = await res.json()
                     eventCard.value.push(addedEvent)
@@ -201,6 +339,8 @@ const addEvent = async (
                 })
             }
             )
+            loading.value = true
+            console.log("loading 1 ", loading.value);
             if (res.status === 201) {
                 const addedEvent = await res.json()
                 eventCard.value.push(addedEvent)
@@ -217,7 +357,13 @@ const addEvent = async (
                 alert('Appointment start time must be present or future.')
             }
             if (res.status === 409) {
-                alert('Appointment start time unable to schedule overlapping')
+
+                // alert('Appointment start time unable to schedule overlapping')
+                return res.json().then(text => {
+                    refMes.value = text.message;
+                    console.log(refMes.value);
+                    alert(refMes.value)
+                })
             }
         }
     }
@@ -226,8 +372,9 @@ const addEvent = async (
     else {
         // กรณีมี file-upload ด้วย
         if (modelFile != null) {
-            var fileSize = 10000000 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+            const fileSize = 10485760 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
             if (modelFile.size <= fileSize) {
+                console.log("file size", modelFile.size);
                 const res = await fetch(`${baseUrl}/events`, {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
@@ -324,7 +471,9 @@ const eventCategory = ref([])
 const getEventCategory = async () => {
     console.log(`${baseUrl}/event-categories`)
     const res = await fetch(`${baseUrl}/event-categories`, {
-        headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` }
+        headers: { 'content-type': 'application/json',
+        //  'Authorization': `Bearer ${token}`
+         }
     })
     eventCategory.value = await res.json()
     console.log('data from api: ' + eventCategory.value)
@@ -439,22 +588,7 @@ const filterByDate = async () => {
 const showFilterMenu = ref(false)
 const picked = ref(false)
 const refresh = () => window.location.reload()
-// เพื่อ disable เวลาที่เป็นอดีต
-var currentDateTime = new Date();
-console.log(currentDateTime.toJSON());
-var dd = String(currentDateTime.getDate()).padStart(2, '0');
-var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0!
-var yyyy = currentDateTime.getFullYear();
-var hr = String(currentDateTime.getHours())
-var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
-currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
 
-
-// file management 
-// const testFile = (e)=>{
-//   const file = e.target.files[0]
-//   console.log(file)
-// }
 
 </script>
 <template>
@@ -561,6 +695,11 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         </div>
         <!-- modal for POST-event from CreateEditEvent.vue(component)-->
         <CreateEditEvent v-if="toggleModal" @closeToggle="closeToggle" @addEventComp="addEvent" @file="testFile" />
+        <div v-if="loading">
+            <div class="relative w-full rounded">
+                <div style="width: 100%" class="absolute top-0 h-4 rounded shim-red"></div>
+            </div>
+        </div>
         <!-- No Schedule -->
         <div v-show="eventCard == 0" class="grid place-items-center h-screen">
             <h1 class="font-bold text-5xl text-blue-500">No Scheduled Events</h1>
@@ -589,17 +728,64 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                         v-for="(event, index) in eventCard" :key="index">
                         <div class="px-6 py-2 text-left">
                             <div>
+                                <div class="flex justify-start">
+                                    <div v-if="event.eventStartTime > currentDateTime"
+                                        class="bg-blue-100 font-semibold rounded-lg w-fit px-2 text-blue-500 ">
+                                        <span class="inline-block">
+                                            <svg width="22" height="22" viewBox="0 -2 24 24">
+                                                <path fill="currentColor" d="M15 22v-2h4V10H5v4H3V6q0-.825.587-1.412Q4.175 4 
+                                                 5 4h1V2h2v2h8V2h2v2h1q.825 0 1.413.588Q21 5.175 21 
+                                                 6v14q0 .825-.587 1.413Q19.825 22 19 22Zm-7 2l-1.4-1.4L9.175 
+                                                 20H1v-2h8.175L6.6 15.4L8 14l5 5Z" />
+                                            </svg>
+                                        </span>
+                                        Upcoming
+                                    </div>
+
+                                    <div v-if="event.eventStartTime < currentDateTime"
+                                        class="border bg-slate-200 font-semibold rounded-lg w-fit px-2 text-slate-600 ">
+                                        <span class="inline-block"><svg width="22" height="22" viewBox="0 -3 24 24">
+                                                <path fill="currentColor" d="M16.53 11.06L15.47 10l-4.88 
+                                                    4.88l-2.12-2.12l-1.06 1.06L10.59 
+                                                    17l5.94-5.94zM19 3h-1V1h-2v2H8V1H6v2H5c-1.11 
+                                                    0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 
+                                                    2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
+                                            </svg>
+                                        </span>
+                                        Past
+                                    </div>
+                                    <div v-if="userEmail == event.bookingEmail"
+                                        class="rounded-lg bg-yellow-200 bg-opacity-50 text-yellow-600 font-semibold ml-1 px-2">
+                                        <span class="inline-block">
+                                            <svg width="24" height="24" viewBox="0 -2 24 24">
+                                                <path fill="currentColor"
+                                                    d="m9.981 14.811l-.467 2.726l2.449-1.287l2.449 1.287l-.468-2.726l1.982-1.932l-2.738-.398L11.963 10l-1.225 2.481L8 12.879z" />
+                                                <path fill="currentColor"
+                                                    d="M19 4h-2V2h-2v2H9V2H7v2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zm.002 16H5V8h14l.002 12z" />
+                                            </svg>
+                                        </span>
+                                        My event
+                                    </div>
+
+                                    <div class="ml-auto">
+                                        <span class="ml-1 text-blue-400 
+                                        border border-blue-400 
+                                        font-bold rounded-lg text-sm px-1.5 py-1 
+                                        text-center">
+                                            {{
+                                                    new Date(event.eventStartTime).toLocaleDateString('en')
+                                            }}
+                                        </span>
+                                    </div>
+                                </div>
+
+
                                 <div class="font-bold text-2xl mb-2 text-gray-700">
                                     {{ event.eventCategoryName }}
                                     <span>
                                         <!--Space between eventCategory and date-->
                                     </span>
-                                    <span
-                                        class="text-blue-400 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none transition duration-500 ease-in-out focus:ring-blue-300 font-semibold rounded-3xl text-sm px-1.5 py-1 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">
-                                        {{
-                                                new Date(event.eventStartTime).toLocaleDateString('en')
-                                        }}
-                                    </span>
+
                                 </div>
                                 <ul class="mb-2">
                                     <li>Name: {{ event.bookingName }}</li>
@@ -632,7 +818,7 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
             </div>
         </div>
         <div class="relative">
-            <button @click="toggleModal = !toggleModal" type="button"
+            <button v-if="allowModal == true" @click="toggleModal = !toggleModal" type="button"
                 class="fixed bottom-8 right-16 p-0 w-25 h-25 bg-blue-400 rounded-full hover:bg-blue-500 hover:scale-150 transition-transform active:shadow-lg mouse shadow ease-in duration-200 focus:outline-none">
                 <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" class="w-16 h-16 inline-block">
                     <path fill="#FFFFFF" d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
@@ -643,3 +829,32 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
         </div>
     </div>
 </template>
+<style scoped>
+.shim-red {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(63, 140, 241, 0.7);
+}
+
+.shim-red::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg,
+            rgba(233, 233, 233, 1) 0,
+            rgba(233, 233, 233, 0.9) 50%,
+            rgba(233, 233, 233, 0.8) 100%);
+    animation: shimmer 3s ease-out infinite;
+    content: "";
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(0%);
+        opacity: 0;
+    }
+}
+</style>
