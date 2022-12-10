@@ -1,12 +1,16 @@
 <script setup>
-import { ref, onBeforeMount } from 'vue'
+import { ref, onBeforeMount,computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BtnEditEvent from '../components/BtnEditEvent.vue'
+
 // import VueCookies from 'vue-cookies'
 const myRouter = useRouter()
 const goToNotFound = () => myRouter.push({ name: 'NotFound' })
 
 console.clear()
+
+const isLogin = localStorage.getItem('jwtToken') ? true : false
+console.log('isLogin: ', isLogin);
 
 const checkIsLogin = computed(() => {
     if (localStorage.getItem('email')) {

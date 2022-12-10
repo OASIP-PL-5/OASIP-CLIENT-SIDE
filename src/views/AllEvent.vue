@@ -297,7 +297,8 @@ const addEvent = async (
                     fileData.append('eventStartTime', newStartTime)
                     const resFile = await fetch(`${baseUrl}/files/upload`, {
                         method: 'POST',
-                        body: fileData
+                        body: fileData,
+                        headers: { 'Authorization': `Bearer ${token}` }
                     })
 
                     alert(`Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`)
