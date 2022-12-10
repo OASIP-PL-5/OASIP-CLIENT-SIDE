@@ -2,29 +2,14 @@
 import { ref, onBeforeMount, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BtnEditEvent from "../components/BtnEditEvent.vue";
+import jwt_decode from 'jwt-decode'
 // import VueCookies from 'vue-cookies'
 const myRouter = useRouter();
 const goToNotFound = () => myRouter.push({ name: "NotFound" });
 console.clear();
-const loggingIn = ref(false)
-const allowModal = ref(false)
+const loggingIn = ref(true)
+const allowModal = ref(true)
 
-const checkIsLogin = computed(() => {
-  if (localStorage.getItem("email") != null) {
-    if (localStorage.getItem("email")) {
-      console.log("email value  : ", localStorage.getItem("email"));
-      const decoded = jwt_decode(localStorage.getItem("jwtToken"));
-      if (decoded.role === "lecturer" || decoded.role === null) {
-        allowModal.value = false;
-        console.log("allowModal : ", allowModal.value);
-      }
-      return (loggingIn.value = true);
-    }
-  } else {
-    loggingIn.value = false;
-    allowModal.value = false;
-  }
-});
 
 const { params } = useRoute();
 const goToAllEvent = () => myRouter.push({ name: "AllEvent" });
@@ -46,6 +31,23 @@ const alert404 =
 
 const isOwner = ref(true);
 
+const checkIsLogin = computed(() => {
+  if (localStorage.getItem("email") != null) {
+    if (localStorage.getItem("email")) {
+      console.log("email value  : ", localStorage.getItem("email"));
+      const decoded = jwt_decode(localStorage.getItem("jwtToken"));
+      if (decoded.role === "lecturer" || decoded.role === null) {
+        allowModal.value = false;
+        console.log("allowModal : ", allowModal.value);
+      }
+      return (loggingIn.value = true);
+    }
+  } else {
+    loggingIn.value = false;
+    allowModal.value = false;
+  }
+});
+
 // model สำหรับเก็บค่า edit จาก user
 const editStartTimeModel = ref("");
 const editNotesModel = ref("");
@@ -58,6 +60,9 @@ const baseUrl = import.meta.env.PROD
 const loadFile = ref(false);
 const loading = ref(true);
 const getThisEventCard = async () => {
+  // ต้องเช็คในนี้ก่อน เพราะ จะได้ computed เข้ามาทำงานเป็นลำดับแรกเลย
+ 
+
   const id = params.id;
   if (isMsalLogin == false) {
     // guest
@@ -83,7 +88,6 @@ const getThisEventCard = async () => {
       // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
       if (res.status === 200) {
         thisEventDetail.value = await res.json();
-        alert(thisEventDetail.value[0].eventNotes)
         if (thisEventDetail.value[0].bookingEmail == null) {
           isOwner.value = false;
           console.log("isOwner", isOwner.value);
@@ -732,7 +736,7 @@ currentDateTime = yyyy + "-" + mm + "-" + dd + "T" + hr + ":" + m;
                     </div>
 
                     <!-- detail: event-notes || เมื่อ click edit จะ ซ่อน div ของ notes นี้แล้วจะกลายเป็น input-->
-                    <div class="w-full mb-3" v-show="isClickEdit == false">
+                    <div class="w-full mb-3" v-show="(isClickEdit == false )">
                       <div
                         class="
                           border
