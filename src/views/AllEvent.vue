@@ -284,17 +284,82 @@ const addEvent = async (
   console.log("booking email", newBookingEmail);
   console.log("have email in localStorage", localStorage.getItem("email")); //เดี๋ยวไปสร้างตัวแปรไว้เก็บเฉพาะ....
   // ถ้าเท่ากันจะได้ 0 ถ้าไม่เท่ากันจะได้ -1
-  console.log(newBookingEmail.localeCompare(userEmail.value));
+  // console.log(newBookingEmail.localeCompare(userEmail.value));
   // if (newBookingEmail.localeCompare(userEmail.value) == 0) {  // ไว้ check สำหรับ login แล้ว email ตรงกับตอนจะ new event มั้ย
   // ยังมีปัญหาอยู่ คาดว่าเกิดจากการเมาปีกกา
   // ไว้ check 2 กรณีคือ สำหรับ login ถ้า login อย่ localeCompare จะเป็น 0 หรือ ถ้าเป็น guest checkIsLogin จะเป็น false
 
-  // กรณี postfile-with-login (Authorized)
-  if (newBookingEmail.localeCompare(localStorage.getItem("email")) == 0) {
-    // กรณีมี file-upload ด้วย
-    if (modelFile != null) {
-      var fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
-      if (modelFile.size <= fileSize) {
+  // กรณี postevent-with-login (Authorized)
+  if (isMsalLogin == false) {
+    // oasip-token
+    if (newBookingEmail.localeCompare(localStorage.getItem("email")) == 0) {
+      // กรณีมี file-upload ด้วย
+      if (modelFile != null) {
+        var fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+        if (modelFile.size <= fileSize) {
+          const res = await fetch(`${baseUrl}/events`, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              // มีผลต่อ payload ต้องใส่
+              bookingName: newBookingName,
+              bookingEmail: newBookingEmail,
+              eventStartTime: newStartTime,
+              eventDuration: categorySelection.eventDuration,
+              eventNotes: newNotes,
+              eventCategoryId: categorySelection.eventCategoryId,
+              eventCategoryName: categorySelection.eventCategoryName,
+            }),
+          });
+          loading.value = true;
+          console.log("loading 1 ", loading.value);
+          if (res.status === 201) {
+            const addedEvent = await res.json();
+            eventCard.value.push(addedEvent);
+            console.log("after submit", newBookingEmail);
+            console.log("added sucessfully");
+
+            // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
+            const fileData = new FormData();
+            fileData.append("file", modelFile);
+            fileData.append("eventStartTime", newStartTime);
+            const resFile = await fetch(`${baseUrl}/files/upload`, {
+              method: "POST",
+              body: fileData,
+              headers: {'Authorization':`Bearer ${token}`}
+            });
+
+            alert(
+              `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
+            );
+            window.location.reload();
+          }
+          if (newBookingName.trim().length == 0 && res.status === 417) {
+            newBookingName = null;
+            alert("Booking Name must be filled out!");
+          }
+          if (newBookingEmail.trim().length == 0 && res.status === 417) {
+            alert("Booking Email must be filled out!");
+          }
+          if (res.status == 400) {
+            console.log(currentDateTime);
+            alert("Appointment start time must be present or future.");
+          }
+          if (res.status === 409) {
+            alert("Appointment start time unable to schedule overlapping");
+          }
+        } else {
+          alert(
+            'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
+          );
+        }
+      }
+
+      // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
+      if (modelFile == null || modelFile == undefined) {
         const res = await fetch(`${baseUrl}/events`, {
           method: "POST",
           headers: {
@@ -319,104 +384,106 @@ const addEvent = async (
           eventCard.value.push(addedEvent);
           console.log("after submit", newBookingEmail);
           console.log("added sucessfully");
-
-          // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
-          const fileData = new FormData();
-          fileData.append("file", modelFile);
-          fileData.append("eventStartTime", newStartTime);
-          const resFile = await fetch(`${baseUrl}/files/upload`, {
-            method: "POST",
-            body: fileData,
-            headers: {'Authorization':`Bearer ${token}`}
-          });
-
           alert(
             `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
           );
           window.location.reload();
         }
-        if (newBookingName.trim().length == 0 && res.status === 417) {
+        if (newBookingName.trim().length == 0) {
           newBookingName = null;
           alert("Booking Name must be filled out!");
-        }
-        if (newBookingEmail.trim().length == 0 && res.status === 417) {
-          alert("Booking Email must be filled out!");
+          res.status = 400;
         }
         if (res.status == 400) {
           console.log(currentDateTime);
           alert("Appointment start time must be present or future.");
         }
         if (res.status === 409) {
-          alert("Appointment start time unable to schedule overlapping");
+          // alert('Appointment start time unable to schedule overlapping')
+          return res.json().then((text) => {
+            refMes.value = text.message;
+            console.log(refMes.value);
+            alert(refMes.value);
+          });
         }
-      } else {
-        alert(
-          'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
-        );
-      }
-    }
-
-    // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
-    if (modelFile == null || modelFile == undefined) {
-      const res = await fetch(`${baseUrl}/events`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          // มีผลต่อ payload ต้องใส่
-          bookingName: newBookingName,
-          bookingEmail: newBookingEmail,
-          eventStartTime: newStartTime,
-          eventDuration: categorySelection.eventDuration,
-          eventNotes: newNotes,
-          eventCategoryId: categorySelection.eventCategoryId,
-          eventCategoryName: categorySelection.eventCategoryName,
-        }),
-      });
-      loading.value = true;
-      console.log("loading 1 ", loading.value);
-      if (res.status === 201) {
-        const addedEvent = await res.json();
-        eventCard.value.push(addedEvent);
-        console.log("after submit", newBookingEmail);
-        console.log("added sucessfully");
-        alert(
-          `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
-        );
-        window.location.reload();
-      }
-      if (newBookingName.trim().length == 0) {
-        newBookingName = null;
-        alert("Booking Name must be filled out!");
-        res.status = 400;
-      }
-      if (res.status == 400) {
-        console.log(currentDateTime);
-        alert("Appointment start time must be present or future.");
-      }
-      if (res.status === 409) {
-        // alert('Appointment start time unable to schedule overlapping')
-        return res.json().then((text) => {
-          refMes.value = text.message;
-          console.log(refMes.value);
-          alert(refMes.value);
-        });
       }
     }
   }
-
-  // กรณีเป็น "Guest / No-Authorized"
-  else {
+  else if(isMsalLogin == true){
+    // azure-token
     // กรณีมี file-upload ด้วย
     if (modelFile != null) {
-      const fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
-      if (modelFile.size <= fileSize) {
-        console.log("file size", modelFile.size);
+        var fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+        if (modelFile.size <= fileSize) {
+          const res = await fetch(`${baseUrl}/events`, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              Authorization: `Bearer ${msalToken}`,
+            },
+            body: JSON.stringify({
+              // มีผลต่อ payload ต้องใส่
+              bookingName: newBookingName,
+              bookingEmail: newBookingEmail,
+              eventStartTime: newStartTime,
+              eventDuration: categorySelection.eventDuration,
+              eventNotes: newNotes,
+              eventCategoryId: categorySelection.eventCategoryId,
+              eventCategoryName: categorySelection.eventCategoryName,
+            }),
+          });
+          loading.value = true;
+          console.log("loading 1 ", loading.value);
+          if (res.status === 201) {
+            const addedEvent = await res.json();
+            eventCard.value.push(addedEvent);
+            console.log("after submit", newBookingEmail);
+            console.log("added sucessfully");
+
+            // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
+            const fileData = new FormData();
+            fileData.append("file", modelFile);
+            fileData.append("eventStartTime", newStartTime);
+            const resFile = await fetch(`${baseUrl}/files/upload`, {
+              method: "POST",
+              body: fileData,
+              headers: {'Authorization':`Bearer ${msalToken}`}
+            });
+
+            alert(
+              `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
+            );
+            window.location.reload();
+          }
+          if (newBookingName.trim().length == 0 && res.status === 417) {
+            newBookingName = null;
+            alert("Booking Name must be filled out!");
+          }
+          if (newBookingEmail.trim().length == 0 && res.status === 417) {
+            alert("Booking Email must be filled out!");
+          }
+          if (res.status == 400) {
+            console.log(currentDateTime);
+            alert("Appointment start time must be present or future.");
+          }
+          if (res.status === 409) {
+            alert("Appointment start time unable to schedule overlapping");
+          }
+        } else {
+          alert(
+            'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
+          );
+        }
+      }
+
+      // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
+      if (modelFile == null || modelFile == undefined) {
         const res = await fetch(`${baseUrl}/events`, {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${msalToken}`,
+          },
           body: JSON.stringify({
             // มีผลต่อ payload ต้องใส่
             bookingName: newBookingName,
@@ -428,86 +495,36 @@ const addEvent = async (
             eventCategoryName: categorySelection.eventCategoryName,
           }),
         });
+        loading.value = true;
+        console.log("loading 1 ", loading.value);
         if (res.status === 201) {
           const addedEvent = await res.json();
           eventCard.value.push(addedEvent);
           console.log("after submit", newBookingEmail);
           console.log("added sucessfully");
-
-          // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
-          const fileData = new FormData();
-          fileData.append("file", modelFile);
-          fileData.append("eventStartTime", newStartTime);
-          const resFile = await fetch(`${baseUrl}/files/upload`, {
-            method: "POST",
-            body: fileData,
-          });
-
           alert(
             `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
           );
           window.location.reload();
         }
-        if (newBookingName.trim().length == 0 && res.status === 417) {
+        if (newBookingName.trim().length == 0) {
           newBookingName = null;
           alert("Booking Name must be filled out!");
-        }
-        if (newBookingEmail.trim().length == 0 && res.status === 417) {
-          alert("Booking Email must be filled out!");
+          res.status = 400;
         }
         if (res.status == 400) {
           console.log(currentDateTime);
           alert("Appointment start time must be present or future.");
         }
         if (res.status === 409) {
-          alert("Appointment start time unable to schedule overlapping");
+          // alert('Appointment start time unable to schedule overlapping')
+          return res.json().then((text) => {
+            refMes.value = text.message;
+            console.log(refMes.value);
+            alert(refMes.value);
+          });
         }
-      } else {
-        alert(
-          'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
-        );
       }
-    }
-
-    // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
-    if (modelFile == null || modelFile == undefined) {
-      const res = await fetch(`${baseUrl}/events`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          // มีผลต่อ payload ต้องใส่
-          bookingName: newBookingName,
-          bookingEmail: newBookingEmail,
-          eventStartTime: newStartTime,
-          eventDuration: categorySelection.eventDuration,
-          eventNotes: newNotes,
-          eventCategoryId: categorySelection.eventCategoryId,
-          eventCategoryName: categorySelection.eventCategoryName,
-        }),
-      });
-      if (res.status === 201) {
-        const addedEvent = await res.json();
-        eventCard.value.push(addedEvent);
-        console.log("after submit", newBookingEmail);
-        console.log("added sucessfully");
-        alert(
-          `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
-        );
-        window.location.reload();
-      }
-      if (newBookingName.trim().length == 0) {
-        newBookingName = null;
-        alert("Booking Name must be filled out!");
-        res.status = 400;
-      }
-      if (res.status == 400) {
-        console.log(currentDateTime);
-        alert("Appointment start time must be present or future.");
-      }
-      if (res.status === 409) {
-        alert("Appointment start time unable to schedule overlapping");
-      }
-    }
   }
 }; //ปีกกาปิดของ function: addEvent()
 
@@ -1159,7 +1176,7 @@ const refresh = () => window.location.reload();
     </div>
     <div class="relative">
       <button
-        v-if="allowModal == true"
+        v-if="allowModal == true && userRole != 'lecturer'"
         @click="toggleModal = !toggleModal"
         type="button"
         class="
