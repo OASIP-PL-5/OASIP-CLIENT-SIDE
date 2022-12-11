@@ -8,24 +8,29 @@ console.log(url.token)//pattern https://url.com?token=บลาๆ
 const getToken = url.token
 console.log(getToken)
 
-const password = computed(()=>{
-    newPassword =''
-    confirmPassword = ''
-})
+// const password = computed(()=>{
+//     newPassword =''
+//     confirmPassword = ''
+// })
+
+const newPassword = ref('')
+const confirmPassword = ref('')
 
 const reset = async (password)=>{
-    console.log(password.newPassword)
-    console.log(password.confirmPassword)
-    if(password.newPassword.length>=8 && password.newPassword.length<=15){
+    // console.log(password.newPassword)
+    // console.log(password.confirmPassword)
+    console.log(newPassword.value);
+    console.log(confirmPassword.value);
+    if(newPassword.value.length>=8 && newPassword.value.length<=15){
         if(password.newPassword.localeCompare(password.confirmPassword) == 0){
-            const res = await fetch(`${baseUrl}/forgot`,{
+            const res = await fetch(`${baseUrl}/users/forgot`,{
                 method: 'PUT',
                 headers: {
                     'content-type': 'application/json',
                     'Authorization': `Bearer ${url.token}`
                 },
                 body:JSON.stringify({
-                    password: password.newPassword
+                    password: newPassword.value
                 })
             })
             if(res.status===200){

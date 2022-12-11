@@ -1,14 +1,53 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
 const myRouter = useRouter()
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
-const goToReset = () => myRouter.push({ name: 'ResetPassword' })
+// const goToReset = () => myRouter.push({ name: 'ResetPassword' })
 const route = useRoute()
 let url = route.query
-console.log("url")
-console.log(url.token)//pattern https://url.com?token=บลาๆ
-const getToken = url.token
-console.log(getToken)
+
+// console.log("url")
+// console.log(url.token)//pattern https://url.com?token=บลาๆ
+// const getToken = url.token
+// console.log(getToken)
+
+const token = localStorage.getItem("jwtToken");
+// const mail = computed(() => {
+//     email = ''
+// })
+
+const baseUrl = import.meta.env.PROD
+    ? `${import.meta.env.VITE_BASE_URL}/api`
+    : "/api";
+
+// const email = ref('')
+
+
+// const inputEmail = computed(() => {
+//     email: ''
+// })
+
+const inputEmail = ref('')
+
+const sentMail = async (email) => {
+    console.log(inputEmail.value)
+    const res = await fetch(`${baseUrl}/users/mailForgot`, {
+        method: "POST",
+        headers: {
+            'content-type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            email: inputEmail.email
+        })
+    })
+    console.log(inputEmail.value);
+    if (res.status === 200) {
+        alert("Sent email complete")
+    }
+
+}
 </script>
  
 <template>
@@ -29,12 +68,13 @@ console.log(getToken)
                             <label class="block mb-2 text-xl font-bold text-blue-400" for="email">
                                 Email Address
                             </label>
-                            <input
+                            <input v-model="inputEmail"
                                 class="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
                                 id="email" type="email" placeholder="Enter Email Address..." />
+
                         </div>
                         <div class="mb-6 text-center">
-                            <button @click="goToReset"
+                            <button @click="sentMail(inputEmail)"
                                 class="w-full px-4 py-2 font-bold text-white bg-blue-400 rounded-full hover:bg-blue-700 focus:outline-none focus:shadow-outline"
                                 type="button">
                                 Send Email

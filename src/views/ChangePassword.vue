@@ -4,6 +4,14 @@ import { useRouter } from 'vue-router'
 const myRouter = useRouter()
 const goToForgot = () => myRouter.push({ name: 'ForgotPassword' })
 
+const oldPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+
+const change = async (password) => {
+    
+}
+
 
 </script>
  
