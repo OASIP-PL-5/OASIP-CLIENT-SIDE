@@ -425,6 +425,9 @@ const cancelEvent = async () => {
   const id = params.id;
   let confirmation = "Are you sure?";
   if (confirm(confirmation) == true) {
+
+    if(isMsalLogin == false){
+    // oasip-token
     //warning:: delete-file-before-event !!!
     const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
       method: "DELETE",
@@ -445,7 +448,7 @@ const cancelEvent = async () => {
 
     if (res.status === 200) {
       console.log("cancel bookingId: [" + id + "] success");
-      alert("cancel bookingId: [" + id + "] success");
+      alert("cancel event: [" + thisEventDetail.value[0].bookingName + "] success");
       await goToAllEvent();
     } else if (res.status === 403) {
       alert("You are not authorized to this action");
@@ -454,16 +457,43 @@ const cancelEvent = async () => {
         'ERROR, cannot delete this note \n"please check your response status code"'
       );
     }
+  }
+    else if(isMsalLogin == true){
+    // azure-token
+    //warning:: delete-file-before-event !!!
+    const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${msalToken}` },
+    });
+
+    const res = await fetch(`${baseUrl}/events/${id}`, {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${msalToken}`,
+      },
+    });
+    if (resDelFile.status === 404 && res.status === 404) {
+      alert(alert404);
+      goToAllEvent();
+    }
+
+    if (res.status === 200) {
+      console.log("cancel bookingId: [" + id + "] success");
+      alert("cancel event: [" + thisEventDetail.value[0].bookingName + "] success");
+      await goToAllEvent();
+    } else if (res.status === 403) {
+      alert("You are not authorized to this action");
+    } else {
+      console.log(
+        'ERROR, cannot delete this note \n"please check your response status code"'
+      );
+    }
+    }
+
   } else {
     console.log("confirmation false");
   }
-  console.log(`${baseUrl}/event/${id}`);
-  // if (res.status === 200) {
-  //     console.log('cancel bookingId: [' + id + '] success');
-  //     await goToHome()
-  // } else {
-  //     console.log('ERROR, cannot delete this note \n"please check your response status code"');
-  // }
 };
 
 // ส่วนการทำงาน PUT
