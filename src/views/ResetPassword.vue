@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed,ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 let url = route.query

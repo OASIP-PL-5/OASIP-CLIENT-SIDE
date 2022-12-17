@@ -1,4 +1,5 @@
 <script setup>
+import jwtDecode from 'jwt-decode'
 import { computed, ref, onBeforeMount } from 'vue'
 const token = localStorage.getItem('jwtToken')
 defineEmits(['file', 'closeToggle', 'addEventComp', 'updateEventComp'])
@@ -26,8 +27,16 @@ console.log("เมื่อกด toggle จะขึ้นใน console");
 // const togxgleModal = ref(false)
 
 // ตัวแปร ดึง email จาก storage เพื่อใส่ input: bookingEmail
-const newBookingEmail = localStorage.getItem("email")
-console.log("email >> ", newBookingEmail);
+const newBookingEmail = ref(localStorage.getItem("email"))
+console.log("email >> ", newBookingEmail.value);
+
+const isMsalLogin = localStorage.getItem(
+  "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
+)
+  ? true
+  : false;
+const msalToken = localStorage.getItem("msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken");
+
 
 // GET เพื่อจะ map [id และ duration : จะทำให้สามารถ POST ได้]
 const eventCategory = ref([])
@@ -36,6 +45,9 @@ const baseUrl = import.meta.env.PROD
   : '/api'
 const getEventCategory = async () => {
   console.log(`${baseUrl}/event-categories`)
+  if (isMsalLogin) {
+  newBookingEmail.value = jwtDecode(msalToken).preferred_username
+}
   const res = await fetch(`${baseUrl}/event-categories`, {
     headers: {
       'content-type': 'application/json',
@@ -133,14 +145,21 @@ const fileAction = (e) => {
               <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" required
                 v-model="newBookingEmail" type="email" placeholder="Somchai.jairuk@gmail.com" maxlength="50" readonly />
             </div>
+            <!-- input Email if  -->
+            <div class="flex flex-col mb-4" v-if="isMsalLogin">
+              <label class="mb-2 font-bold text-lg text-gray-900">Email<span class="text-sm font-thin"> | maximum 50
+                  characters</span></label>
+              <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" required
+                v-model="newBookingEmail" type="email" placeholder="Somchai.jairuk@gmail.com" maxlength="50" readonly />
+            </div>
             <!-- input Email if not login-->
-            <div class="flex flex-col mb-4" v-else-if="isLoginNull() == true">
+            <!-- <div class="flex flex-col mb-4" v-else-if="isLoginNull() == true">
               <label class="mb-2 font-bold text-lg text-gray-900 border-gray-200">Email<span class="text-sm font-thin">
                   | maximum 50
                   characters</span></label>
               <input class="border py-2 px-3 text-grey-800 rounded-lg border-gray-200" required
                 v-model="newBookingEmail" type="email" placeholder="Somchai.jairuk@gmail.com" maxlength="50" />
-            </div>
+            </div> -->
             <!-- EventCategory -->
             <div class="grid grid-cols-2 mb-2 gap-x-2">
               <h1 class="font-bold text-lg text-gray-900 ">Category</h1>

@@ -4,27 +4,23 @@ import { useRoute, useRouter } from "vue-router";
 import CreateEditEvent from "../components/CreateEditEvent.vue";
 import IconFilter from "../components/icons/IconFilter.vue";
 import jwt_decode from "jwt-decode";
-
 // ref-message-กรณี จะนำ errormessage ไปใช้งาน
 const refMes = ref("");
-
 // import VueCookies from 'vue-cookies'
 const token = localStorage.getItem("jwtToken");
 const newToken = localStorage.getItem("refreshToken");
-
 const msalToken = localStorage.getItem(
-    "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
+  "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
 );
 const isMsalLogin = localStorage.getItem(
-    "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
+  "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
 )
-    ? true
-    : false;
-
+  ? true
+  : false;
 console.clear();
 // binding-CSS
 const btnTailWind =
-    "inline-block px-6 py-2.5 mt-1.5 bg-blue-400 text-white font-bold text-xs leading-tight uppercase rounded shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600 active:shadow-lg transition duration-150 ease-in-out";
+  "inline-block px-6 py-2.5 mt-1.5 bg-blue-400 text-white font-bold text-xs leading-tight uppercase rounded shadow-sm hover:bg-blue-500 hover:shadow-lg focus:bg-blue-500 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600 active:shadow-lg transition duration-150 ease-in-out";
 const myRouter = useRouter();
 const { params } = useRoute();
 const goToDetail = () => myRouter.push({ name: "EventDetailBase" });
@@ -40,14 +36,11 @@ const searchingInfo = ref([]);
 const eventCat = ref([]);
 // GET:: Card
 const baseUrl = import.meta.env.PROD
-    ? `${import.meta.env.VITE_BASE_URL}/api`
-    : "/api";
-
+  ? `${import.meta.env.VITE_BASE_URL}/api`
+  : "/api";
 // ตัวแปรไว้เก็บ email
 const userEmail = ref();
-
 const ownEvent = ref(false);
-
 // get current datetime
 // เพื่อ disable เวลาที่เป็นอดีต
 var currentDateTime = new Date();
@@ -59,504 +52,505 @@ var hr = String(currentDateTime.getHours());
 var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, "0"));
 currentDateTime = yyyy + "-" + mm + "-" + dd + "T" + hr + ":" + m;
 console.log("currentDateTime: ", currentDateTime);
-
 const isUpcoming = ref(false);
 const isPast = ref(false);
-
 const loggingIn = ref(false);
 const allowModal = ref(true);
-
 const userRole = ref("")
 const checkIsLogin = computed(() => {
-    if (localStorage.getItem("email")) {
-        console.log("email value  : ", localStorage.getItem("email"));
-        const decoded = jwt_decode(localStorage.getItem("jwtToken"));
-        if (decoded.role === "lecturer" || decoded.role === null) {
-            allowModal.value = false;
-            console.log("allowModal : ", allowModal.value);
-        }
-        return (loggingIn.value = true);
-    } else if (isMsalLogin) {
-        userRole.value = jwt_decode(msalToken).roles[0]
-        return loggingIn.value = true
-    } else {
-        loggingIn.value = false;
-        allowModal.value = false;
+  if (localStorage.getItem("email")) {
+    console.log("email value  : ", localStorage.getItem("email"));
+    const decoded = jwt_decode(localStorage.getItem("jwtToken"));
+    if (decoded.role === "lecturer" || decoded.role === null) {
+      allowModal.value = false;
+      console.log("allowModal : ", allowModal.value);
     }
+    return (loggingIn.value = true);
+  } else if (isMsalLogin) {
+    userRole.value = jwt_decode(msalToken).roles[0]
+    return loggingIn.value = true
+  } else {
+    loggingIn.value = false;
+    allowModal.value = false;
+  }
 });
-
 const getEventCard = async () => {
-    // console.log(`${baseUrl}/events`)
-    // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
-    // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
-    if (isMsalLogin == false) {
-        // guest
-        if (checkIsLogin.value == undefined || checkIsLogin.value == null) {
-            const resEvent = await fetch(`${baseUrl}/events`, {
-                headers: {
-                    "content-type": "application/json",
-                    // 'Authorization': `Bearer ${token}`
-                },
-            }); // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-            if (resEvent.status === 200) {
-                eventCard.value = await resEvent.json();
-                userEmail.value = localStorage.getItem("email");
-                console.log("userEmail : ", userEmail.value);
-                console.log("eventCard : ", eventCard.value);
-                console.log(eventCard.value[0].email);
-                console.clear();
-                console.log(eventCard.value);
-                // for (let i = 0; i < eventCard.value.length; i++) {
-
-                //   console.log(eventCard.value[i].eventStartTime);
-
-                // }
-                console.clear()
-                console.log("user email: ", userEmail.value)
-            }
-            if (resEvent.status === 401 && checkIsLogin.value === true) {
-                const resRefresh = await fetch(`${baseUrl}/refresh`, {
-                    method: "POST",
-                    headers: {
-                        "content-type": "application/json",
-                        Authorization: `Bearer ${newToken}`,
-                    },
-                    body: JSON.stringify({
-                        token: newToken,
-                    }),
-                });
-                if (resRefresh.status === 401) {
-                    localStorage.clear();
-                    alert("Please login again");
-                    await myRouter.push({ path: "/sign-in" });
-                }
-                if (resRefresh.status === 200) {
-                    const data = await resRefresh.json();
-                    localStorage.setItem("jwtToken", data.refreshToken);
-                    const resEvent = await fetch(`${baseUrl}/events`, {
-                        headers: {
-                            "content-type": "application/json",
-                            Authorization: `Bearer ${newToken}`,
-                        },
-                    });
-                    if (resEvent.status === 200) {
-                        eventCard.value = await resEvent.json();
-                    }
-                }
-            }
-        } else {
-            const resEvent = await fetch(`${baseUrl}/events`, {
-                headers: {
-                    "content-type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            }); // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-            if (resEvent.status === 200) {
-                console.clear()
-                console.log("get event success :: token from oasip");
-                eventCard.value = await resEvent.json();
-                userEmail.value = localStorage.getItem("email");
-                userRole.value = jwt_decode(newToken).role
-                console.log("user role: ", userRole.value);
-                console.log("userEmail : ", userEmail.value);
-                console.log("eventCard : ", eventCard.value);
-                console.log("-------------------------------------");
-                console.log("<<< booking email for student >>>");
-                for (let i = 0; i < eventCard.value.length; i++) {
-                    console.log("booking email :: ", eventCard.value[i].bookingEmail);
-                }
-                console.log("-------------------------------------");
-            }
-            if (resEvent.status === 401 && checkIsLogin.value === true) {
-                const resRefresh = await fetch(`${baseUrl}/refresh`, {
-                    method: "POST",
-                    headers: {
-                        "content-type": "application/json",
-                        Authorization: `Bearer ${newToken}`,
-                    },
-                    body: JSON.stringify({
-                        token: newToken,
-                    }),
-                });
-                if (resRefresh.status === 401) {
-                    localStorage.clear();
-                    alert("Please login again");
-                    await myRouter.push({ path: "/sign-in" });
-                }
-                if (resRefresh.status === 200) {
-                    const data = await resRefresh.json();
-                    localStorage.setItem("jwtToken", data.refreshToken);
-                    const resEvent = await fetch(`${baseUrl}/events`, {
-                        headers: {
-                            "content-type": "application/json",
-                            Authorization: `Bearer ${newToken}`,
-                        },
-                    });
-                    if (resEvent.status === 200) {
-                        eventCard.value = await resEvent.json();
-                    }
-                }
-            }
+  // console.log(`${baseUrl}/events`)
+  // ลดรูปเหลือเป็น const res = await fetch(`api/event`) ได้
+  // ซึ่งก็ไม่จำเป็นต้องใช้ baseUrl
+  if (isMsalLogin == false) {
+    // guest
+    if (checkIsLogin.value == undefined || checkIsLogin.value == null) {
+      const resEvent = await fetch(`${baseUrl}/events`, {
+        headers: {
+          "content-type": "application/json",
+          // 'Authorization': `Bearer ${token}`
+        },
+      }); // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+      if (resEvent.status === 200) {
+        eventCard.value = await resEvent.json();
+        userEmail.value = localStorage.getItem("email");
+        console.log("userEmail : ", userEmail.value);
+        console.log("eventCard : ", eventCard.value);
+        console.log(eventCard.value[0].email);
+        console.clear();
+        console.log(eventCard.value);
+        // for (let i = 0; i < eventCard.value.length; i++) {
+            
+        //   console.log(eventCard.value[i].eventStartTime);
+        // }
+        console.clear()
+        console.log("user email: ",userEmail.value)
+      }
+      if (resEvent.status === 401 && checkIsLogin.value === true) {
+        const resRefresh = await fetch(`${baseUrl}/refresh`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${newToken}`,
+          },
+          body: JSON.stringify({
+            token: newToken,
+          }),
+        });
+        if (resRefresh.status === 401) {
+          localStorage.clear();
+          alert("Please login again");
+          await myRouter.push({ path: "/sign-in" });
         }
-    }
-    if (isMsalLogin == true) {
-        const resEvent = await fetch(`${baseUrl}/events`, {
+        if (resRefresh.status === 200) {
+          const data = await resRefresh.json();
+          localStorage.setItem("jwtToken", data.refreshToken);
+          const resEvent = await fetch(`${baseUrl}/events`, {
             headers: {
-                "content-type": "application/json",
-                Authorization: `Bearer ${msalToken}`,
+              "content-type": "application/json",
+              Authorization: `Bearer ${newToken}`,
             },
-        }); // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
-        if (resEvent.status === 200) {
-            console.clear()
-            console.log("get all event success :: token from ms-azure");
+          });
+          if (resEvent.status === 200) {
             eventCard.value = await resEvent.json();
-            userEmail.value = jwt_decode(msalToken).preferred_username
-            console.log("user role: ", userRole.value);
-            console.log("userEmail : ", userEmail.value);
-            console.log("eventCard : ", eventCard.value);
-            console.log("-------------------------------------");
-            console.log("<<< booking email for student >>>");
-            for (let i = 0; i < eventCard.value.length; i++) {
-                console.log("booking email :: ", eventCard.value[i].bookingEmail);
-            }
-            console.log("-------------------------------------");
+          }
         }
-        if (resEvent.status === 401 && checkIsLogin.value === true) {
-            const resRefresh = await fetch(`${baseUrl}/refresh`, {
-                method: "POST",
-                headers: {
-                    "content-type": "application/json",
-                    Authorization: `Bearer ${newToken}`,
-                },
-                body: JSON.stringify({
-                    token: newToken,
-                }),
-            });
-            if (resRefresh.status === 401) {
-                localStorage.clear();
-                alert("Please login again");
-                await myRouter.push({ path: "/sign-in" });
-            }
-            if (resRefresh.status === 200) {
-                const data = await resRefresh.json();
-                localStorage.setItem("jwtToken", data.refreshToken);
-                const resEvent = await fetch(`${baseUrl}/events`, {
-                    headers: {
-                        "content-type": "application/json",
-                        Authorization: `Bearer ${newToken}`,
-                    },
-                });
-                if (resEvent.status === 200) {
-                    eventCard.value = await resEvent.json();
-                }
-            }
+      }
+    } else {
+      const resEvent = await fetch(`${baseUrl}/events`, {
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }); // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+      if (resEvent.status === 200) {
+        console.clear()
+        console.log("get event success :: token from oasip");
+        eventCard.value = await resEvent.json();
+        userEmail.value = localStorage.getItem("email");
+        userRole.value = jwt_decode(newToken).role
+        console.log("user role: ",userRole.value);
+        console.log("userEmail : ", userEmail.value);
+        console.log("eventCard : ", eventCard.value);
+        console.log("-------------------------------------");
+        console.log("<<< booking email for student >>>");
+        for (let i = 0; i < eventCard.value.length; i++) {
+          console.log("booking email :: ",eventCard.value[i].bookingEmail);        
+        }      
+        console.log("-------------------------------------");
+      }
+      if (resEvent.status === 401 && checkIsLogin.value === true) {
+        const resRefresh = await fetch(`${baseUrl}/refresh`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${newToken}`,
+          },
+          body: JSON.stringify({
+            token: newToken,
+          }),
+        });
+        if (resRefresh.status === 401) {
+          localStorage.clear();
+          alert("Please login again");
+          await myRouter.push({ path: "/sign-in" });
         }
+        if (resRefresh.status === 200) {
+          const data = await resRefresh.json();
+          localStorage.setItem("jwtToken", data.refreshToken);
+          const resEvent = await fetch(`${baseUrl}/events`, {
+            headers: {
+              "content-type": "application/json",
+              Authorization: `Bearer ${newToken}`,
+            },
+          });
+          if (resEvent.status === 200) {
+            eventCard.value = await resEvent.json();
+          }
+        }
+      }
     }
+  }
+  if (isMsalLogin == true) {
+    const resEvent = await fetch(`${baseUrl}/events`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${msalToken}`,
+      },
+    }); // const res = await fetch(`${import.meta.env.VITE_BASE_URL}/event`)
+    if (resEvent.status === 200) {
+      console.clear()
+      console.log("get all event success :: token from ms-azure");
+      eventCard.value = await resEvent.json();
+      userEmail.value = jwt_decode(msalToken).preferred_username
+      console.log("user role: ",userRole.value);
+      console.log("userEmail : ", userEmail.value);
+      console.log("eventCard : ", eventCard.value);
+      console.log("-------------------------------------");
+      console.log("<<< booking email for student >>>");
+      for (let i = 0; i < eventCard.value.length; i++) {
+        console.log("booking email :: ",eventCard.value[i].bookingEmail);        
+      }      
+      console.log("-------------------------------------");
+    }
+    if (resEvent.status === 401 && checkIsLogin.value === true) {
+      const resRefresh = await fetch(`${baseUrl}/refresh`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${newToken}`,
+        },
+        body: JSON.stringify({
+          token: newToken,
+        }),
+      });
+      if (resRefresh.status === 401) {
+        localStorage.clear();
+        alert("Please login again");
+        await myRouter.push({ path: "/sign-in" });
+      }
+      if (resRefresh.status === 200) {
+        const data = await resRefresh.json();
+        localStorage.setItem("jwtToken", data.refreshToken);
+        const resEvent = await fetch(`${baseUrl}/events`, {
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${newToken}`,
+          },
+        });
+        if (resEvent.status === 200) {
+          eventCard.value = await resEvent.json();
+        }
+      }
+    }
+  }
 };
 onBeforeMount(async () => {
-    await getEventCard();
-    console.log("length of eventCard: ", eventCard.value);
-    // console.log('student email :', eventCard.value[0].bookingEmail);
+  await getEventCard();
+  console.log("length of eventCard: ", eventCard.value);
+  // console.log('student email :', eventCard.value[0].bookingEmail);
 });
 const noScheduleImg =
-    "https://img.freepik.com/free-vector/man-reading-concept-illustration_114360-8705.jpg?t=st=1651136740~exp=1651137340~hmac=d17fed796546aa370aea3c826f9743b6eb558fd34399d6cf89663051933ab10f&w=826";
+  "https://img.freepik.com/free-vector/man-reading-concept-illustration_114360-8705.jpg?t=st=1651136740~exp=1651137340~hmac=d17fed796546aa370aea3c826f9743b6eb558fd34399d6cf89663051933ab10f&w=826";
 // console.log(toggleModal.value);
 const toggleModal = ref(false);
 const closeToggle = () => window.location.reload();
-
-
-
 console.log("isLogin", checkIsLogin.value);
 // method: POST -- add event
 const loading = ref(false);
 const addEvent = async (
-    newBookingName,
-    newBookingEmail,
-    newStartTime,
-    newNotes,
-    categorySelection,
-    modelFile
+  newBookingName,
+  newBookingEmail,
+  newStartTime,
+  newNotes,
+  categorySelection,
+  modelFile
 ) => {
-    loading.value = true;
-    console.log("loading 1 ", loading.value);
-    console.log("***modelFile*** : ", modelFile);
-    console.log(`${baseUrl}/events`);
-    console.log("booking email", newBookingEmail);
-    console.log("have email in localStorage", localStorage.getItem("email")); //เดี๋ยวไปสร้างตัวแปรไว้เก็บเฉพาะ....
-    // ถ้าเท่ากันจะได้ 0 ถ้าไม่เท่ากันจะได้ -1
-    console.log(newBookingEmail.localeCompare(userEmail.value));
-    // if (newBookingEmail.localeCompare(userEmail.value) == 0) {  // ไว้ check สำหรับ login แล้ว email ตรงกับตอนจะ new event มั้ย
-    // ยังมีปัญหาอยู่ คาดว่าเกิดจากการเมาปีกกา
-    // ไว้ check 2 กรณีคือ สำหรับ login ถ้า login อย่ localeCompare จะเป็น 0 หรือ ถ้าเป็น guest checkIsLogin จะเป็น false
-
-    // กรณี postfile-with-login (Authorized)
+  loading.value = true;
+  console.log("loading 1 ", loading.value);
+  console.log("***modelFile*** : ", modelFile);
+  console.log(`${baseUrl}/events`);
+  console.log("booking email", newBookingEmail);
+  console.log("have email in localStorage", localStorage.getItem("email")); //เดี๋ยวไปสร้างตัวแปรไว้เก็บเฉพาะ....
+  // ถ้าเท่ากันจะได้ 0 ถ้าไม่เท่ากันจะได้ -1
+  // console.log(newBookingEmail.localeCompare(userEmail.value));
+  // if (newBookingEmail.localeCompare(userEmail.value) == 0) {  // ไว้ check สำหรับ login แล้ว email ตรงกับตอนจะ new event มั้ย
+  // ยังมีปัญหาอยู่ คาดว่าเกิดจากการเมาปีกกา
+  // ไว้ check 2 กรณีคือ สำหรับ login ถ้า login อย่ localeCompare จะเป็น 0 หรือ ถ้าเป็น guest checkIsLogin จะเป็น false
+  // กรณี postevent-with-login (Authorized)
+  if (isMsalLogin == false) {
+    // oasip-token
     if (newBookingEmail.localeCompare(localStorage.getItem("email")) == 0) {
-        // กรณีมี file-upload ด้วย
-        if (modelFile != null) {
-            var fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
-            if (modelFile.size <= fileSize) {
-                const res = await fetch(`${baseUrl}/events`, {
-                    method: "POST",
-                    headers: {
-                        "content-type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                        // มีผลต่อ payload ต้องใส่
-                        bookingName: newBookingName,
-                        bookingEmail: newBookingEmail,
-                        eventStartTime: newStartTime,
-                        eventDuration: categorySelection.eventDuration,
-                        eventNotes: newNotes,
-                        eventCategoryId: categorySelection.eventCategoryId,
-                        eventCategoryName: categorySelection.eventCategoryName,
-                    }),
-                });
-                loading.value = true;
-                console.log("loading 1 ", loading.value);
-                if (res.status === 201) {
-                    const addedEvent = await res.json();
-                    eventCard.value.push(addedEvent);
-                    console.log("after submit", newBookingEmail);
-                    console.log("added sucessfully");
-
-                    // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
-                    const fileData = new FormData();
-                    fileData.append("file", modelFile);
-                    fileData.append("eventStartTime", newStartTime);
-                    const resFile = await fetch(`${baseUrl}/files/upload`, {
-                        method: "POST",
-                        body: fileData,
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-
-                    alert(
-                        `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
-                    );
-                    window.location.reload();
-                }
-                if (newBookingName.trim().length == 0 && res.status === 417) {
-                    newBookingName = null;
-                    alert("Booking Name must be filled out!");
-                }
-                if (newBookingEmail.trim().length == 0 && res.status === 417) {
-                    alert("Booking Email must be filled out!");
-                }
-                if (res.status == 400) {
-                    console.log(currentDateTime);
-                    alert("Appointment start time must be present or future.");
-                }
-                if (res.status === 409) {
-                    alert("Appointment start time unable to schedule overlapping");
-                }
-            } else {
-                alert(
-                    'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
-                );
-            }
-        }
-
-        // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
-        if (modelFile == null || modelFile == undefined) {
-            const res = await fetch(`${baseUrl}/events`, {
-                method: "POST",
-                headers: {
-                    "content-type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    // มีผลต่อ payload ต้องใส่
-                    bookingName: newBookingName,
-                    bookingEmail: newBookingEmail,
-                    eventStartTime: newStartTime,
-                    eventDuration: categorySelection.eventDuration,
-                    eventNotes: newNotes,
-                    eventCategoryId: categorySelection.eventCategoryId,
-                    eventCategoryName: categorySelection.eventCategoryName,
-                }),
+      // กรณีมี file-upload ด้วย
+      if (modelFile != null) {
+        var fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+        if (modelFile.size <= fileSize) {
+          const res = await fetch(`${baseUrl}/events`, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              // มีผลต่อ payload ต้องใส่
+              bookingName: newBookingName,
+              bookingEmail: newBookingEmail,
+              eventStartTime: newStartTime,
+              eventDuration: categorySelection.eventDuration,
+              eventNotes: newNotes,
+              eventCategoryId: categorySelection.eventCategoryId,
+              eventCategoryName: categorySelection.eventCategoryName,
+            }),
+          });
+          loading.value = true;
+          console.log("loading 1 ", loading.value);
+          if (res.status === 201) {
+            const addedEvent = await res.json();
+            eventCard.value.push(addedEvent);
+            console.log("after submit", newBookingEmail);
+            console.log("added sucessfully");
+            // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
+            const fileData = new FormData();
+            fileData.append("file", modelFile);
+            fileData.append("eventStartTime", newStartTime);
+            const resFile = await fetch(`${baseUrl}/files/upload`, {
+              method: "POST",
+              body: fileData,
+              headers: {'Authorization':`Bearer ${token}`}
             });
-            loading.value = true;
-            console.log("loading 1 ", loading.value);
-            if (res.status === 201) {
-                const addedEvent = await res.json();
-                eventCard.value.push(addedEvent);
-                console.log("after submit", newBookingEmail);
-                console.log("added sucessfully");
-                alert(
-                    `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
-                );
-                window.location.reload();
-            }
-            if (newBookingName.trim().length == 0) {
-                newBookingName = null;
-                alert("Booking Name must be filled out!");
-                res.status = 400;
-            }
-            if (res.status == 400) {
-                console.log(currentDateTime);
-                alert("Appointment start time must be present or future.");
-            }
-            if (res.status === 409) {
-                // alert('Appointment start time unable to schedule overlapping')
-                return res.json().then((text) => {
-                    refMes.value = text.message;
-                    console.log(refMes.value);
-                    alert(refMes.value);
-                });
-            }
+            alert(
+              `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
+            );
+            window.location.reload();
+          }
+          if (newBookingName.trim().length == 0 && res.status === 417) {
+            newBookingName = null;
+            alert("Booking Name must be filled out!");
+          }
+          if (newBookingEmail.trim().length == 0 && res.status === 417) {
+            alert("Booking Email must be filled out!");
+          }
+          if (res.status == 400) {
+            console.log(currentDateTime);
+            alert("Appointment start time must be present or future.");
+          }
+          if (res.status === 409) {
+            alert("Appointment start time unable to schedule overlapping");
+          }
+        } else {
+          alert(
+            'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
+          );
         }
+      }
+      // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
+      if (modelFile == null || modelFile == undefined) {
+        const res = await fetch(`${baseUrl}/events`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            // มีผลต่อ payload ต้องใส่
+            bookingName: newBookingName,
+            bookingEmail: newBookingEmail,
+            eventStartTime: newStartTime,
+            eventDuration: categorySelection.eventDuration,
+            eventNotes: newNotes,
+            eventCategoryId: categorySelection.eventCategoryId,
+            eventCategoryName: categorySelection.eventCategoryName,
+          }),
+        });
+        loading.value = true;
+        console.log("loading 1 ", loading.value);
+        if (res.status === 201) {
+          const addedEvent = await res.json();
+          eventCard.value.push(addedEvent);
+          console.log("after submit", newBookingEmail);
+          console.log("added sucessfully");
+          alert(
+            `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
+          );
+          window.location.reload();
+        }
+        if (newBookingName.trim().length == 0) {
+          newBookingName = null;
+          alert("Booking Name must be filled out!");
+          res.status = 400;
+        }
+        if (res.status == 400) {
+          console.log(currentDateTime);
+          alert("Appointment start time must be present or future.");
+        }
+        if (res.status === 409) {
+          // alert('Appointment start time unable to schedule overlapping')
+          return res.json().then((text) => {
+            refMes.value = text.message;
+            console.log(refMes.value);
+            alert(refMes.value);
+          });
+        }
+      }
     }
-
-    // กรณีเป็น "Guest / No-Authorized"
-    else {
-        // กรณีมี file-upload ด้วย
-        if (modelFile != null) {
-            const fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
-            if (modelFile.size <= fileSize) {
-                console.log("file size", modelFile.size);
-                const res = await fetch(`${baseUrl}/events`, {
-                    method: "POST",
-                    headers: { "content-type": "application/json" },
-                    body: JSON.stringify({
-                        // มีผลต่อ payload ต้องใส่
-                        bookingName: newBookingName,
-                        bookingEmail: newBookingEmail,
-                        eventStartTime: newStartTime,
-                        eventDuration: categorySelection.eventDuration,
-                        eventNotes: newNotes,
-                        eventCategoryId: categorySelection.eventCategoryId,
-                        eventCategoryName: categorySelection.eventCategoryName,
-                    }),
-                });
-                if (res.status === 201) {
-                    const addedEvent = await res.json();
-                    eventCard.value.push(addedEvent);
-                    console.log("after submit", newBookingEmail);
-                    console.log("added sucessfully");
-
-                    // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
-                    const fileData = new FormData();
-                    fileData.append("file", modelFile);
-                    fileData.append("eventStartTime", newStartTime);
-                    const resFile = await fetch(`${baseUrl}/files/upload`, {
-                        method: "POST",
-                        body: fileData,
-                    });
-
-                    alert(
-                        `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
-                    );
-                    window.location.reload();
-                }
-                if (newBookingName.trim().length == 0 && res.status === 417) {
-                    newBookingName = null;
-                    alert("Booking Name must be filled out!");
-                }
-                if (newBookingEmail.trim().length == 0 && res.status === 417) {
-                    alert("Booking Email must be filled out!");
-                }
-                if (res.status == 400) {
-                    console.log(currentDateTime);
-                    alert("Appointment start time must be present or future.");
-                }
-                if (res.status === 409) {
-                    alert("Appointment start time unable to schedule overlapping");
-                }
-            } else {
-                alert(
-                    'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
-                );
-            }
-        }
-
-        // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
-        if (modelFile == null || modelFile == undefined) {
-            const res = await fetch(`${baseUrl}/events`, {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({
-                    // มีผลต่อ payload ต้องใส่
-                    bookingName: newBookingName,
-                    bookingEmail: newBookingEmail,
-                    eventStartTime: newStartTime,
-                    eventDuration: categorySelection.eventDuration,
-                    eventNotes: newNotes,
-                    eventCategoryId: categorySelection.eventCategoryId,
-                    eventCategoryName: categorySelection.eventCategoryName,
-                }),
+  }
+  else if(isMsalLogin == true){
+    // azure-token
+    // กรณีมี file-upload ด้วย
+    if (modelFile != null) {
+        var fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+        if (modelFile.size <= fileSize) {
+          const res = await fetch(`${baseUrl}/events`, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              Authorization: `Bearer ${msalToken}`,
+            },
+            body: JSON.stringify({
+              // มีผลต่อ payload ต้องใส่
+              bookingName: newBookingName,
+              bookingEmail: newBookingEmail,
+              eventStartTime: newStartTime,
+              eventDuration: categorySelection.eventDuration,
+              eventNotes: newNotes,
+              eventCategoryId: categorySelection.eventCategoryId,
+              eventCategoryName: categorySelection.eventCategoryName,
+            }),
+          });
+          loading.value = true;
+          console.log("loading 1 ", loading.value);
+          if (res.status === 201) {
+            const addedEvent = await res.json();
+            eventCard.value.push(addedEvent);
+            console.log("after submit", newBookingEmail);
+            console.log("added sucessfully");
+            // fetch-file-upload :: หากมีไฟล์ที่เพิ่ม upload เข้ามา ก็จะ != null ดังนั้น fecth-api ตัวนี้จึงทำงาน
+            const fileData = new FormData();
+            fileData.append("file", modelFile);
+            fileData.append("eventStartTime", newStartTime);
+            const resFile = await fetch(`${baseUrl}/files/upload`, {
+              method: "POST",
+              body: fileData,
+              headers: {'Authorization':`Bearer ${msalToken}`}
             });
-            if (res.status === 201) {
-                const addedEvent = await res.json();
-                eventCard.value.push(addedEvent);
-                console.log("after submit", newBookingEmail);
-                console.log("added sucessfully");
-                alert(
-                    `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
-                );
-                window.location.reload();
-            }
-            if (newBookingName.trim().length == 0) {
-                newBookingName = null;
-                alert("Booking Name must be filled out!");
-                res.status = 400;
-            }
-            if (res.status == 400) {
-                console.log(currentDateTime);
-                alert("Appointment start time must be present or future.");
-            }
-            if (res.status === 409) {
-                alert("Appointment start time unable to schedule overlapping");
-            }
+            alert(
+              `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
+            );
+            window.location.reload();
+          }
+          if (newBookingName.trim().length == 0 && res.status === 417) {
+            newBookingName = null;
+            alert("Booking Name must be filled out!");
+          }
+          if (newBookingEmail.trim().length == 0 && res.status === 417) {
+            alert("Booking Email must be filled out!");
+          }
+          if (res.status == 400) {
+            console.log(currentDateTime);
+            alert("Appointment start time must be present or future.");
+          }
+          if (res.status === 409) {
+            alert("Appointment start time unable to schedule overlapping");
+          }
+        } else {
+          alert(
+            'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
+          );
         }
-    }
+      }
+      // กรณีไม่มี file-upload / post แค่ event อย่างเดียว
+      if (modelFile == null || modelFile == undefined) {
+        const res = await fetch(`${baseUrl}/events`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${msalToken}`,
+          },
+          body: JSON.stringify({
+            // มีผลต่อ payload ต้องใส่
+            bookingName: newBookingName,
+            bookingEmail: newBookingEmail,
+            eventStartTime: newStartTime,
+            eventDuration: categorySelection.eventDuration,
+            eventNotes: newNotes,
+            eventCategoryId: categorySelection.eventCategoryId,
+            eventCategoryName: categorySelection.eventCategoryName,
+          }),
+        });
+        loading.value = true;
+        console.log("loading 1 ", loading.value);
+        if (res.status === 201) {
+          const addedEvent = await res.json();
+          eventCard.value.push(addedEvent);
+          console.log("after submit", newBookingEmail);
+          console.log("added sucessfully");
+          alert(
+            `Booking Name: ${newBookingName} is created successfully.\n We have send a confirmation email to ${newBookingEmail}`
+          );
+          window.location.reload();
+        }
+        if (newBookingName.trim().length == 0) {
+          newBookingName = null;
+          alert("Booking Name must be filled out!");
+          res.status = 400;
+        }
+        if (res.status == 400) {
+          console.log(currentDateTime);
+          alert("Appointment start time must be present or future.");
+        }
+        if (res.status === 409) {
+          // alert('Appointment start time unable to schedule overlapping')
+          return res.json().then((text) => {
+            refMes.value = text.message;
+            console.log(refMes.value);
+            alert(refMes.value);
+          });
+        }
+      }
+  }
 }; //ปีกกาปิดของ function: addEvent()
-
 // SEARCHING METHOD
 // search-catName-option
 const eventCategory = ref([]);
 const getEventCategory = async () => {
-    console.log(`${baseUrl}/event-categories`);
-    const res = await fetch(`${baseUrl}/event-categories`, {
-        headers: {
-            "content-type": "application/json",
-            //  'Authorization': `Bearer ${token}`
-        },
-    });
-    eventCategory.value = await res.json();
-    console.log("data from api: " + eventCategory.value);
+  console.log(`${baseUrl}/event-categories`);
+  const res = await fetch(`${baseUrl}/event-categories`, {
+    headers: {
+      "content-type": "application/json",
+      //  'Authorization': `Bearer ${token}`
+    },
+  });
+  eventCategory.value = await res.json();
+  console.log("data from api: " + eventCategory.value);
 };
 onBeforeMount(async () => {
-    await getEventCategory();
+  await getEventCategory();
 });
 // ลองกำหนด model สำหรับรับ id
 const modelId = ref(null);
 // model for filter: time/chrono
 const filterByCategory = async () => {
-    // fetch for filter catName
-    // const test = modelId.value
-    if (modelId.value == "all") {
-        const res = await fetch(`${baseUrl}/events`, {
-            headers: {
-                "content-type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        eventCard.value = await res.json();
+  // fetch for filter catName
+  // const test = modelId.value
+  if (modelId.value == "all") {
+    const res = await fetch(`${baseUrl}/events`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    eventCard.value = await res.json();
+  } else {
+    var id = modelId.value.eventCategoryId;
+    const res = await fetch(`${baseUrl}/events/getByEventCategories/${id}`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (res.status == 204) {
+      eventCard.value = 0;
     } else {
-        var id = modelId.value.eventCategoryId;
-        const res = await fetch(`${baseUrl}/events/getByEventCategories/${id}`, {
-            headers: {
-                "content-type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        if (res.status == 204) {
-            eventCard.value = 0;
-        } else {
-            eventCard.value = await res.json();
-            console.log("res", res.url);
-        }
+      eventCard.value = await res.json();
+      console.log("res", res.url);
     }
+  }
 };
 // let isShow = ref(true);
 // const isShowListAll = ref(true)
@@ -572,81 +566,81 @@ const isFilterAll = ref(true);
 const isFilterUp = ref(false);
 const isFilterPast = ref(false);
 const filterByPeriod = async () => {
-    // // fetch for filter period/chrono
-    if (modelTime.value == "all") {
-        isFilterAll.value = true;
-        isFilterUp.value = false;
-        isFilterPast.value = false;
-        const res = await fetch(`${baseUrl}/events`, {
-            headers: {
-                "content-type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        eventCard.value = await res.json();
-        haveAll.value = true;
-        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming & past
-        haveUpcoming.value = false;
-        havePast.value = false;
-    } else if (modelTime.value == "upcoming") {
-        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no past
-        const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`, {
-            headers: {
-                "content-type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        havePast.value = false;
-        haveAll.value = false;
-        isFilterUp.value = true;
-        isFilterAll.value = false;
-        isFilterPast.value = false;
-        if (resUp.status == 204) {
-            console.log(
-                `event card returned: ${haveUpcoming.value.length} + no upcoming or on-going events`
-            );
-            haveUpcoming.value = true;
-        } else {
-            eventCard.value = await resUp.json();
-        }
-    } else if (modelTime.value == "past") {
-        const resPast = await fetch(`${baseUrl}/events/getEventByPast`, {
-            headers: {
-                "content-type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        isFilterPast.value = true;
-        isFilterAll.value = false;
-        isFilterUp.value = false;
-        // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming
-        haveUpcoming.value = false;
-        haveAll.value = false;
-        if (resPast.status == 204) {
-            havePast.value = true;
-        } else {
-            eventCard.value = await resPast.json();
-        }
+  // // fetch for filter period/chrono
+  if (modelTime.value == "all") {
+    isFilterAll.value = true;
+    isFilterUp.value = false;
+    isFilterPast.value = false;
+    const res = await fetch(`${baseUrl}/events`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    eventCard.value = await res.json();
+    haveAll.value = true;
+    // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming & past
+    haveUpcoming.value = false;
+    havePast.value = false;
+  } else if (modelTime.value == "upcoming") {
+    // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no past
+    const resUp = await fetch(`${baseUrl}/events/getEventByUpcoming`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    havePast.value = false;
+    haveAll.value = false;
+    isFilterUp.value = true;
+    isFilterAll.value = false;
+    isFilterPast.value = false;
+    if (resUp.status == 204) {
+      console.log(
+        `event card returned: ${haveUpcoming.value.length} + no upcoming or on-going events`
+      );
+      haveUpcoming.value = true;
+    } else {
+      eventCard.value = await resUp.json();
     }
+  } else if (modelTime.value == "past") {
+    const resPast = await fetch(`${baseUrl}/events/getEventByPast`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    isFilterPast.value = true;
+    isFilterAll.value = false;
+    isFilterUp.value = false;
+    // ถ้าหาก กดมาที่ตรงนี้จะปิด show ของ no upcoming
+    haveUpcoming.value = false;
+    haveAll.value = false;
+    if (resPast.status == 204) {
+      havePast.value = true;
+    } else {
+      eventCard.value = await resPast.json();
+    }
+  }
 };
 const modelDate = ref();
 const filterByDate = async () => {
-    var date = modelDate.value;
-    const res = await fetch(
-        `${baseUrl}/events/getEventsByEventStartTime/${date}`,
-        {
-            headers: {
-                "content-type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
-    if (res.status == 204) {
-        eventCard.value = 0;
-    } else {
-        eventCard.value = await res.json();
-        console.log("modelDate: ", modelDate.value);
+  var date = modelDate.value;
+  const res = await fetch(
+    `${baseUrl}/events/getEventsByEventStartTime/${date}`,
+    {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     }
+  );
+  if (res.status == 204) {
+    eventCard.value = 0;
+  } else {
+    eventCard.value = await res.json();
+    console.log("modelDate: ", modelDate.value);
+  }
 };
 const showFilterMenu = ref(false);
 const picked = ref(false);

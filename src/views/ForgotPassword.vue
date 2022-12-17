@@ -31,26 +31,36 @@ const baseUrl = import.meta.env.PROD
 const inputEmail = ref('')
 
 const sentMail = async (email) => {
-    console.log(inputEmail.value)
+    console.clear()
+    console.log("inputEmail:", inputEmail.value)
+    console.log("email param:", email);
     const res = await fetch(`${baseUrl}/users/mailForgot`, {
         method: "POST",
         headers: {
             'content-type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            // 'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-            email: inputEmail.email
+            // email:inputEmail.email
+            email:inputEmail.value
         })
+        
     })
     console.log(inputEmail.value);
     if (res.status === 200) {
         alert("Sent email complete")
+    }else if (res.status === 404){
+        alert("Email not found")
     }
+
+    console.log(inputEmail.value);
+
 
 }
 </script>
  
 <template>
+    
     <div class="container mx-auto ">
         <div class="flex justify-center px-6 my-12 ">
             <div class="w-full xl:w-3/4 lg:w-11/12 flex rounded-3xl shadow-2xl">
