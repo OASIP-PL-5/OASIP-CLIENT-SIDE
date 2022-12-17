@@ -3,6 +3,8 @@ import { ref, onBeforeMount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 const myRouter = useRouter()
 const goToForgot = () => myRouter.push({ name: 'ForgotPassword' })
+const goToHome = () => myRouter.push({ path: "/" });
+
 
 const oldPassword = ref('')
 const newPassword = ref('')
@@ -12,25 +14,43 @@ const baseUrl = import.meta.env.PROD
     ? `${import.meta.env.VITE_BASE_URL}/api`
     : "/api";
 
+const token = localStorage.getItem("jwtToken");
+
+
 const setPassword = async () => {
     console.clear()
+    if (newPassword.value.length >= 8 && newPassword.value.length <= 15) {
+        if (newPassword.value.localeCompare(confirmPassword.value) == 0) {
+            const res = await fetch(`${baseUrl}/users/change-password`, {
+                method: "PUT",
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    password: oldPassword.value,
+                    newPassword: newPassword.value
+                })
+            })
+            if (res.status === 200) {
+                alert("Your password has been changed.")
+                localStorage.clear()
+                goToHome()
+            }
+            else if (res.status === 401) {
+                alert("Password incorrect")
+            }
+        } else {
+            alert("New password and confirm password must be matched")
+        }
+    }
+
+
     console.log("oldPass", oldPassword.value);
     console.log("newPass", newPassword.value);
     console.log("conPass", confirmPassword.value);
-    const res = await fetch(`${baseUrl}/users/change-password`, {
-        method: "PUT",
-        headers: {
-            'content-type': 'application/json',
-            // 'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            password: oldPassword.value,
-            newPassword: newPassword.value
-        })
-    })
-    if(res.status === 200){
-        alert("Your password has been changed.")
-    }
+
+
 
 }
 
