@@ -1,47 +1,73 @@
 <script setup>
-import { computed,ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import jwt_decode from "jwt-decode";
+
+
+console.clear()
+const myRouter = useRouter();
+
+const goToSignIn = () => myRouter.push({ name: 'SignIn' })
 const route = useRoute()
 let url = route.query
 console.log("url")
-console.log(url.token)//pattern https://url.com?token=บลาๆ
-const getToken = url.token
-console.log(getToken)
-
+// console.log(url.token)
+//pattern https://url.com?token=บลาๆ
+console.log(url);
+// check ว่า url ที่ได้่มาเป็น empty obj หรือไม่
+// console.log(Object.keys(url).length === 0)
+if (Object.keys(url).length > 0 && Object.keys(url) == 'token') {
+    const getToken = url.token
+    console.log(jwt_decode(getToken));
+    const email = jwt_decode(getToken)
+    console.log(email.sub);
+} else {
+    console.log("ไม่พบ token ใน url-path = reset-password ไม่ควรทำงานได้");
+    alert("please input your email in ForgotPassword's page")
+    myRouter.push('forgot-password')
+}
 // const password = computed(()=>{
 //     newPassword =''
 //     confirmPassword = ''
 // })
-
+const baseUrl = import.meta.env.PROD
+    ? `${import.meta.env.VITE_BASE_URL}/api`
+    : "/api";
 const newPassword = ref('')
 const confirmPassword = ref('')
 
-const reset = async (password)=>{
+const reset = async () => {
+    console.clear()
     // console.log(password.newPassword)
     // console.log(password.confirmPassword)
-    console.log(newPassword.value);
-    console.log(confirmPassword.value);
-    if(newPassword.value.length>=8 && newPassword.value.length<=15){
-        if(password.newPassword.localeCompare(password.confirmPassword) == 0){
-            const res = await fetch(`${baseUrl}/users/forgot`,{
+    console.log("newPass", newPassword.value);
+    console.log("ConPass", confirmPassword.value);
+    if (newPassword.value.length >= 8 && newPassword.value.length <= 15) {
+        console.log(newPassword.value);
+        if (newPassword.value.localeCompare(confirmPassword.value) == 0) {
+            const res = await fetch(`${baseUrl}/users/forgot`, {
                 method: 'PUT',
                 headers: {
                     'content-type': 'application/json',
                     'Authorization': `Bearer ${url.token}`
                 },
-                body:JSON.stringify({
+                body: JSON.stringify({
                     password: newPassword.value
                 })
             })
-            if(res.status===200){
+            if (res.status === 200) {
                 alert("Change password complete")
+                goToSignIn()
+
             }
-        }else{
+        } else {
             alert("password and confirm password not match")
         }
-    }else{
+    } else {
         alert("Password must have between 8-15 charecters")
     }
+    console.log(`${url.token}`);
 }
 </script>
  

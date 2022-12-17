@@ -38,18 +38,20 @@ const sentMail = async (email) => {
         method: "POST",
         headers: {
             'content-type': 'application/json',
+            // ไม่ต้องใส่ Auth header เพราะ back permitAll
             // 'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
             // email:inputEmail.email
-            email:inputEmail.value
+            email: inputEmail.value
         })
-        
+
     })
     console.log(inputEmail.value);
     if (res.status === 200) {
         alert("Sent email complete")
-    }else if (res.status === 404){
+        inputEmail.value = ''
+    } else if (res.status === 404) {
         alert("Email not found")
     }
 
@@ -60,8 +62,13 @@ const sentMail = async (email) => {
 </script>
  
 <template>
-    
+    <div > 
+        <div class="relative w-full rounded">
+            <div style="width: 100%" class="absolute top-0 h-4 rounded shim-red"></div>
+        </div>
+    </div>
     <div class="container mx-auto ">
+
         <div class="flex justify-center px-6 my-12 ">
             <div class="w-full xl:w-3/4 lg:w-11/12 flex rounded-3xl shadow-2xl">
                 <div class="w-full h-auto bg-gray-400 hidden lg:block lg:w-1/2 bg-cover rounded-l-lg"><img

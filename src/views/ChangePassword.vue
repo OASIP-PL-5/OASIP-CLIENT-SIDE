@@ -8,8 +8,30 @@ const oldPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 
-const change = async (password) => {
-    
+const baseUrl = import.meta.env.PROD
+    ? `${import.meta.env.VITE_BASE_URL}/api`
+    : "/api";
+
+const setPassword = async () => {
+    console.clear()
+    console.log("oldPass", oldPassword.value);
+    console.log("newPass", newPassword.value);
+    console.log("conPass", confirmPassword.value);
+    const res = await fetch(`${baseUrl}/users/change-password`, {
+        method: "PUT",
+        headers: {
+            'content-type': 'application/json',
+            // 'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            password: oldPassword.value,
+            newPassword: newPassword.value
+        })
+    })
+    if(res.status === 200){
+        alert("Your password has been changed.")
+    }
+
 }
 
 
@@ -32,7 +54,7 @@ const change = async (password) => {
                             <label class="block mb-2 text-lg font-bold text-blue-400">
                                 Old password
                             </label>
-                            <input
+                            <input v-model="oldPassword"
                                 class="mb-2 w-full px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
                                 type="password" placeholder="Enter your password" />
                             <div class="flex justify-end text-lg mb-2">
@@ -45,18 +67,18 @@ const change = async (password) => {
                                 New password <span class="text-slate-400 font-thin">| minimum 8 maximum 14
                                     characters</span>
                             </label>
-                            <input
+                            <input v-model="newPassword"
                                 class="w-full px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
                                 type="password" placeholder="Enter new password" />
                             <label class="block mt-2 mb-2 text-lg font-bold text-blue-400">
                                 Confirm password
                             </label>
-                            <input
+                            <input v-model="confirmPassword"
                                 class="w-full mb-2 px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
                                 type="password" placeholder="Enter new password again" />
                         </div>
                         <div class="mb-3 text-center">
-                            <button @click="goToReset"
+                            <button @click="setPassword()"
                                 class="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:shadow-outline"
                                 type="button">
                                 Set Password
