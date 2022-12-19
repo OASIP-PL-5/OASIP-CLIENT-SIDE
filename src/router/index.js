@@ -9,6 +9,9 @@ import AllUser from '../views/AllUser.vue'
 import UserDetail from '../views/UserDetail.vue'
 import SignUp from '../views/SignUp.vue'
 import SignIn from '../views/SignIn.vue'
+import ForgotPassword from '../views/ForgotPassword.vue'
+import ResetPassword from '../views/ResetPassword.vue'
+import ChangePassword from '../views/ChangePassword.vue'
 
 
 const history = createWebHistory(import.meta.env.BASE_URL)
@@ -66,8 +69,23 @@ const routes = [
         path: '/sign-in',
         name: 'SignIn',
         component: SignIn
+    },
+    {
+        path: '/forgot-password',
+        name: 'ForgotPassword',
+        component: ForgotPassword
+    },
+    {
+        path: '/reset-password',
+        name: 'ResetPassword',
+        component: ResetPassword
+    },
+    {
+        path: '/setting-password',
+        name: 'ChangePassword',
+        component: ChangePassword
     }
-    
+
 
 
 

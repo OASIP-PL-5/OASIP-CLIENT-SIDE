@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import aad from "../services/aad.js"
 const myRouter = useRouter()
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
+const goToForgot = () => myRouter.push({ name: 'ForgotPassword' })
 const goToHome = () => myRouter.push({ name: 'Home' })
 
 defineEmits(['matchUser'])
@@ -26,10 +27,11 @@ const test = () => {
     alert('hello')
 }
 
-const aadLogin = () => {
-    aad.login().then((account) => {
+const aadLogin =  () => {
+    aad.login().then(async (account) => {
         // account.userName
-        myRouter.push({ path: '/' })
+        await myRouter.push({ path: '/' })
+        myRouter.go(0)
 
     })
 }
@@ -71,7 +73,7 @@ const aadLogin = () => {
                                     </div>
                                 </div>
                                 <div class="flex -mx-3">
-                                    <div class="w-full px-3 mb-5">
+                                    <div class="w-full px-3 mb-1">
                                         <label for="" class="text-xl font-semibold text-blue-400">Password</label>
                                         <div class="flex">
                                             <div
@@ -86,6 +88,11 @@ const aadLogin = () => {
                                                 class="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500">
                                         </div>
                                     </div>
+                                </div>
+                                <div class="flex justify-end text-lg mb-2">
+                                    <a @click="goToForgot" class="font-semibold text-slate-400 
+                                     hover:underline hover:scale-105 
+                                     transition-transform cursor-pointer">Forgot password?</a>
                                 </div>
 
                                 <div class="flex justify-center">
@@ -112,16 +119,12 @@ const aadLogin = () => {
                                 focus:ring-0 active:shadow-lg transition 
                                 duration-150 ease-in-out w-full flex justify-center 
                                 items-center mb-3 bg-slate-100 cursor-pointer	">
-                                <img src="../assets/microsoft.png" alt="ms-logo" class="w-8 mr-2">
+                                    <img src="../assets/microsoft.png" alt="ms-logo" class="w-8 mr-2">
 
                                     <span class="text-slate-500 font-semibold text-xl">Continue with Microsoft</span>
                                 </a>
 
-                                <!-- <div class="flex justify-center mt-2 text-xl">New here?&nbsp;
-                                    <button @click="goToSignUp" class="font-bold text-blue-400 
-                                     hover:underline hover:scale-105 
-                                     transition-transform">Create an account</button>
-                                </div> -->
+
                             </div>
                         </div>
                     </div>

@@ -1,416 +1,739 @@
 <script setup>
-import { ref, onBeforeMount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import BtnEditEvent from '../components/BtnEditEvent.vue'
+import { ref, onBeforeMount, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import BtnEditEvent from "../components/BtnEditEvent.vue";
+import jwt_decode from 'jwt-decode'
 // import VueCookies from 'vue-cookies'
-const myRouter = useRouter()
-const goToNotFound = () => myRouter.push({ name: 'NotFound' })
-
-console.clear()
-const { params } = useRoute()
-const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
-const goToAllUser = () => myRouter.push({ name: 'AllUser' })
-const token = localStorage.getItem('jwtToken');
-const IsAuthorized = ref(true)
-const alert404 = "Sorry... Something went wrong with this event.\nWe'll take you back to the EVENT-LIST-PAGE"
-
-
-
+const myRouter = useRouter();
+const goToNotFound = () => myRouter.push({ name: "NotFound" });
+console.clear();
+const loggingIn = ref(true)
+const allowModal = ref(true)
+const { params } = useRoute();
+const goToAllEvent = () => myRouter.push({ name: "AllEvent" });
+const goToAllUser = () => myRouter.push({ name: "AllUser" });
+const token = localStorage.getItem("jwtToken");
+const newToken = localStorage.getItem("refreshToken");
+const msalToken = localStorage.getItem(
+  "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
+);
+const isMsalLogin = localStorage.getItem(
+  "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
+)
+  ? true
+  : false;
+const IsAuthorized = ref(true);
+const alert404 =
+  "Sorry... Something went wrong with this event.\nWe'll take you back to the EVENT-LIST-PAGE";
+const isOwner = ref(true);
+const userRole = ref("")
+const checkIsLogin = computed(() => {
+  if (localStorage.getItem("email")) {
+    console.log("email value  : ", localStorage.getItem("email"));
+    const decoded = jwt_decode(localStorage.getItem("jwtToken"));
+    if (decoded.role === "lecturer" || decoded.role === null) {
+      allowModal.value = false;
+      console.log("allowModal : ", allowModal.value);
+    }
+    return (loggingIn.value = true);
+  } else if (isMsalLogin) {
+    // userRole.value = jwt_decode(msalToken).roles[0]
+    return loggingIn.value = true
+  } else {
+    loggingIn.value = false;
+    allowModal.value = false;
+  }
+});
 // model สำหรับเก็บค่า edit จาก user
-const editStartTimeModel = ref('')
-const editNotesModel = ref('')
+const editStartTimeModel = ref("");
+const editNotesModel = ref("");
 // GET:: DetailBases
-const thisEventDetail = ref([])
+const thisEventDetail = ref([]);
 const baseUrl = import.meta.env.PROD
   ? `${import.meta.env.VITE_BASE_URL}/api`
-  : '/api'
-
-const loadFile = ref(false)
-const loading = ref(true)
+  : "/api";
+const loadFile = ref(false);
+const loading = ref(true);
 const getThisEventCard = async () => {
-  const id = params.id
-  const res = await fetch(`${baseUrl}/events/${id}/`, {
-    headers:
-    {
-      'content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    }
-  }
-  )
-  // check is fetching
-  loading.value = false
-  if (res.status === 404) {
-    alert(alert404)
-    goToAllEvent()
-  }
-  // ต้องการให้ เมื่อ token หมดอายุแล้วไปเรียก refreshToken ที่หน้า list-all-user แล้วกลับมาหน้าเดิมก่อนไปเรียก refreshToken
-  if (res.status === 401) {
-    alert("Please login again")
-    await myRouter.push({ path: '/list-all-user' }) // เพื่อไปขอ refreshToken มาใหม่
-    myRouter.go(-1) // กลับมาหน้าเดิมหลังไปเรียก refreshToken
-  }
-  // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
-  // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
-  if (res.status === 200) {
-    thisEventDetail.value = await res.json()
-    console.log(`model startTime:: ${thisEventDetail.value[0].eventStartTime}`);
-    console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
-    editStartTimeModel.value = thisEventDetail.value[0].eventStartTime
-    editNotesModel.value = thisEventDetail.value[0].eventNotes
-    console.log(`res.status = 200? --> ${res.status == 200 ? true : false}`)
-    console.log(thisEventDetail.value)
-  } else if (res.status === 403) {
-    alert("You are not authorized to view this page")
-    goToAllEvent()
-  } else if (res.status === 400) {
-    goToNotFound()
-  }
-  // else {
-  //   await goToNotFound()
-  //   console.log(`event: ${id} is not exist!`)
-  // }
-}
+  // ต้องเช็คในนี้ก่อน เพราะ จะได้ computed เข้ามาทำงานเป็นลำดับแรกเลย
 
-const fileId = ref('')
-const fileType = ref('')
-const hasFile = ref(false)
-const thisEventFile = ref([])
-const getFile = async () => {
-  const id = params.id
-  const res = await fetch(`${baseUrl}/files/${id}/`, {
-    headers:
-    {
-      'content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      // 'responseType': 'blob'
-    }
-  }
-  )
-  loadFile.value = true
-  console.log("loading file", loadFile.value);
-  if (res.status === 200) {
-    thisEventFile.value = await res.json()
-    hasFile.value = true
-
-    loadFile.value = false
-    console.log("thisEventFile = ", thisEventFile)
-    console.log(thisEventFile.value.fileName);
-    console.log(thisEventFile.value.fileType);
-    console.log(thisEventFile.value.eventBooking);
-    console.log(thisEventFile.value.id);
-    fileId.value = thisEventFile.value.id
-    console.log(`fileId = ${fileId.value}`);
-    fileType.value = thisEventFile.value.fileType
-    console.log(`fileType = ${fileType.value}`);
-  }
-  else if (res.status === 404) {
-    loadFile.value = false
-
-  }
-}
-
-
-const fileUrl = ref('')
-const clicked = ref(false)
-const toggle = ref(true)
-const downloadFile = async () => {
-  const id = fileId.value
-  const res = await fetch(`${baseUrl}/files/download/${id}`, {
-    headers:
-    {
-      'content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      // 'responseType': 'blob'
-
-    }
-  }
-  )
-
-  if (res.status === 200) {
-    clicked.value = true
-    toggle.value = false
-    // loadFile.value = false
-
-    // thisEventFile.value = await res.json()
-    console.log("res", res);
-    // console.log(res.url);
-    fileUrl.value = res.url
-    console.log("fileUrl", fileUrl.value);
-    console.log("thisEventFile = ", thisEventFile)
-    console.log(thisEventFile.value.fileName);
-    console.log(thisEventFile.value.fileType);
-    console.log(thisEventFile.value.eventBooking);
-    console.log(thisEventFile.value.id);
-    fileId.value = thisEventFile.value.id
-    console.log(`fileId = ${fileId.value}`);
-    fileType.value = thisEventFile.value.fileType
-    console.log(`fileType = ${fileType.value}`);
-
-  }
-
-}
-
-// delete file 
-const deleteFile = async () => {
-  const id = fileId.value
-  let confirmation = `Are you sure to delete ${thisEventFile.value.fileName} ?`
-  if (confirm(confirmation) == true) {
-    const res = await fetch(`${baseUrl}/files/delete/${id}/`, {
-      method: 'DELETE',
-      headers:
-      {
-        'content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        // 'responseType': 'blob'
+  const id = params.id;
+  if (isMsalLogin == false) {
+    // guest
+    if (checkIsLogin.value == undefined || checkIsLogin.value == null) {
+      const res = await fetch(`${baseUrl}/events/${id}/`, {
+        headers: {
+          "content-Type": "application/json"
+        },
+      });
+      // check is fetching
+      loading.value = false;
+      if (res.status === 404) {
+        alert(alert404);
+        goToAllEvent();
+      }
+      // ต้องการให้ เมื่อ token หมดอายุแล้วไปเรียก refreshToken ที่หน้า list-all-user แล้วกลับมาหน้าเดิมก่อนไปเรียก refreshToken
+      if (res.status === 401) {
+        alert("Please login again");
+        await myRouter.push({ path: "/list-all-user" }); // เพื่อไปขอ refreshToken มาใหม่
+        myRouter.go(-1); // กลับมาหน้าเดิมหลังไปเรียก refreshToken
+      }
+      // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
+      // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
+      if (res.status === 200) {
+        thisEventDetail.value = await res.json();
+        if (thisEventDetail.value[0].bookingEmail == null) {
+          isOwner.value = false;
+          console.log("isOwner", isOwner.value);
+        }
+        console.log(
+          `model startTime:: ${thisEventDetail.value[0].eventStartTime}`
+        );
+        console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
+        editStartTimeModel.value = thisEventDetail.value[0].eventStartTime;
+        editNotesModel.value = thisEventDetail.value[0].eventNotes;
+        console.log(
+          `res.status = 200? --> ${res.status == 200 ? true : false}`
+        );
+        console.log(thisEventDetail.value);
+      } else if (res.status === 403) {
+        alert("You are not authorized to view this page");
+        goToAllEvent();
+      } else if (res.status === 400) {
+        goToNotFound();
       }
     }
-    )
+    // login-oasip
+    else {
+      const res = await fetch(`${baseUrl}/events/${id}/`, {
+        headers: {
+          "content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // check is fetching
+      loading.value = false;
+      if (res.status === 404) {
+        alert(alert404);
+        goToAllEvent();
+      }
+      // ต้องการให้ เมื่อ token หมดอายุแล้วไปเรียก refreshToken ที่หน้า list-all-user แล้วกลับมาหน้าเดิมก่อนไปเรียก refreshToken
+      if (res.status === 401) {
+        alert("Please login again");
+        await myRouter.push({ path: "/list-all-user" }); // เพื่อไปขอ refreshToken มาใหม่
+        myRouter.go(-1); // กลับมาหน้าเดิมหลังไปเรียก refreshToken
+      }
+      // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
+      // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
+      if (res.status === 200) {
+        thisEventDetail.value = await res.json();
+        if (thisEventDetail.value[0].bookingEmail == null) {
+          isOwner.value = false;
+          console.log("isOwner", isOwner.value);
+        }
+        console.log(
+          `model startTime:: ${thisEventDetail.value[0].eventStartTime}`
+        );
+        console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
+        editStartTimeModel.value = thisEventDetail.value[0].eventStartTime;
+        editNotesModel.value = thisEventDetail.value[0].eventNotes;
+        console.log(
+          `res.status = 200? --> ${res.status == 200 ? true : false}`
+        );
+        console.log(thisEventDetail.value);
+      } else if (res.status === 403) {
+        alert("You are not authorized to view this page");
+        goToAllEvent();
+      } else if (res.status === 400) {
+        goToNotFound();
+      }
+    }
+  }
+  if (isMsalLogin == true) {
+    console.clear()
+    userRole.value = jwt_decode(msalToken).roles[0]
+    console.log("role: ", userRole.value)
+    const res = await fetch(`${baseUrl}/events/${id}/`, {
+      headers: {
+        "content-Type": "application/json",
+        Authorization: `Bearer ${msalToken}`,
+      },
+    });
+    // check is fetching
+    loading.value = false;
+    if (res.status === 404) {
+      alert(alert404);
+      goToAllEvent();
+    }
+    // ต้องการให้ เมื่อ token หมดอายุแล้วไปเรียก refreshToken ที่หน้า list-all-user แล้วกลับมาหน้าเดิมก่อนไปเรียก refreshToken
+    if (res.status === 401) {
+      alert("Please login again");
+      await myRouter.push({ path: "/list-all-user" }); // เพื่อไปขอ refreshToken มาใหม่
+      myRouter.go(-1); // กลับมาหน้าเดิมหลังไปเรียก refreshToken
+    }
+    // เมื่อ get หน้า detail-base จะรับค่าจาก thisEventDetail มายัด model ที่ต้องการ
+    // เมื่อกด "edit" จะมีข้อมูล startTime & notes แสดงแล้วนั่นเอง
     if (res.status === 200) {
-      alert(`${thisEventFile.value.fileName} is deleted.`)
-      hasFile.value = false
-      console.log("thisEventFile = ", thisEventFile)
+      thisEventDetail.value = await res.json();
+      console.log(thisEventDetail.value);
+      if (thisEventDetail.value[0].bookingEmail == null) {
+        isOwner.value = false;
+        console.log("isOwner", isOwner.value);
+      }
+      console.log(
+        `model startTime:: ${thisEventDetail.value[0].eventStartTime}`
+      );
+      console.log(`model notes:: ${thisEventDetail.value[0].eventNotes}`);
+      editStartTimeModel.value = thisEventDetail.value[0].eventStartTime;
+      editNotesModel.value = thisEventDetail.value[0].eventNotes;
+      console.log(
+        `res.status = 200? --> ${res.status == 200 ? true : false}`
+      );
+      console.log(thisEventDetail.value);
+    } else if (res.status === 403) {
+      alert("You are not authorized to view this page");
+      goToAllEvent();
+    } else if (res.status === 400) {
+      goToNotFound();
+    }
+  }
+};
+const fileId = ref("");
+const fileType = ref("");
+const hasFile = ref(false);
+const thisEventFile = ref([]);
+const getFile = async () => {
+  const id = params.id;
+  if (isMsalLogin == false) {
+    // เป็น token ของ oasip
+    const res = await fetch(`${baseUrl}/files/${id}/`, {
+      headers: {
+        "content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        // 'responseType': 'blob'
+      },
+    });
+    loadFile.value = true;
+    console.log("loading file", loadFile.value);
+    if (res.status === 200) {
+      thisEventFile.value = await res.json();
+      hasFile.value = true;
+      loadFile.value = false;
+      console.log("thisEventFile = ", thisEventFile);
       console.log(thisEventFile.value.fileName);
       console.log(thisEventFile.value.fileType);
       console.log(thisEventFile.value.eventBooking);
       console.log(thisEventFile.value.id);
-      fileId.value = thisEventFile.value.id
+      fileId.value = thisEventFile.value.id;
       console.log(`fileId = ${fileId.value}`);
-      fileType.value = thisEventFile.value.fileType
+      fileType.value = thisEventFile.value.fileType;
+      console.log(`fileType = ${fileType.value}`);
+    } else if (res.status === 404) {
+      loadFile.value = false;
+    }
+  }
+  else if (isMsalLogin == true) {
+    // azure-token
+    const res = await fetch(`${baseUrl}/files/${id}/`, {
+      headers: {
+        "content-Type": "application/json",
+        Authorization: `Bearer ${msalToken}`,
+      },
+    });
+    loadFile.value = true;
+    console.log("loading file", loadFile.value);
+    if (res.status === 200) {
+      thisEventFile.value = await res.json();
+      hasFile.value = true;
+      loadFile.value = false;
+      console.log("thisEventFile = ", thisEventFile);
+      console.log(thisEventFile.value.fileName);
+      console.log(thisEventFile.value.fileType);
+      console.log(thisEventFile.value.eventBooking);
+      console.log(thisEventFile.value.id);
+      fileId.value = thisEventFile.value.id;
+      console.log(`fileId = ${fileId.value}`);
+      fileType.value = thisEventFile.value.fileType;
+      console.log(`fileType = ${fileType.value}`);
+    } else if (res.status === 404) {
+      loadFile.value = false;
+    }
+  }
+};
+const fileUrl = ref("");
+const clicked = ref(false);
+const toggle = ref(true);
+const downloadFile = async () => {
+  const id = fileId.value;
+  if (isMsalLogin == false) {
+    // oasip-token
+    const res = await fetch(`${baseUrl}/files/download/${id}`, {
+      headers: {
+        "content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        // 'responseType': 'blob'
+      },
+    });
+    if (res.status === 200) {
+      clicked.value = true;
+      toggle.value = false;
+      // loadFile.value = false
+      // thisEventFile.value = await res.json()
+      console.log("res", res);
+      // console.log(res.url);
+      fileUrl.value = res.url;
+      console.log("fileUrl", fileUrl.value);
+      console.log("thisEventFile = ", thisEventFile);
+      // console.log(thisEventFile.value.fileName);
+      // console.log(thisEventFile.value.fileType);
+      // console.log(thisEventFile.value.eventBooking);
+      // console.log(thisEventFile.value.id);
+      fileId.value = thisEventFile.value.id;
+      console.log(`fileId = ${fileId.value}`);
+      fileType.value = thisEventFile.value.fileType;
       console.log(`fileType = ${fileType.value}`);
     }
   }
-
-
-  if (res.status === 200) {
-    hasFile.value = false
-    console.log("res", res);
-    // console.log(res.url);
-    fileUrl.value = res.url
-
-
+  else if (isMsalLogin == true) {
+    const res = await fetch(`${baseUrl}/files/download/${id}`, {
+      headers: {
+        "content-Type": "application/json",
+        Authorization: `Bearer ${msalToken}`,
+      }
+    });
+    if (res.status === 200) {
+      clicked.value = true;
+      toggle.value = false;
+      // loadFile.value = false
+      // thisEventFile.value = await res.json()
+      console.log("res", res);
+      // console.log(res.url);
+      fileUrl.value = res.url;
+      console.log("fileUrl", fileUrl.value);
+      console.log("thisEventFile = ", thisEventFile);
+      // console.log(thisEventFile.value.fileName);
+      // console.log(thisEventFile.value.fileType);
+      // console.log(thisEventFile.value.eventBooking);
+      // console.log(thisEventFile.value.id);
+      fileId.value = thisEventFile.value.id;
+      console.log(`fileId = ${fileId.value}`);
+      fileType.value = thisEventFile.value.fileType;
+      console.log(`fileType = ${fileType.value}`);
+    }
   }
+};
+// delete file
+const deleteFile = async () => {
+  const id = fileId.value;
+  let confirmation = `Are you sure to delete ${thisEventFile.value.fileName} ?`;
+  if (confirm(confirmation) == true) {
+    if (isMsalLogin == false) {
+      // oasip-token
 
-}
+      const res = await fetch(`${baseUrl}/files/delete/${id}/`, {
+        method: "DELETE",
+        headers: {
+          "content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          // 'responseType': 'blob'
+        },
+      });
+      if (res.status === 200) {
+        alert(`${thisEventFile.value.fileName} is deleted.`);
+        hasFile.value = false;
+        console.log("thisEventFile = ", thisEventFile);
+        console.log(thisEventFile.value.fileName);
+        console.log(thisEventFile.value.fileType);
+        console.log(thisEventFile.value.eventBooking);
+        console.log(thisEventFile.value.id);
+        fileId.value = thisEventFile.value.id;
+        console.log(`fileId = ${fileId.value}`);
+        fileType.value = thisEventFile.value.fileType;
+        console.log(`fileType = ${fileType.value}`);
+      }
 
+      if (res.status === 200) {
+        hasFile.value = false;
+        console.log("res", res);
+        // console.log(res.url);
+        fileUrl.value = res.url;
+      }
+    }
+    else if (isMsalLogin == true) {
+      // azure-token
+      const res = await fetch(`${baseUrl}/files/delete/${id}/`, {
+        method: "DELETE",
+        headers: {
+          "content-Type": "application/json",
+          Authorization: `Bearer ${msalToken}`,
+          // 'responseType': 'blob'
+        },
+      });
+      if (res.status === 200) {
+        alert(`${thisEventFile.value.fileName} is deleted.`);
+        hasFile.value = false;
+        console.log("thisEventFile = ", thisEventFile);
+        console.log(thisEventFile.value.fileName);
+        console.log(thisEventFile.value.fileType);
+        console.log(thisEventFile.value.eventBooking);
+        console.log(thisEventFile.value.id);
+        fileId.value = thisEventFile.value.id;
+        console.log(`fileId = ${fileId.value}`);
+        fileType.value = thisEventFile.value.fileType;
+        console.log(`fileType = ${fileType.value}`);
+      }
 
-
+      if (res.status === 200) {
+        hasFile.value = false;
+        console.log("res", res);
+        // console.log(res.url);
+        fileUrl.value = res.url;
+      }
+    }
+  } else { console.log("cancel delete file"); }
+};
 onBeforeMount(async () => {
-  await getThisEventCard()
-  await getFile()
-  // await downloadFile()
-
-})
-
+  await getThisEventCard();
+  await getFile();
+  await downloadFile();
+});
 // DELETE: event
 const cancelEvent = async () => {
-  console.clear()
+  console.clear();
   console.log(thisEventFile.value.id);
-  const fileId = thisEventFile.value.id
-  const id = params.id
-  let confirmation = 'Are you sure?'
+  const fileId = thisEventFile.value.id;
+  const id = params.id;
+  let confirmation = "Are you sure?";
   if (confirm(confirmation) == true) {
     //warning:: delete-file-before-event !!!
-    const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
-      method: 'DELETE'
-    })
-
-    const res = await fetch(`${baseUrl}/events/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'content-type': 'application/json',
-        'Authorization': `Bearer ${token}`
+    if (isMsalLogin == false) {
+      const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const res = await fetch(`${baseUrl}/events/${id}`, {
+        method: "DELETE",
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (resDelFile.status === 404 && res.status === 404) {
+        alert(alert404);
+        goToAllEvent();
       }
-    })
-    if (resDelFile.status === 404 && res.status === 404) {
-      alert(alert404)
-      goToAllEvent()
+      if (res.status === 200) {
+        console.log("cancel bookingId: [" + id + "] success");
+        alert("cancel bookingId: [" + id + "] success");
+        await goToAllEvent();
+      } else if (res.status === 403) {
+        alert("You are not authorized to this action");
+      } else {
+        console.log(
+          'ERROR, cannot delete this note \n"please check your response status code"'
+        );
+      }
+    }
+    else if (isMsalLogin == true) {
+      const resDelFile = await fetch(`${baseUrl}/files/delete/${fileId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${msalToken}` },
+      });
+      const res = await fetch(`${baseUrl}/events/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${msalToken}` },
+      });
+      if (resDelFile.status === 404 && res.status === 404) {
+        alert(alert404);
+        goToAllEvent();
+      }
+      if (res.status === 200) {
+        console.log("cancel bookingId: [" + id + "] success");
+        alert("cancel bookingId: [" + id + "] success");
+        await goToAllEvent();
+      } else if (res.status === 403) {
+        alert("You are not authorized to this action");
+      } else {
+        console.log(
+          'ERROR, cannot delete this note \n"please check your response status code"'
+        );
+      }
     }
 
-    if (res.status === 200) {
-      console.log('cancel bookingId: [' + id + '] success')
-      await goToAllEvent()
-    } else if (res.status === 403) {
-      alert("You are not authorized to this action")
-    }
-    else {
-      console.log(
-        'ERROR, cannot delete this note \n"please check your response status code"'
-      )
-    }
-  } else {
-    console.log('confirmation false')
   }
-  console.log(`${baseUrl}/event/${id}`)
+
+  else {
+    console.log("confirmation false");
+  }
+
+
+  console.log(`${baseUrl}/event/${id}`);
   // if (res.status === 200) {
   //     console.log('cancel bookingId: [' + id + '] success');
   //     await goToHome()
   // } else {
   //     console.log('ERROR, cannot delete this note \n"please check your response status code"');
   // }
-}
-
+};
 // ส่วนการทำงาน PUT
-const isClickEdit = ref(false)
+const isClickEdit = ref(false);
 const onClickEdit = () => {
-  isClickEdit.value = true
-}
+  isClickEdit.value = true;
+};
 const cancelEdit = () => {
-  isClickEdit.value = false
-}
+  isClickEdit.value = false;
+};
 // model สำหรับเก็บค่า edit จาก user
 // const editStartTimeModel = ref(`${thisEventDetail.value.eventStartTime}`)
 // const editNotesModel = ref(`${thisEventDetail.value.eventNotes}`)
-const editLoading = ref(false)
-const doneEdit = ref(false)
+const editLoading = ref(false);
+const doneEdit = ref(false);
 const updateEvent = async () => {
-  const id = params.id
-  const resGet = await fetch(`${baseUrl}/events/${id}`, {
-    headers: {
-      'content-type': 'application/json',
-      'Authorization': `Bearer ${token}`
+  const id = params.id;
+  if (isMsalLogin == false) {
+    // oasip-token
+    const resGet = await fetch(`${baseUrl}/events/${id}`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    editLoading.value = true;
+    console.log("edit loading", editLoading.value);
+    if (resGet.status == 200) {
+      // window.location.reload()
+      editLoading.value = false;
+    } else if (resGet.status === 404) {
+      alert(alert404);
+      goToAllEvent();
     }
-  }
-
-  )
-  editLoading.value = true
-  console.log("edit loading", editLoading.value);
-  if (resGet.status === 404) {
-    alert(alert404)
-    goToAllEvent()
-  }
-  // const bookingName = params.bookingName
-  // method: GET
-  console.clear()
-  // let editStartTimeModel = new Date()
-  // editStartTimeModel.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  console.log(editStartTimeModel.value);
-  console.log(editNotesModel.value);
-  // method: PUT
-
-  const resPut = await fetch(`${baseUrl}/events/${id}`, {
-    method: 'PUT',
-    headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({
-      id: thisEventDetail.value[0].id,
-      eventStartTime: editStartTimeModel.value, // รับค่าจาก model
-      eventNotes: editNotesModel.value, //รับค่าจาก model
-    })
-  })
-  editLoading.value = true
-  if (resPut.status == 400) {
-    alert("Appointment date can not be time in the past.")
-  }
-  if (resPut.status === 403) {
-    alert("You are not authorized to this action")
-    myRouter.go(0)
-  }
-  // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
-  if (fileEditModel.value != null) {
-    const fileEditedData = new FormData()
-    console.log(fileEditModel.value);
-    fileEditedData.append('file', fileEditModel.value)
-    const resPutFile = await fetch(`${baseUrl}/files/update/${id}`, {
-      method: 'PATCH',
-      body: fileEditedData
-    })
-    if (resPutFile.status === 200) {
-      window.location.reload()
+    console.log(editStartTimeModel.value);
+    console.log(editNotesModel.value);
+    // method: PUT
+    const resPut = await fetch(`${baseUrl}/events/${id}`, {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        id: thisEventDetail.value[0].id,
+        eventStartTime: editStartTimeModel.value, // รับค่าจาก model
+        eventNotes: editNotesModel.value, //รับค่าจาก model
+      }),
+    });
+    editLoading.value = true;
+    if (resPut.status == 400) {
+      alert("Appointment date can not be time in the past.");
     }
-    else if (resPutFile.status === 404) {
-      // fetch post file
-      // const addNewFile ({modelFile}) => {
-
-      // }
-      console.log(fileEditModel.value.size);
-      var fileSize = 10485760 // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
-      if (fileEditModel.value.size > fileSize) {
-        alert('Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".')
+    if (resPut.status === 403) {
+      alert("You are not authorized to this action");
+      myRouter.go(0);
+    }
+    // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
+    if (fileEditModel.value != null) {
+      const fileEditedData = new FormData();
+      console.log(fileEditModel.value);
+      fileEditedData.append("file", fileEditModel.value);
+      const resPutFile = await fetch(`${baseUrl}/files/update/${id}`, {
+        method: "PATCH",
+        body: fileEditedData,
+        // ถ้าไม่ใส่ header จะ 401
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (resPutFile.status === 200) {
+        window.location.reload();
+      } else if (resPutFile.status === 404) {
+        // fetch post file
+        // const addNewFile ({modelFile}) => {
+        // }
+        console.log(fileEditModel.value.size);
+        var fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+        if (fileEditModel.value.size > fileSize) {
+          alert(
+            'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
+          );
+        }
+        const fileData = new FormData();
+        fileData.append("file", fileEditModel.value);
+        // check file size
+        console.log(fileEditModel);
+        console.log("test file size ::");
+        // if(fileEditModel.value.siz>)
+        // editStartTimeModel.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        console.log("format", editStartTimeModel.value);
+        // fileData.append('eventStartTime', editStartTimeModel.value.substring(0,16))
+        console.log(editStartTimeModel.value);
+        console.log(fileEditModel.value);
+        console.log(fileData);
+        console.log("sub string : ", editStartTimeModel.value.substring(0, 16));
+        const completedStartTime = editStartTimeModel.value.substring(0, 16);
+        fileData.append("eventStartTime", completedStartTime);
+        console.log("completed starttime: ", completedStartTime);
+        const resFile = await fetch(`${baseUrl}/files/upload`, {
+          method: "POST",
+          // body: `${resGet.eventStartTime}`
+          body: fileData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        editLoading.value = true;
+        if (resFile.status == 201) {
+          editLoading.value = false;
+          doneEdit.value = true;
+          // wait 2 seconds then reload page
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+          // window.location.reload()
+        }
+        // else{
+        //   alert("File size is too large")
+        // }
       }
-
-      const fileData = new FormData()
-      fileData.append('file', fileEditModel.value)
-      // check file size
-      console.log(fileEditModel)
-
-      console.log("test file size ::");
-      // if(fileEditModel.value.siz>)
-
-      // editStartTimeModel.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      console.log("format", editStartTimeModel.value);
-      // fileData.append('eventStartTime', editStartTimeModel.value.substring(0,16))
-      console.log(editStartTimeModel.value);
-      console.log(fileEditModel.value)
-      console.log(fileData)
-      console.log("sub string : ", editStartTimeModel.value.substring(0, 16));
-      const completedStartTime = editStartTimeModel.value.substring(0, 16)
-      fileData.append('eventStartTime', completedStartTime)
-      console.log("completed starttime: ", completedStartTime);
-
-      const resFile = await fetch(`${baseUrl}/files/upload`, {
-        method: 'POST',
-        // body: `${resGet.eventStartTime}`
-        body: fileData
-      })
-      editLoading.value = true
-      if (resFile.status == 200) {
-        editLoading.value = false
-        doneEdit.value = true
-        // wait 2 seconds then reload page
-        setTimeout(() => {
-          window.location.reload()
-        }, 500)
-        // window.location.reload()
-
-      }
-      // else{
-      //   alert("File size is too large")
-      // }
     }
   }
-  // window.location.reload()
-
-}
-
+  else if (isMsalLogin == true) {
+    // azure-token
+    const resGet = await fetch(`${baseUrl}/events/${id}`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${msalToken}`,
+      },
+    });
+    editLoading.value = true;
+    console.log("edit loading", editLoading.value);
+    if (resGet.status == 200) {
+      // window.location.reload()
+      editLoading.value = false;
+    } else if (resGet.status === 404) {
+      alert(alert404);
+      goToAllEvent();
+    }
+    console.log(editStartTimeModel.value);
+    console.log(editNotesModel.value);
+    // method: PUT
+    const resPut = await fetch(`${baseUrl}/events/${id}`, {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${msalToken}`,
+      },
+      body: JSON.stringify({
+        id: id,
+        eventStartTime: editStartTimeModel.value, // รับค่าจาก model
+        eventNotes: editNotesModel.value, //รับค่าจาก model
+      }),
+    });
+    editLoading.value = true;
+    if (resPut.status == 400) {
+      alert("Appointment date can not be time in the past.");
+    }
+    if (resPut.status === 403) {
+      alert("You are not authorized to this action");
+      myRouter.go(0);
+    }
+    // หลังบ้านเปลี่ยนข้อมูลแล้ว เมื่อ restart-page ใหม่ ก็จะดึงข้อมูลแบบใหม่มาแล้ว
+    if (fileEditModel.value != null) {
+      const fileEditedData = new FormData();
+      console.log(fileEditModel.value);
+      fileEditedData.append("file", fileEditModel.value);
+      const resPutFile = await fetch(`${baseUrl}/files/update/${id}`, {
+        method: "PATCH",
+        body: fileEditedData,
+        // ถ้าไม่ใส่ header จะ 401
+        headers: { Authorization: `Bearer ${msalToken}` },
+      });
+      if (resPutFile.status === 200) {
+        window.location.reload();
+      } else if (resPutFile.status === 404) {
+        console.log(fileEditModel.value.size);
+        var fileSize = 10485760; // เทียบขนาดของไฟล์ หาก <= 10MB จะสามารถ post-file ได้ เพื่อดักก่อนจะ post-event
+        if (fileEditModel.value.size > fileSize) {
+          alert(
+            'Could not upload the file. File is too large ! \nThe maximum file size you can upload is "10MB".'
+          );
+        }
+        const fileData = new FormData();
+        fileData.append("file", fileEditModel.value);
+        // check file size
+        console.log(fileEditModel);
+        console.log("test file size ::");
+        // if(fileEditModel.value.siz>)
+        // editStartTimeModel.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        console.log("format", editStartTimeModel.value);
+        // fileData.append('eventStartTime', editStartTimeModel.value.substring(0,16))
+        console.log(editStartTimeModel.value);
+        console.log(fileEditModel.value);
+        console.log(fileData);
+        console.log("sub string : ", editStartTimeModel.value.substring(0, 16));
+        const completedStartTime = editStartTimeModel.value.substring(0, 16);
+        fileData.append("eventStartTime", completedStartTime);
+        console.log("completed starttime: ", completedStartTime);
+        const resFile = await fetch(`${baseUrl}/files/upload`, {
+          method: "POST",
+          // body: `${resGet.eventStartTime}`
+          body: fileData,
+          headers: { Authorization: `Bearer ${msalToken}` },
+        });
+        // editLoading.value = true;
+        if (resFile.status == 201) {
+          editLoading.value = false;
+          doneEdit.value = true;
+          // wait 2 seconds then reload page
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }
+      }
+    }
+    editLoading.value = true;
+    if (resPut.status == 200) {
+      editLoading.value = false;
+      doneEdit.value = true;
+      // wait 2 seconds then reload page
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    }
+  }
+};
 // สำหรับจัดการ edit-file
-const fileEditModel = ref(null)
-const isTooLarge = ref(false)
+const fileEditModel = ref(null);
+const isTooLarge = ref(false);
 const fileAction = (e) => {
-  const file = e.target.files[0]
+  const file = e.target.files[0];
   // console.log(file)
-  fileEditModel.value = file
-  console.clear()
+  fileEditModel.value = file;
+  console.clear();
   console.log(fileEditModel.value);
   // byte -> MB
   console.log("size :: ", fileEditModel.value.size * 0.000001);
-  const mbfile = fileEditModel.value.size * 0.000001
-  const tenMb = 10485760
+  const mbfile = fileEditModel.value.size * 0.000001;
+  const tenMb = 10485760;
   // if(mbfile>1048576){
   //   alert("File too large")
   // }
   console.log(fileEditModel.value.size);
   if (fileEditModel.value.size > tenMb) {
     console.log("file size", fileEditModel.value.size);
-    alert("The file size cannot be larger than 10 MB")
-    fileEditModel.value = null
-    isTooLarge.value = true
+    alert("The file size cannot be larger than 10 MB");
+    fileEditModel.value = null;
+    isTooLarge.value = true;
     // เพื่อ reset file เมื่อขนาดเกินกำหนด
-    e.target.value = ''
+    e.target.value = "";
+  } else {
+    isTooLarge.value = false;
   }
-  else {
-    isTooLarge.value = false
-  }
-}
-
+};
 // เพื่อ disable เวลาที่เป็นอดีต
 var currentDateTime = new Date();
 console.log(currentDateTime.toJSON());
-var dd = String(currentDateTime.getDate()).padStart(2, '0');
-var mm = String(currentDateTime.getMonth() + 1).padStart(2, '0'); //January is 0!
+var dd = String(currentDateTime.getDate()).padStart(2, "0");
+var mm = String(currentDateTime.getMonth() + 1).padStart(2, "0"); //January is 0!
 var yyyy = currentDateTime.getFullYear();
-var hr = String(currentDateTime.getHours())
-var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, '0'))
-
-currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
+var hr = String(currentDateTime.getHours());
+var m = String(currentDateTime.getMinutes().toLocaleString().padStart(2, "0"));
+currentDateTime = yyyy + "-" + mm + "-" + dd + "T" + hr + ":" + m;
 </script>
   
 <template>
@@ -611,7 +934,8 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       </button>
                       <span class="mx-14" v-if="isClickEdit == false"></span>
                       <!-- click เพื่อเริ่มต้นการ edit -->
-                      <button @click="onClickEdit" class="text-orange-400 hover:text-white border 
+                      <button v-if="allowModal == true && userRole != 'lecturer' && isOwner == true"
+                        @click="onClickEdit" class="text-orange-400 hover:text-white border 
                           border-orange-700 hover:bg-orange-800 focus:ring-4
                           focus:outline-none transition duration-500 ease-in-out
                           focus:ring-orange-300 font-light rounded-xl text-lg
@@ -625,7 +949,8 @@ currentDateTime = yyyy + '-' + mm + '-' + dd + 'T' + hr + ":" + m;
                       <!-- <span class="mx-14" v-show="isClickEdit"></span> -->
 
                       <!-- ยกเลิกการจองนัด -->
-                      <button @click="cancelEvent" class="text-red-400 hover:text-white 
+                      <button v-if="allowModal == true && userRole != 'lecturer' && isOwner == true"
+                        @click="cancelEvent" class="text-red-400 hover:text-white 
                           border border-red-700 hover:bg-red-800
                           focus:ring-4 focus:outline-none transition
                           duration-500 ease-in-out focus:ring-red-300
