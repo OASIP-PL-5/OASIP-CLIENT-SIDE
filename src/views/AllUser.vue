@@ -1,121 +1,149 @@
 <script setup>
 // modal-addUser
-import { ref, onBeforeMount, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import CreateUser from '../components/CreateUser.vue'
+import { ref, onBeforeMount, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import CreateUser from "../components/CreateUser.vue";
 // import VueCookies from 'vue-cookies'
 // const token = VueCookies.get('jwtToken');
-const token = localStorage.getItem('jwtToken')
-const newToken = localStorage.getItem('refreshToken')
-
-
-
-const myRouter = useRouter()
-const goToUserDetail = () => myRouter.push({ name: 'UserDetail' })
-const goToAllUser = () => myRouter.push({ name: 'AllUser' })
-const goToSignIn = () => myRouter.push({ name: 'SignIn' })
-const goToHome = () => myRouter.push({ name: 'Home' })
-
-const users = ref([])
+const token = localStorage.getItem("jwtToken");
+const newToken = localStorage.getItem("refreshToken");
+const myRouter = useRouter();
+const goToUserDetail = () => myRouter.push({ name: "UserDetail" });
+const goToAllUser = () => myRouter.push({ name: "AllUser" });
+const goToSignIn = () => myRouter.push({ name: "SignIn" });
+const goToHome = () => myRouter.push({ name: "Home" });
+const users = ref([]);
 // console.log(VueCookies.get('jwtToken'))
-console.log('localStorage token : ', localStorage.getItem('jwtToken'));
-console.log('localStorage refreshToken : ', localStorage.getItem('refreshToken'));
-console.log('is login : ', localStorage.getItem('email') ? true : false);
-const IsAuthorized = ref(true)
-
-
+console.log("localStorage token : ", localStorage.getItem("jwtToken"));
+console.log(
+  "localStorage refreshToken : ",
+  localStorage.getItem("refreshToken")
+);
+console.log("is login : ", localStorage.getItem("email") ? true : false);
+const IsAuthorized = ref(true);
 const baseUrl = import.meta.env.PROD
   ? `${import.meta.env.VITE_BASE_URL}/api`
-  : '/api'
-
+  : "/api";
+const isMsalLogin = localStorage.getItem(
+  "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
+)
+  ? true
+  : false;
+const msalToken = localStorage.getItem(
+  "msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken"
+);
 //GET
 const getUser = async () => {
-  const isLogin = localStorage.getItem('email') ? true : false
-  if(isLogin == false){
-    alert('Please login again')
-    await myRouter.push({ path: '/sign-in' })
-    myRouter.go(0)
+  const isLogin = localStorage.getItem("email") ? true : false;
+  if (isLogin == false && isMsalLogin == false) {
+    alert("Session timeout...please login again !");
+    await myRouter.push({ path: "/sign-in" });
+    myRouter.go(0);
   }
-
-
-  const resUser = await fetch(`${baseUrl}/users`, {
-    headers: {
-      'content-type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    }
-  })
-  // พอ access token หมดอายุ จะไป fetch /refresh เพื่อเอา refreshToken มาใช้
-  if (resUser.status === 401) {
-    const resRefresh = await fetch(`${baseUrl}/refresh`, {
-      method: 'POST',
+  if (isMsalLogin == false) {
+    const resUser = await fetch(`${baseUrl}/users`, {
       headers: {
-        'content-type': 'application/json',
-        'Authorization': `Bearer ${newToken}`
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        token: newToken
-      })
-    })
-    // ใช้ตอน refreshToken หมดอายุ ให้ทำการ sign out และกลับไปหน้า sign in ใหม่
-    if (resRefresh.status === 401) {
-      localStorage.removeItem('jwtToken')
-      localStorage.removeItem('refreshToken')
-      alert('Please login again')
-      await myRouter.push({ path: '/sign-in' })
-      myRouter.go(0)
-    }
-    if (resRefresh.status === 200) {
-      const data = await resRefresh.json()
-      localStorage.setItem('jwtToken', data.refreshToken)
-      // localStorage.setItem('refreshToken', data.refreshToken)
-      const resUser = await fetch(`${baseUrl}/users`, {
+    });
+    // พอ access token หมดอายุ จะไป fetch /refresh เพื่อเอา refreshToken มาใช้
+    if (resUser.status === 401 || resUser.status === 403) {
+      const resRefresh = await fetch(`${baseUrl}/refresh`, {
+        method: "POST",
         headers: {
-          'content-type': 'application/json',
-          'Authorization': `Bearer ${newToken}`
-        }
-      })
-      if (resUser.status === 200) {
-        users.value = await resUser.json()
-        console.log(users.value)
-        console.log(resUser)
-      } else console.log('error cannot get users')
-    } else {
-      console.log('error cannot refresh token')
+          "content-type": "application/json",
+          Authorization: `Bearer ${newToken}`,
+        },
+        body: JSON.stringify({
+          token: newToken,
+        }),
+      });
+      // ใช้ตอน refreshToken หมดอายุ ให้ทำการ sign out และกลับไปหน้า sign in ใหม่
+      if (resRefresh.status === 401) {
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("refreshToken");
+        alert("Session timeout...please login again !");
+        await myRouter.push({ path: "/sign-in" });
+        myRouter.go(0);
+      }
+      if (resRefresh.status === 200) {
+        const data = await resRefresh.json();
+        localStorage.setItem("jwtToken", data.refreshToken);
+        // localStorage.setItem('refreshToken', data.refreshToken)
+        const resUser = await fetch(`${baseUrl}/users`, {
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${newToken}`,
+          },
+        });
+        if (resUser.status === 200) {
+          users.value = await resUser.json();
+          console.log(users.value);
+          console.log(resUser);
+        } else console.log("error cannot get users");
+      } else {
+        console.log("error cannot refresh token");
+      }
+    } else if (resUser.status === 200) {
+      users.value = await resUser.json();
+      console.log(users.value);
+      console.log(resUser);
     }
-  } else if (resUser.status === 200) {
-    users.value = await resUser.json()
-    console.log(users.value)
-    console.log(resUser)
+    // if (resUser.status === 200) {
+    //   users.value = await resUser.json()
+    //   console.log(users.value)
+    //   console.log(resUser)
+    // }
+    else if (resUser.status === 403) {
+      alert("You are not authorized to access this page");
+      IsAuthorized.value = false;
+      console.log(
+        "Is this user allow to access this page:",
+        IsAuthorized.value
+      );
+      goToHome();
+    } else console.log("error cannot get users");
   }
-
-  // if (resUser.status === 200) {
-  //   users.value = await resUser.json()
-  //   console.log(users.value)
-  //   console.log(resUser)
-  // }
-  else if (resUser.status === 403) {
-    alert('You are not authorized to access this page')
-    IsAuthorized.value = false
-    console.log("Is this user allow to access this page:", IsAuthorized.value);
-    goToHome()
+  //for azure-token
+  else if (isMsalLogin == true) {
+    const resUser = await fetch(`${baseUrl}/users`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${msalToken}`,
+      },
+    });
+    // หาก mstoken หมดอายุหรือพัง จะพาไปหน้า signin
+    if (resUser.status === 403) {
+      alert("You are not authorized to access this page");
+      IsAuthorized.value = false;
+      console.log(
+        "Is this user allow to access this page:",
+        IsAuthorized.value
+        );
+        goToHome();
+      } 
+      else if (resUser.status === 401 || resUser.status === 403) {
+        alert("Session timeout...please login again !");
+        await myRouter.push({ path: "/sign-in" });
+        myRouter.go(0);
+      } 
+      else if (resUser.status === 200) {
+        users.value = await resUser.json();
+        console.log(users.value);
+        console.log(resUser);
+      } 
+      else console.log("error cannot get users");
   }
-  else console.log('error cannot get users')
-
-
-
-}
-
+};
 onBeforeMount(async () => {
-  await getUser()
-})
-
+  await getUser();
+});
 // toggle add-user
-const toggleModal = ref(false)
-const closeToggle = () => location.reload()
-
-const isNameExist = ref(false)
-const isEmailExist = ref(false)
-
+const toggleModal = ref(false);
+const closeToggle = () => location.reload();
+const isNameExist = ref(false);
+const isEmailExist = ref(false);
 //POST
 const addUser = async (
   //ใส่ตัวแปรที่จะใช้POST
@@ -123,7 +151,7 @@ const addUser = async (
   newEmail,
   newPassword,
   confirm,
-  newRole,
+  newRole
   // newPassword,
   // confirm,
 ) => {
@@ -135,96 +163,157 @@ const addUser = async (
   });
   console.log(checkName);
   console.log(checkEmail);
-
   console.log(newName);
   console.log(newEmail);
   console.log(newRole);
   console.log(newPassword);
   console.log(confirm);
-
   console.log(newPassword.localeCompare(confirm));
-
-  if (newName.length !== 0 && newEmail.length !== 0 && newRole.length !== 0 && newPassword.length !== 0) {
+  if (
+    newName.length !== 0 &&
+    newEmail.length !== 0 &&
+    newRole.length !== 0 &&
+    newPassword.length !== 0
+  ) {
     if (checkName.length == 0) {
       if (checkEmail.length == 0) {
         if (newPassword.localeCompare(confirm) == 0) {
           if (newPassword.length > 7) {
-            const res = await fetch(`${baseUrl}/users`, {
-              method: 'POST',
-              headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${token}` },
-              body: JSON.stringify({
-                //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
-                name: newName,
-                email: newEmail,
-                password: newPassword,
-                role: newRole
-              })
-            })
-
-            if (res.status === 201) {
-              // const addedUser = await res.json()
-              // users.value.push(addedUser) <- what is this
-              alert(`User: ${newName} is created successfully`)
-              location.reload()
-            }
-            else if(res.status === 409){
-              alert("This name is already used.")
-              console.log("This name is already used.")
-            }
-            else if(res.status === 400){
-              alert("This email is already used.")
-              console.log("This email is already used.")
+            if (isMsalLogin == false) {
+              const res = await fetch(`${baseUrl}/users`, {
+                method: "POST",
+                headers: {
+                  "content-type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
+                  name: newName,
+                  email: newEmail,
+                  password: newPassword,
+                  role: newRole,
+                }),
+              });
+              if (res.status === 201) {
+                // const addedUser = await res.json()
+                // users.value.push(addedUser) <- what is this
+                alert(`User: ${newName} is created successfully`);
+                location.reload();
+              } else if (res.status === 409) {
+                alert("This name is already used.");
+                console.log("This name is already used.");
+              } else if (res.status === 400) {
+                alert("This email is already used.");
+                console.log("This email is already used.");
+              } else if (res.status === 401 || res.status === 403) {
+                const resRefresh = await fetch(`${baseUrl}/refresh`, {
+                  method: "POST",
+                  headers: {
+                    "content-type": "application/json",
+                    Authorization: `Bearer ${newToken}`,
+                  },
+                  body: JSON.stringify({
+                    token: newToken,
+                  }),
+                });
+                // ใช้ตอน refreshToken หมดอายุ ให้ทำการ sign out และกลับไปหน้า sign in ใหม่
+                if (resRefresh.status === 401) {
+                  localStorage.removeItem("jwtToken");
+                  localStorage.removeItem("refreshToken");
+                  alert("Please login again");
+                  await myRouter.push({ path: "/sign-in" });
+                  myRouter.go(0);
+                }
+                if (resRefresh.status === 200) {
+                  const data = await resRefresh.json();
+                  localStorage.setItem("jwtToken", data.refreshToken);
+                  // localStorage.setItem('refreshToken', data.refreshToken)
+                  const resUser = await fetch(`${baseUrl}/users`, {
+                    headers: {
+                      "content-type": "application/json",
+                      Authorization: `Bearer ${newToken}`,
+                    },
+                  });
+                  if (resUser.status === 200) {
+                    users.value = await resUser.json();
+                    console.log(users.value);
+                    console.log(resUser);
+                  } else console.log("error cannot get users");
+                } else {
+                  console.log("error cannot refresh token");
+                }
+              }
+            } else if (isMsalLogin == true) {
+              const res = await fetch(`${baseUrl}/users`, {
+                method: "POST",
+                headers: {
+                  "content-type": "application/json",
+                  Authorization: `Bearer ${msalToken}`,
+                },
+                body: JSON.stringify({
+                  //แทนตัวแปร เพื่อส่ง value ออกไปผ่านการ post
+                  name: newName,
+                  email: newEmail,
+                  password: newPassword,
+                  role: newRole,
+                }),
+              });
+              if (res.status === 201) {
+                // const addedUser = await res.json()
+                // users.value.push(addedUser) <- what is this
+                alert(`User: ${newName} is created successfully`);
+                location.reload();
+              } else if (res.status === 409) {
+                alert("This name is already used.");
+                console.log("This name is already used.");
+              } else if (res.status === 400) {
+                alert("This email is already used.");
+                console.log("This email is already used.");
+              } else if (res.status === 401 || res.status === 403) {
+                alert("Session timeout...please login again !");
+                await myRouter.push({ path: "/sign-in" });
+                myRouter.go(0);
+              }
             }
           }
           if (newPassword.length < 7) {
-            alert("password must 8-14")
+            alert("password must 8-14");
           }
         } else {
-          alert("password not match please try again")
-          console.log("password not match please try again")
+          alert("password not match please try again");
+          console.log("password not match please try again");
         }
       } else {
-        alert("This email is already used.")
-        isEmailExist.value = true
+        alert("This email is already used.");
+        isEmailExist.value = true;
         console.log("is email exist ? : ", isEmailExist.value);
       }
     } else {
-      alert("This name is already used.")
-      isNameExist.value = true
+      alert("This name is already used.");
+      isNameExist.value = true;
       console.log("is name exist ? : ", isNameExist.value);
     }
   }
-
   if (newName.trim().length == 0) {
-    newName = null
-    alert('name must not be null')
+    newName = null;
+    alert("name must not be null");
   }
   if (newEmail.trim().length == 0) {
-    newEmail = null
-    alert('email must not be null')
+    newEmail = null;
+    alert("email must not be null");
   }
-  // if (res.status === 500) {
-  //   alert('user-name or user-email is already used. !')
-  // }
-
-
-}
-
-const loggingIn = ref(false)
+};
+const loggingIn = ref(false);
 const checkIsLogin = computed(() => {
-  if (localStorage.getItem('jwtToken')) {
-    console.log('token: ', localStorage.getItem('jwtToken'))
-    return loggingIn.value = true
+  if (localStorage.getItem("jwtToken")) {
+    console.log("token: ", localStorage.getItem("jwtToken"));
+    return (loggingIn.value = true);
+  } else {
+    return (loggingIn.value = false);
   }
-  else {
-    return loggingIn.value = false
-  }
-
-})
-
-
+});
 const noUsersImg =
-  'https://img.freepik.com/free-vector/empty-concept-illustration_114360-1253.jpg?w=826&t=st=1661052554~exp=1661053154~hmac=e91c27a84a9612e6b7b0edd5e394264f3ec6ea7c46a13ef33bfec2fb404cbe8f'
+  "https://img.freepik.com/free-vector/empty-concept-illustration_114360-1253.jpg?w=826&t=st=1661052554~exp=1661053154~hmac=e91c27a84a9612e6b7b0edd5e394264f3ec6ea7c46a13ef33bfec2fb404cbe8f";
 </script>
   
 <template>

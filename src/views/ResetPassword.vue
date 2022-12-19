@@ -9,6 +9,7 @@ console.clear()
 const myRouter = useRouter();
 
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
+const goToHome = () => myRouter.push({ name: 'Home' })
 const route = useRoute()
 let url = route.query
 console.log("url")
@@ -37,13 +38,19 @@ const baseUrl = import.meta.env.PROD
 const newPassword = ref('')
 const confirmPassword = ref('')
 
+const notMatched = ref(false)
+const invalidPassword = ref(false)
+
 const reset = async () => {
     console.clear()
+    notMatched.value = false
+    invalidPassword.value = false
+
     // console.log(password.newPassword)
     // console.log(password.confirmPassword)
     console.log("newPass", newPassword.value);
     console.log("ConPass", confirmPassword.value);
-    if (newPassword.value.length >= 8 && newPassword.value.length <= 15) {
+    if (newPassword.value.length >= 8 && newPassword.value.length <= 14) {
         console.log(newPassword.value);
         if (newPassword.value.localeCompare(confirmPassword.value) == 0) {
             const res = await fetch(`${baseUrl}/users/forgot`, {
@@ -58,15 +65,21 @@ const reset = async () => {
             })
             if (res.status === 200) {
                 alert("Change password complete")
+                goToHome()
+            }
+            else if(res.status === 401){
+                alert("Token expired")
                 goToSignIn()
-
             }
         } else {
             alert("password and confirm password not match")
+            notMatched.value = true
         }
     } else {
         alert("Password must have between 8-15 charecters")
+        invalidPassword.value = true
     }
+    
     console.log(`${url.token}`);
 }
 </script>
@@ -90,13 +103,17 @@ const reset = async () => {
                             </label>
                             <input v-model="newPassword"
                                 class="w-full px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                                type="password" placeholder="Enter new password" />
+                                type="password" placeholder="Enter new password" minlength="8" maxlength="14" />
                             <label class="block mt-2 mb-2 text-lg font-bold text-blue-400">
                                 Confirm password
                             </label>
                             <input v-model="confirmPassword"
                                 class="w-full mb-2 px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                                type="password" placeholder="Enter new password again" />
+                                type="password" placeholder="Enter new password again" minlength="8" maxlength="14" />
+                            <h2 v-if="invalidPassword == true" class="text-sm text-red-500 italic">Password must be at
+                                least 8 characters and maximum 15 characters.</h2>
+                            <h2 v-if="notMatched == true" class="text-sm text-red-500 italic">Password must be matched.
+                            </h2>
                         </div>
                         <div class="mb-3 text-center">
                             <button @click="reset()"

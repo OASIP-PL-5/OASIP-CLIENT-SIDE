@@ -67,7 +67,15 @@ const checkIsLogin = computed(() => {
     }
     return (loggingIn.value = true);
   } else if (isMsalLogin) {
-    userRole.value = jwt_decode(msalToken).roles[0]
+    if (jwt_decode(msalToken).roles == undefined || jwt_decode(msalToken).roles[0] == 'lecturer') {
+      console.log("ไม่มี role ใน azure-token");
+      allowModal.value = false;
+      // loggingIn.value = false;
+      // checkIsLogin.value = false;
+    }
+    else {
+      userRole.value = jwt_decode(msalToken).roles[0]
+    }
     return loggingIn.value = true
   } else {
     loggingIn.value = false;
@@ -96,7 +104,6 @@ const getEventCard = async () => {
         console.clear();
         console.log(eventCard.value);
         // for (let i = 0; i < eventCard.value.length; i++) {
-
         //   console.log(eventCard.value[i].eventStartTime);
         // }
         console.clear()
@@ -649,7 +656,7 @@ const refresh = () => window.location.reload();
 <template>
   <div>
     <!-- show filter component button -->
-    <button v-if="checkIsLogin == true" class="
+    <button v-if="checkIsLogin == true && allowModal == true " class="
         border rounded-xl bg-blue-400 text-white bg-blue-400 font-medium 
         text-lg leading-tight uppercase rounded shadow-sm hover:bg-blue-500 
         hover:shadow-lg focus:bg-blue-500 focus:shadow-lg focus:outline-none 

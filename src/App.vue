@@ -14,8 +14,9 @@ const goToContact = () => myRouter.push({ name: 'ContactUs' })
 const goToAllEvent = () => myRouter.push({ name: 'AllEvent' })
 const goToSignUp = () => myRouter.push({ name: 'SignUp' })
 const goToSignIn = () => myRouter.push({ name: 'SignIn' })
-const goToPasswordConfig = () => myRouter.push({ name: 'PasswordConfig' })
+// const goToPasswordConfig = () => myRouter.push({ name: 'PasswordConfig' })
 const goToChangePassword = () => myRouter.push({ name: 'ChangePassword' })
+
 
 const userEmail = localStorage.getItem('email')
 const token = localStorage.getItem('jwtToken');
@@ -31,9 +32,6 @@ const userRole = ref('')
 const msEmail = ref('')
 
 
-
-
-
 const checkIsLogin = computed(() => {
     if (localStorage.getItem('jwtToken')) {
         console.log('token: ', localStorage.getItem('jwtToken'))
@@ -45,9 +43,15 @@ const checkIsLogin = computed(() => {
         return loggingIn.value = true
     } else if (localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken')) {
         console.log('msal token: ', localStorage.getItem('msal.634fde75-c93d-4e46-9b36-5f66eff43805.idtoken'));
+        
         userName.value = jwt_decode(msal).name
         msEmail.value = jwt_decode(msal).preferred_username
-        userRole.value = jwt_decode(msal).roles[0]
+        // กรณี role ไม่ได้ assign
+        if (jwt_decode(msal).roles == undefined) {
+            console.log("no role in azure ad")
+        }else{
+            userRole.value = jwt_decode(msal).roles[0]
+        }
         console.log('userName: ', userName);
         return loggingIn.value = true
     }
@@ -160,7 +164,7 @@ const toggle = () => {
                                     <a @click="goToChangePassword" href="#" class="block py-2 px-4 
                                         hover:bg-gray-400 
                                         dark:hover:bg-gray-100 
-                                        ">Setting</a>
+                                        ">Change password</a>
                                 </li>
                                 <li @click="logOut()" class="block py-2 px-4  
                                         hover:bg-gray-800 
@@ -224,6 +228,7 @@ const toggle = () => {
                 <button type="button" class="font-semibold text-gray-400" @click="goToAllEvent">ALL
                     EVENTS</button>
                 <button type="button" class="font-semibold text-gray-800" @click="goToContact">ABOUT US</button>
+                <button v-if="loggingIn == true" type="button" class="font-semibold text-gray-800" @click="goToChangePassword">SETTING</button>
                 <button v-if="loggingIn == false" type="button" class="font-semibold text-gray-800"
                     @click="goToSignIn">SIGN IN</button>
                 <button v-if="loggingIn == true" type="button" class="font-semibold text-gray-800" @click="logOut">SIGN

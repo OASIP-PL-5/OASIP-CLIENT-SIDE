@@ -23,7 +23,7 @@ const setPassword = async () => {
     console.clear()
     oldPassIncorrect.value = false
     passMatch.value = false
-    if (newPassword.value.length >= 8 && newPassword.value.length <= 15) {
+    if (newPassword.value.length >= 8 && newPassword.value.length <= 14) {
         if (newPassword.value.localeCompare(confirmPassword.value) == 0) {
             const res = await fetch(`${baseUrl}/users/change-password`, {
                 method: "PUT",
@@ -82,7 +82,7 @@ const setPassword = async () => {
                             </label>
                             <input v-model="oldPassword"
                                 class="mb-2 w-full px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                                type="password" placeholder="Enter your password" />
+                                type="password" placeholder="Enter your password" minlength="8" maxlength="14"/>
                                 <h2 v-if="oldPassIncorrect == true" class="text-red-400 text-sm italic"> Incorrect password.Please try again.</h2>
                             <div class="flex justify-end text-lg mb-2">
                                 <a @click="goToForgot" class="font-semibold text-slate-400 
@@ -96,13 +96,13 @@ const setPassword = async () => {
                             </label>
                             <input v-model="newPassword"
                                 class="w-full px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                                type="password" placeholder="Enter new password" />
+                                type="password" placeholder="Enter new password" minlength="8" maxlength="14" />
                             <label class="block mt-2 mb-2 text-lg font-bold text-blue-400">
                                 Confirm password
                             </label>
                             <input v-model="confirmPassword"
                                 class="w-full mb-2 px-3 py-2 text-lg leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                                type="password" placeholder="Enter new password again" />
+                                type="password" placeholder="Enter new password again" minlength="8" maxlength="14" />
                                 <h2 v-if="passMatch == true" class="text-red-400 text-sm italic">Ensure that password is matched.</h2>
                         </div>
                         <div class="mb-3 text-center">

@@ -45,7 +45,7 @@ const getThisEventCatCard = async () => {
     const res = await fetch(`${baseUrl}/event-categories/${id}`, {
         headers: {
             'content-type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            // 'Authorization': `Bearer ${token}`
         }
     })
 
